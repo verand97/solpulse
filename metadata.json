@@ -1,0 +1,6 @@
+{
+  "name": "Solana Dex Screener",
+  "description": "Real-time Solana DEX analyzer with charts, whale tracking, and liquidity monitoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
