@@ -1,22 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { Wallet as WalletIcon, Copy, ExternalLink, QrCode, ArrowRightLeft, Check, ChevronDown, AlertTriangle } from 'lucide-react';
 import { formatCurrency, formatAddress, cn } from '../utils';
-import { MOCK_PORTFOLIO, SWAP_TOKENS } from '../data';
-import { SwapToken } from '../types';
+import { SwapToken, PortfolioAsset } from '../types';
 
 interface WalletViewProps {
   walletConnected: boolean;
   onConnect: () => void;
+  swapTokens: SwapToken[];
+  portfolio: PortfolioAsset[];
 }
 
-export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConnect }) => {
+export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConnect, swapTokens, portfolio }) => {
   const address = '7aVkR9pQm3nV2bZ8wT4jFgHsAcDrEf6YuN1oXi9Kp';
-  const totalValue = MOCK_PORTFOLIO.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
+  const totalValue = portfolio.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
 
   const [payAmount, setPayAmount] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
-  const [payToken, setPayToken] = useState<SwapToken>(SWAP_TOKENS[0]); // SOL
-  const [receiveToken, setReceiveToken] = useState<SwapToken>(SWAP_TOKENS[1]); // USDC
+  // Use first two tokens if available, otherwise fallback
+  const [payToken, setPayToken] = useState<SwapToken>(swapTokens[0] || { symbol: 'SOL', name: 'Solana', balance: 0, price: 0, icon: 'S' });
+  const [receiveToken, setReceiveToken] = useState<SwapToken>(swapTokens[1] || { symbol: 'USDC', name: 'USD Coin', balance: 0, price: 0, icon: 'U' });
   const [showPaySelect, setShowPaySelect] = useState(false);
   const [showReceiveSelect, setShowReceiveSelect] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -205,15 +207,19 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                     onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
                     className="flex items-center gap-2 bg-charcoal-light px-3 py-1.5 rounded-lg text-white font-medium hover:bg-charcoal-lighter transition-colors whitespace-nowrap"
                   >
-                    <div className="w-5 h-5 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                      {payToken.icon}
-                    </div>
+                    {payToken.imageUrl ? (
+                      <img src={payToken.imageUrl} alt={payToken.symbol} className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
+                        {payToken.icon}
+                      </div>
+                    )}
                     {payToken.symbol}
                     <ChevronDown size={14} />
                   </button>
                   {showPaySelect && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
-                      {SWAP_TOKENS.filter(t => t.symbol !== receiveToken.symbol).map(token => (
+                      {swapTokens.filter(t => t.symbol !== receiveToken.symbol).map(token => (
                         <button
                           key={token.symbol}
                           onClick={() => selectPayToken(token)}
@@ -222,9 +228,13 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                             token.symbol === payToken.symbol && "bg-neon-purple/10"
                           )}
                         >
-                          <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                            {token.icon}
-                          </div>
+                          {token.imageUrl ? (
+                            <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
+                              {token.icon}
+                            </div>
+                          )}
                           <div>
                             <p className="text-sm text-white font-medium">{token.symbol}</p>
                             <p className="text-xs text-gray-500">{token.name}</p>
@@ -274,15 +284,19 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                     onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
                     className="flex items-center gap-2 bg-neon-purple px-3 py-1.5 rounded-lg text-white font-medium hover:bg-neon-purple-hover transition-colors whitespace-nowrap"
                   >
-                    <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                      {receiveToken.icon}
-                    </div>
+                    {receiveToken.imageUrl ? (
+                      <img src={receiveToken.imageUrl} alt={receiveToken.symbol} className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
+                        {receiveToken.icon}
+                      </div>
+                    )}
                     {receiveToken.symbol}
                     <ChevronDown size={14} />
                   </button>
                   {showReceiveSelect && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
-                      {SWAP_TOKENS.filter(t => t.symbol !== payToken.symbol).map(token => (
+                      {swapTokens.filter(t => t.symbol !== payToken.symbol).map(token => (
                         <button
                           key={token.symbol}
                           onClick={() => selectReceiveToken(token)}
@@ -291,9 +305,13 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                             token.symbol === receiveToken.symbol && "bg-neon-purple/10"
                           )}
                         >
-                          <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                            {token.icon}
-                          </div>
+                          {token.imageUrl ? (
+                            <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
+                              {token.icon}
+                            </div>
+                          )}
                           <div>
                             <p className="text-sm text-white font-medium">{token.symbol}</p>
                             <p className="text-xs text-gray-500">{token.name}</p>
@@ -344,7 +362,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
               </tr>
             </thead>
             <tbody className="divide-y divide-charcoal-lighter">
-              {MOCK_PORTFOLIO.map(item => {
+              {portfolio.map(item => {
                 const value = item.balance * item.token.price;
                 const cost = item.balance * item.avgBuyPrice;
                 const pnl = value - cost;
@@ -355,9 +373,13 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                   <tr key={item.token.id} className="hover:bg-charcoal-lighter/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
-                          {item.token.symbol[0]}
-                        </div>
+                        {item.token.imageUrl ? (
+                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
+                            {item.token.symbol[0]}
+                          </div>
+                        )}
                         <div>
                           <div className="font-semibold text-white">{item.token.symbol}</div>
                           <div className="text-xs text-gray-500">{item.token.name}</div>

@@ -1,10 +1,16 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { MOCK_PORTFOLIO, generateMockChartData } from '../data';
+import { generateMockChartData } from '../data';
+import { PortfolioAsset } from '../types';
 import { formatCurrency, cn } from '../utils';
 import { TokenChart } from './TokenChart';
-import { PieChart, ArrowUpRight, ArrowDownRight, Activity, Wifi, TrendingUp } from 'lucide-react';
+import { PieChart, ArrowUpRight, ArrowDownRight, Activity, Wifi, TrendingUp, Loader2 } from 'lucide-react';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  portfolio: PortfolioAsset[];
+  isLoading: boolean;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) => {
   const [chartRange, setChartRange] = useState<'1h' | '4h' | '1d' | '7d'>('1d');
   const [tps, setTps] = useState(2845);
   const [ping, setPing] = useState(12);
@@ -12,8 +18,8 @@ export const Dashboard: React.FC = () => {
   const pointsMap = { '1h': 12, '4h': 48, '1d': 100, '7d': 168 };
   const chartData = useMemo(() => generateMockChartData(15234.50, pointsMap[chartRange]), [chartRange]);
   
-  const totalValue = MOCK_PORTFOLIO.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
-  const totalCost = MOCK_PORTFOLIO.reduce((acc, item) => acc + (item.balance * item.avgBuyPrice), 0);
+  const totalValue = portfolio.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
+  const totalCost = portfolio.reduce((acc, item) => acc + (item.balance * item.avgBuyPrice), 0);
   const totalPnl = totalValue - totalCost;
   const pnlPercent = (totalPnl / totalCost) * 100;
   const isPositivePnl = totalPnl >= 0;
@@ -84,9 +90,14 @@ export const Dashboard: React.FC = () => {
             <PieChart size={18} className="text-neon-purple" /> Assets Allocation
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto pr-2">
-            {MOCK_PORTFOLIO.map((item) => {
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
+                <Loader2 size={24} className="animate-spin text-neon-purple" />
+                Fetching portfolio data...
+              </div>
+            ) : portfolio.map((item) => {
               const value = item.balance * item.token.price;
-              const allocation = (value / totalValue) * 100;
+              const allocation = totalValue > 0 ? (value / totalValue) * 100 : 0;
               const pnl = value - (item.balance * item.avgBuyPrice);
               const isGain = pnl >= 0;
 
@@ -94,9 +105,13 @@ export const Dashboard: React.FC = () => {
                 <div key={item.token.id} className="p-4 rounded-lg bg-charcoal border border-charcoal-lighter">
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-charcoal-light flex items-center justify-center font-bold text-xs text-white">
-                        {item.token.symbol[0]}
-                      </div>
+                      {item.token.imageUrl ? (
+                        <img src={item.token.imageUrl} alt={item.token.symbol} className="w-8 h-8 rounded-full bg-charcoal-light object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-charcoal-light flex items-center justify-center font-bold text-xs text-white">
+                          {item.token.symbol[0]}
+                        </div>
+                      )}
                       <div>
                         <div className="font-semibold text-white">{item.token.symbol}</div>
                         <div className="text-xs text-gray-400">{item.balance.toLocaleString()} tokens</div>

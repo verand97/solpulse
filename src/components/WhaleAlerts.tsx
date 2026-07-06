@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { MOCK_WHALE_ALERTS } from '../data';
-import { WhaleAlert } from '../types';
+import { WhaleAlert, Token } from '../types';
 import { formatCurrency, formatAddress, cn } from '../utils';
 import { ShieldAlert, ArrowRightLeft, ExternalLink, Eye, EyeOff, RefreshCw } from 'lucide-react';
 
-export const WhaleAlerts: React.FC = () => {
+interface WhaleAlertsProps {
+  tokens: Token[];
+}
+
+export const WhaleAlerts: React.FC<WhaleAlertsProps> = ({ tokens }) => {
   const [filter, setFilter] = useState<'all' | 'buy' | 'sell'>('all');
-  const [alerts, setAlerts] = useState<WhaleAlert[]>(MOCK_WHALE_ALERTS);
+  const [alerts, setAlerts] = useState<WhaleAlert[]>([]);
   const [liveMode, setLiveMode] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Initialize with some dynamic data based on tokens if available
+  useEffect(() => {
+    if (tokens.length > 0 && alerts.length === 0) {
+      const initialAlerts = Array.from({ length: 8 }).map((_, i) => {
+        const token = tokens[Math.floor(Math.random() * Math.min(tokens.length, 20))];
+        const isBuy = Math.random() > 0.5;
+        return {
+          id: `w-init-${i}`,
+          tokenSymbol: token.symbol,
+          type: (isBuy ? 'buy' : 'sell') as 'buy' | 'sell',
+          amountUsd: Math.floor(Math.random() * 5000000) + 500000,
+          timestamp: Date.now() - Math.floor(Math.random() * 3600000),
+          txHash: Array.from({ length: 44 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'[Math.floor(Math.random() * 57)]).join(''),
+          walletAddress: Array.from({ length: 44 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'[Math.floor(Math.random() * 57)]).join(''),
+        };
+      }).sort((a, b) => b.timestamp - a.timestamp);
+      setAlerts(initialAlerts);
+    }
+  }, [tokens]);
 
   // Simulate new whale alerts coming in
   useEffect(() => {
     if (!liveMode) return;
     
     const interval = setInterval(() => {
-      const tokens = ['SOL', 'WIF', 'BONK', 'JUP', 'POPCAT', 'RAY', 'ORCA', 'PYTH'];
-      const randomToken = tokens[Math.floor(Math.random() * tokens.length)];
+      if (!tokens.length) return;
+      const randomToken = tokens[Math.floor(Math.random() * Math.min(tokens.length, 20))].symbol;
       const isBuy = Math.random() > 0.45;
       const amount = Math.floor(Math.random() * 5000000) + 200000;
       
@@ -34,7 +57,7 @@ export const WhaleAlerts: React.FC = () => {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [liveMode]);
+  }, [liveMode, tokens]);
 
   const filteredAlerts = alerts.filter(alert => {
     if (filter === 'all') return true;
@@ -156,7 +179,16 @@ export const WhaleAlerts: React.FC = () => {
                     <div className="text-lg font-medium text-white">
                       <span className="font-mono font-bold">{formatCurrency(alert.amountUsd)}</span> 
                       <span className="text-gray-400 mx-2">of</span> 
-                      <span className="text-white font-bold">{alert.tokenSymbol}</span>
+                      <div className="inline-flex items-center gap-1.5 align-text-bottom bg-charcoal border border-charcoal-lighter px-2 py-0.5 rounded-full translate-y-[-2px]">
+                        {tokens.find(t => t.symbol === alert.tokenSymbol)?.imageUrl ? (
+                          <img src={tokens.find(t => t.symbol === alert.tokenSymbol)?.imageUrl} alt={alert.tokenSymbol} className="w-4 h-4 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-charcoal-lighter flex items-center justify-center text-[10px] font-bold text-white">
+                            {alert.tokenSymbol[0]}
+                          </div>
+                        )}
+                        <span className="text-white font-bold text-sm">{alert.tokenSymbol}</span>
+                      </div>
                     </div>
                   </div>
                 </div>

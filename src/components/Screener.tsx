@@ -2,38 +2,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MOCK_TOKENS, generateMockChartData } from '../data';
 import { Token } from '../types';
 import { formatCurrency, formatNumber, cn } from '../utils';
-import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2 } from 'lucide-react';
 import { TokenChart } from './TokenChart';
 
 interface ScreenerProps {
   searchQuery: string;
+  tokens: Token[];
+  isLoading: boolean;
 }
 
 type SortKey = 'price' | 'priceChange24h' | 'volume24h' | 'liquidity' | 'marketCap';
 
-export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
-  const [tokens, setTokens] = useState<Token[]>(MOCK_TOKENS);
+export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoading }) => {
   const [filter, setFilter] = useState<'all' | 'gainers' | 'losers' | 'new'>('all');
   const [sortBy, setSortBy] = useState<SortKey>('volume24h');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
-
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTokens(prev => prev.map(t => {
-        const change = (Math.random() - 0.5) * 0.05 * t.price;
-        const newPrice = t.price + change;
-        const newChange24h = t.priceChange24h + (change / t.price) * 100 * 0.1;
-        return {
-          ...t,
-          price: Math.max(0.000001, newPrice),
-          priceChange24h: newChange24h
-        };
-      }));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSort = (key: SortKey) => {
     if (sortBy === key) {
@@ -149,7 +133,16 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-charcoal-lighter">
-              {filteredTokens.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <Loader2 size={24} className="animate-spin text-neon-purple" />
+                      Fetching real-time data from DexScreener...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredTokens.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     No tokens found{searchQuery ? ` for "${searchQuery}"` : ''}.
@@ -166,9 +159,13 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
-                            {token.symbol[0]}
-                          </div>
+                          {token.imageUrl ? (
+                            <img src={token.imageUrl} alt={token.symbol} className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
+                              {token.symbol[0]}
+                            </div>
+                          )}
                           <div>
                             <div className="font-semibold text-white">{token.symbol}</div>
                             <div className="text-xs text-gray-500">{token.name}</div>
@@ -224,9 +221,13 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
           >
             <div className="flex items-center justify-between p-6 border-b border-charcoal-lighter">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-sm text-white">
-                  {selectedToken.symbol[0]}
-                </div>
+                {selectedToken.imageUrl ? (
+                  <img src={selectedToken.imageUrl} alt={selectedToken.symbol} className="w-10 h-10 rounded-full bg-charcoal border border-charcoal-lighter object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-sm text-white">
+                    {selectedToken.symbol[0]}
+                  </div>
+                )}
                 <div>
                   <h3 className="text-lg font-bold text-white">{selectedToken.symbol}</h3>
                   <p className="text-sm text-gray-400">{selectedToken.name}</p>

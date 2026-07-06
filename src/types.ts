@@ -9,6 +9,7 @@ export interface Token {
   marketCap: number;
   address: string;
   createdAt: number;
+  imageUrl?: string;
 }
 
 export interface ChartDataPoint {
