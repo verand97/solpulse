@@ -23,6 +23,7 @@ export interface WhaleAlert {
   amountUsd: number;
   timestamp: number;
   txHash: string;
+  walletAddress: string;
 }
 
 export interface PortfolioAsset {
@@ -30,3 +31,20 @@ export interface PortfolioAsset {
   balance: number;
   avgBuyPrice: number;
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'whale' | 'price' | 'system';
+  timestamp: number;
+  read: boolean;
+}
+
+export type SwapToken = {
+  symbol: string;
+  name: string;
+  balance: number;
+  price: number;
+  icon: string;
+};
