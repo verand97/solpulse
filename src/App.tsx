@@ -30,7 +30,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#1E1F22] overflow-hidden selection:bg-[#7F56FF]/30">
+    <div className="flex h-screen bg-charcoal overflow-hidden selection:bg-neon-purple/30">
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 

@@ -112,14 +112,14 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
     return (
       <div className="p-6 flex items-center justify-center h-full">
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#7F56FF] to-[#80FF56] flex items-center justify-center mx-auto mb-6">
-            <WalletIcon size={40} className="text-[#1E1F22]" />
+          <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center mx-auto mb-6">
+            <WalletIcon size={40} className="text-charcoal" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
           <p className="text-gray-400 mb-6">Connect your Solana wallet to view balances, manage assets, and swap tokens instantly.</p>
           <button
             onClick={onConnect}
-            className="bg-[#7F56FF] hover:bg-[#9675FF] text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-[0_0_20px_rgba(127,86,255,0.3)]"
+            className="bg-neon-purple hover:bg-neon-purple-hover text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-[0_0_20px_rgba(127,86,255,0.3)]"
           >
             Connect Wallet
           </button>
@@ -137,11 +137,11 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Wallet Card */}
-        <div className="bg-gradient-to-br from-[#7F56FF] to-[#9675FF] rounded-2xl p-8 text-white relative overflow-hidden shadow-[0_0_30px_rgba(127,86,255,0.2)]">
+        <div className="bg-linear-to-br from-neon-purple to-neon-purple-hover rounded-2xl p-8 text-white relative overflow-hidden shadow-[0_0_30px_rgba(127,86,255,0.2)]">
           <div className="absolute top-0 right-0 p-8 opacity-10">
             <WalletIcon size={120} />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-8">
               <span className="font-medium text-white/80">Total Balance</span>
@@ -150,7 +150,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                 className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm cursor-pointer hover:bg-white/30 transition-colors"
               >
                 {formatAddress(address)}
-                {copied ? <Check size={14} className="text-[#80FF56]" /> : <Copy size={14} />}
+                {copied ? <Check size={14} className="text-lime-green" /> : <Copy size={14} />}
               </button>
             </div>
             <h3 className="text-5xl font-bold font-mono tracking-tight mb-2">
@@ -163,13 +163,13 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                 href={`https://solscan.io/account/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-white text-[#7F56FF] font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2"
+                className="flex-1 bg-white text-neon-purple font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2"
               >
                 <ExternalLink size={16} /> View on Solscan
               </a>
               <button
                 onClick={handleCopy}
-                className="flex-1 bg-[#1E1F22]/20 backdrop-blur-sm border border-white/20 text-white font-bold py-3 rounded-xl hover:bg-[#1E1F22]/30 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-charcoal/20 backdrop-blur-sm border border-white/20 text-white font-bold py-3 rounded-xl hover:bg-charcoal/30 transition-colors flex items-center justify-center gap-2"
               >
                 <QrCode size={18} /> Copy Address
               </button>
@@ -178,11 +178,11 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
         </div>
 
         {/* Swap Card */}
-        <div className="bg-[#2B2D31] rounded-2xl border border-[#383A40] p-6 flex flex-col">
+        <div className="bg-charcoal-light rounded-2xl border border-charcoal-lighter p-6 flex flex-col">
           <h3 className="text-lg font-semibold text-white mb-4">Quick Swap</h3>
           <div className="flex-1 flex flex-col justify-center space-y-4">
             {/* Pay */}
-            <div className="bg-[#1E1F22] p-4 rounded-xl border border-[#383A40] relative">
+            <div className="bg-charcoal p-4 rounded-xl border border-charcoal-lighter relative">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-400">You pay</span>
                 <span className="text-gray-400">Balance: {payToken.balance.toLocaleString()} {payToken.symbol}</span>
@@ -197,32 +197,32 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                   onChange={(e) => handlePayChange(e.target.value)}
                   className={cn(
                     "bg-transparent text-2xl font-mono text-white outline-none w-full min-w-0",
-                    insufficientBalance && payAmount && "text-[#FF5656]"
+                    insufficientBalance && payAmount && "text-danger"
                   )}
                 />
                 <div className="relative">
                   <button
                     onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
-                    className="flex items-center gap-2 bg-[#2B2D31] px-3 py-1.5 rounded-lg text-white font-medium hover:bg-[#383A40] transition-colors whitespace-nowrap"
+                    className="flex items-center gap-2 bg-charcoal-light px-3 py-1.5 rounded-lg text-white font-medium hover:bg-charcoal-lighter transition-colors whitespace-nowrap"
                   >
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#7F56FF] to-[#80FF56] flex items-center justify-center text-[10px] font-bold text-[#1E1F22]">
+                    <div className="w-5 h-5 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
                       {payToken.icon}
                     </div>
                     {payToken.symbol}
                     <ChevronDown size={14} />
                   </button>
                   {showPaySelect && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#2B2D31] border border-[#383A40] rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
                       {SWAP_TOKENS.filter(t => t.symbol !== receiveToken.symbol).map(token => (
                         <button
                           key={token.symbol}
                           onClick={() => selectPayToken(token)}
                           className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#383A40] transition-colors text-left",
-                            token.symbol === payToken.symbol && "bg-[#7F56FF]/10"
+                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-charcoal-lighter transition-colors text-left",
+                            token.symbol === payToken.symbol && "bg-neon-purple/10"
                           )}
                         >
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#7F56FF] to-[#80FF56] flex items-center justify-center text-[10px] font-bold text-[#1E1F22]">
+                          <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
                             {token.icon}
                           </div>
                           <div>
@@ -236,7 +236,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                 </div>
               </div>
               {insufficientBalance && payAmount && (
-                <p className="text-xs text-[#FF5656] mt-2 flex items-center gap-1">
+                <p className="text-xs text-danger mt-2 flex items-center gap-1">
                   <AlertTriangle size={12} /> Insufficient balance
                 </p>
               )}
@@ -247,14 +247,14 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
               <button
                 id="swap-toggle"
                 onClick={handleSwapTokens}
-                className="bg-[#383A40] p-2 rounded-full border-4 border-[#2B2D31] text-gray-400 hover:text-white hover:bg-[#7F56FF] transition-all"
+                className="bg-charcoal-lighter p-2 rounded-full border-4 border-charcoal-light text-gray-400 hover:text-white hover:bg-neon-purple transition-all"
               >
                 <ArrowRightLeft size={16} className="rotate-90" />
               </button>
             </div>
 
             {/* Receive */}
-            <div className="bg-[#1E1F22] p-4 rounded-xl border border-[#383A40] relative">
+            <div className="bg-charcoal p-4 rounded-xl border border-charcoal-lighter relative">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-400">You receive</span>
                 <span className="text-gray-400">Balance: {receiveToken.balance.toLocaleString()} {receiveToken.symbol}</span>
@@ -272,7 +272,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                 <div className="relative">
                   <button
                     onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
-                    className="flex items-center gap-2 bg-[#7F56FF] px-3 py-1.5 rounded-lg text-white font-medium hover:bg-[#9675FF] transition-colors whitespace-nowrap"
+                    className="flex items-center gap-2 bg-neon-purple px-3 py-1.5 rounded-lg text-white font-medium hover:bg-neon-purple-hover transition-colors whitespace-nowrap"
                   >
                     <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
                       {receiveToken.icon}
@@ -281,17 +281,17 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                     <ChevronDown size={14} />
                   </button>
                   {showReceiveSelect && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#2B2D31] border border-[#383A40] rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
                       {SWAP_TOKENS.filter(t => t.symbol !== payToken.symbol).map(token => (
                         <button
                           key={token.symbol}
                           onClick={() => selectReceiveToken(token)}
                           className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#383A40] transition-colors text-left",
-                            token.symbol === receiveToken.symbol && "bg-[#7F56FF]/10"
+                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-charcoal-lighter transition-colors text-left",
+                            token.symbol === receiveToken.symbol && "bg-neon-purple/10"
                           )}
                         >
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#7F56FF] to-[#80FF56] flex items-center justify-center text-[10px] font-bold text-[#1E1F22]">
+                          <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
                             {token.icon}
                           </div>
                           <div>
@@ -318,10 +318,10 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
               className={cn(
                 "w-full font-bold py-4 rounded-xl transition-all mt-2",
                 swapSuccess
-                  ? "bg-[#80FF56] text-[#1E1F22]"
+                  ? "bg-lime-green text-charcoal"
                   : canSwap
-                    ? "bg-[#7F56FF] hover:bg-[#9675FF] text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
-                    : "bg-[#383A40] text-gray-500 cursor-not-allowed"
+                    ? "bg-neon-purple hover:bg-neon-purple-hover text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
+                    : "bg-charcoal-lighter text-gray-500 cursor-not-allowed"
               )}
             >
               {swapSuccess ? '✓ Swap Successful!' : insufficientBalance ? 'Insufficient Balance' : 'Swap Now'}
@@ -333,17 +333,17 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
       {/* Holdings */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold text-white mb-4">Your Holdings</h3>
-        <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] overflow-hidden">
+        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-[#1E1F22] border-b border-[#383A40] text-gray-400 text-xs uppercase tracking-wider">
+              <tr className="bg-charcoal border-b border-charcoal-lighter text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-6 py-3 text-left font-medium">Asset</th>
                 <th className="px-6 py-3 text-right font-medium">Balance</th>
                 <th className="px-6 py-3 text-right font-medium">Value</th>
                 <th className="px-6 py-3 text-right font-medium">P&L</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#383A40]">
+            <tbody className="divide-y divide-charcoal-lighter">
               {MOCK_PORTFOLIO.map(item => {
                 const value = item.balance * item.token.price;
                 const cost = item.balance * item.avgBuyPrice;
@@ -352,10 +352,10 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                 const isGain = pnl >= 0;
 
                 return (
-                  <tr key={item.token.id} className="hover:bg-[#383A40]/50 transition-colors">
+                  <tr key={item.token.id} className="hover:bg-charcoal-lighter/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#1E1F22] border border-[#383A40] flex items-center justify-center font-bold text-xs text-white">
+                        <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
                           {item.token.symbol[0]}
                         </div>
                         <div>
@@ -372,10 +372,10 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
                       {formatCurrency(value)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className={cn("font-mono font-medium", isGain ? "text-[#80FF56]" : "text-[#FF5656]")}>
+                      <div className={cn("font-mono font-medium", isGain ? "text-lime-green" : "text-danger")}>
                         {isGain ? '+' : ''}{formatCurrency(pnl)}
                       </div>
-                      <div className={cn("text-xs", isGain ? "text-[#80FF56]/70" : "text-[#FF5656]/70")}>
+                      <div className={cn("text-xs", isGain ? "text-lime-green/70" : "text-danger/70")}>
                         {isGain ? '+' : ''}{pnlPct.toFixed(2)}%
                       </div>
                     </td>

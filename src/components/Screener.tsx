@@ -98,28 +98,28 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
           <p className="text-gray-400 text-sm">Real-time Solana token pairs and liquidity.</p>
         </div>
         
-        <div className="flex bg-[#2B2D31] p-1 rounded-lg border border-[#383A40]">
+        <div className="flex bg-charcoal-light p-1 rounded-lg border border-charcoal-lighter">
           <button 
             onClick={() => setFilter('all')}
-            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors", filter === 'all' ? "bg-[#383A40] text-white" : "text-gray-400 hover:text-gray-200")}
+            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors", filter === 'all' ? "bg-charcoal-lighter text-white" : "text-gray-400 hover:text-gray-200")}
           >
             All
           </button>
           <button 
             onClick={() => setFilter('gainers')}
-            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'gainers' ? "bg-[#383A40] text-[#80FF56]" : "text-gray-400 hover:text-gray-200")}
+            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'gainers' ? "bg-charcoal-lighter text-lime-green" : "text-gray-400 hover:text-gray-200")}
           >
             <TrendingUp size={14} /> Gainers
           </button>
           <button 
             onClick={() => setFilter('losers')}
-            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'losers' ? "bg-[#383A40] text-[#FF5656]" : "text-gray-400 hover:text-gray-200")}
+            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'losers' ? "bg-charcoal-lighter text-danger" : "text-gray-400 hover:text-gray-200")}
           >
             <TrendingDown size={14} /> Losers
           </button>
           <button 
             onClick={() => setFilter('new')}
-            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'new' ? "bg-[#383A40] text-[#7F56FF]" : "text-gray-400 hover:text-gray-200")}
+            className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1", filter === 'new' ? "bg-charcoal-lighter text-neon-purple" : "text-gray-400 hover:text-gray-200")}
           >
             <Clock size={14} /> New Pairs
           </button>
@@ -134,11 +134,11 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
         </div>
       )}
 
-      <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] overflow-hidden">
+      <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#1E1F22] border-b border-[#383A40] text-gray-400 text-xs uppercase tracking-wider">
+              <tr className="bg-charcoal border-b border-charcoal-lighter text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-6 py-4 font-medium">Token</th>
                 <SortHeader label="Price" field="price" />
                 <SortHeader label="24h Change" field="priceChange24h" />
@@ -148,7 +148,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                 <th className="px-6 py-4 font-medium text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#383A40]">
+            <tbody className="divide-y divide-charcoal-lighter">
               {filteredTokens.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
@@ -161,12 +161,12 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                   return (
                     <tr
                       key={token.id}
-                      className="hover:bg-[#383A40]/50 transition-colors group cursor-pointer"
+                      className="hover:bg-charcoal-lighter/50 transition-colors group cursor-pointer"
                       onClick={() => setSelectedToken(token)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#1E1F22] border border-[#383A40] flex items-center justify-center font-bold text-xs text-white">
+                          <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
                             {token.symbol[0]}
                           </div>
                           <div>
@@ -179,7 +179,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                         {formatCurrency(token.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
-                        <span className={isPositive ? 'text-[#80FF56]' : 'text-[#FF5656]'}>
+                        <span className={isPositive ? 'text-lime-green' : 'text-danger'}>
                           {isPositive ? '+' : ''}{token.priceChange24h.toFixed(2)}%
                         </span>
                       </td>
@@ -198,7 +198,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
                           onClick={(e) => { e.stopPropagation(); setSelectedToken(token); }}
-                          className="text-xs bg-[#7F56FF]/10 text-[#7F56FF] hover:bg-[#7F56FF] hover:text-white px-3 py-1.5 rounded transition-all font-medium border border-[#7F56FF]/20 opacity-0 group-hover:opacity-100"
+                          className="text-xs bg-neon-purple/10 text-neon-purple hover:bg-neon-purple hover:text-white px-3 py-1.5 rounded transition-all font-medium border border-neon-purple/20 opacity-0 group-hover:opacity-100"
                         >
                           View Chart
                         </button>
@@ -219,12 +219,12 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
           onClick={() => setSelectedToken(null)}
         >
           <div
-            className="bg-[#2B2D31] border border-[#383A40] rounded-2xl w-full max-w-2xl shadow-2xl shadow-black/50 animate-[fadeIn_150ms_ease-out]"
+            className="bg-charcoal-light border border-charcoal-lighter rounded-2xl w-full max-w-2xl shadow-2xl shadow-black/50 animate-[fadeIn_150ms_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 border-b border-[#383A40]">
+            <div className="flex items-center justify-between p-6 border-b border-charcoal-lighter">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#1E1F22] border border-[#383A40] flex items-center justify-center font-bold text-sm text-white">
+                <div className="w-10 h-10 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-sm text-white">
                   {selectedToken.symbol[0]}
                 </div>
                 <div>
@@ -237,13 +237,13 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
                   href={`https://solscan.io/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#7F56FF] hover:text-[#9675FF] transition-colors flex items-center gap-1 text-sm"
+                  className="text-neon-purple hover:text-neon-purple-hover transition-colors flex items-center gap-1 text-sm"
                 >
                   Solscan <ExternalLink size={14} />
                 </a>
                 <button
                   onClick={() => setSelectedToken(null)}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-[#383A40] rounded-lg transition-colors"
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-charcoal-lighter rounded-lg transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -254,7 +254,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <p className="text-3xl font-bold text-white font-mono">{formatCurrency(selectedToken.price)}</p>
-                  <p className={cn("text-sm font-medium mt-1", selectedToken.priceChange24h >= 0 ? "text-[#80FF56]" : "text-[#FF5656]")}>
+                  <p className={cn("text-sm font-medium mt-1", selectedToken.priceChange24h >= 0 ? "text-lime-green" : "text-danger")}>
                     {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(2)}% (24h)
                   </p>
                 </div>
@@ -275,15 +275,15 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery }) => {
               </div>
 
               <div className="grid grid-cols-3 gap-4 mt-6">
-                <div className="bg-[#1E1F22] rounded-lg p-3 border border-[#383A40]">
+                <div className="bg-charcoal rounded-lg p-3 border border-charcoal-lighter">
                   <p className="text-xs text-gray-500 mb-1">Liquidity</p>
                   <p className="text-sm font-mono text-white">{formatCurrency(selectedToken.liquidity)}</p>
                 </div>
-                <div className="bg-[#1E1F22] rounded-lg p-3 border border-[#383A40]">
+                <div className="bg-charcoal rounded-lg p-3 border border-charcoal-lighter">
                   <p className="text-xs text-gray-500 mb-1">Market Cap</p>
                   <p className="text-sm font-mono text-white">{formatCurrency(selectedToken.marketCap)}</p>
                 </div>
-                <div className="bg-[#1E1F22] rounded-lg p-3 border border-[#383A40]">
+                <div className="bg-charcoal rounded-lg p-3 border border-charcoal-lighter">
                   <p className="text-xs text-gray-500 mb-1">Contract</p>
                   <p className="text-sm font-mono text-white truncate" title={selectedToken.address}>
                     {selectedToken.address.slice(0, 6)}...{selectedToken.address.slice(-4)}

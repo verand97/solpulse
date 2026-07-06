@@ -15,9 +15,9 @@ interface HeaderProps {
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
-  whale: <ShieldAlert size={16} className="text-[#FF5656]" />,
-  price: <TrendingUp size={16} className="text-[#80FF56]" />,
-  system: <Radio size={16} className="text-[#7F56FF]" />,
+  whale: <ShieldAlert size={16} className="text-danger" />,
+  price: <TrendingUp size={16} className="text-lime-green" />,
+  system: <Radio size={16} className="text-neon-purple" />,
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-16 bg-[#1E1F22] border-b border-[#383A40] flex items-center justify-between px-6 sticky top-0 z-20">
+    <header className="h-16 bg-charcoal border-b border-charcoal-lighter flex items-center justify-between px-6 sticky top-0 z-20">
       {/* Search */}
       <div className="flex-1 max-w-xl">
         <div className="relative">
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-10 pr-10 py-2 border border-[#383A40] rounded-lg leading-5 bg-[#2B2D31] text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#7F56FF] focus:border-[#7F56FF] sm:text-sm transition-colors"
+            className="block w-full pl-10 pr-10 py-2 border border-charcoal-lighter rounded-lg leading-5 bg-charcoal-light text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-neon-purple focus:border-neon-purple sm:text-sm transition-colors"
             placeholder="Search tokens, pairs, or addresses..."
           />
           {searchQuery && (
@@ -90,26 +90,26 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Bell size={20} />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#FF5656] text-[10px] text-white font-bold flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-danger text-[10px] text-white font-bold flex items-center justify-center">
                 {unreadCount}
               </span>
             )}
           </button>
 
           {showNotifs && (
-            <div className="absolute right-0 top-12 w-96 bg-[#2B2D31] border border-[#383A40] rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-50 animate-[fadeIn_150ms_ease-out]">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#383A40]">
+            <div className="absolute right-0 top-12 w-96 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-50 animate-[fadeIn_150ms_ease-out]">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-charcoal-lighter">
                 <h3 className="text-sm font-semibold text-white">Notifications</h3>
                 {unreadCount > 0 && (
                   <button
                     onClick={onMarkAllRead}
-                    className="text-xs text-[#7F56FF] hover:text-[#9675FF] font-medium flex items-center gap-1 transition-colors"
+                    className="text-xs text-neon-purple hover:text-neon-purple-hover font-medium flex items-center gap-1 transition-colors"
                   >
                     <CheckCheck size={14} /> Mark all read
                   </button>
                 )}
               </div>
-              <div className="max-h-80 overflow-y-auto divide-y divide-[#383A40]">
+              <div className="max-h-80 overflow-y-auto divide-y divide-charcoal-lighter">
                 {notifications.length === 0 ? (
                   <div className="p-6 text-center text-gray-500 text-sm">No notifications</div>
                 ) : (
@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => onMarkRead(n.id)}
                       className={cn(
                         "px-4 py-3 flex gap-3 cursor-pointer transition-colors",
-                        !n.read ? "bg-[#7F56FF]/5 hover:bg-[#7F56FF]/10" : "hover:bg-[#383A40]/50"
+                        !n.read ? "bg-neon-purple/5 hover:bg-neon-purple/10" : "hover:bg-charcoal-lighter/50"
                       )}
                     >
                       <div className="mt-0.5 shrink-0">
@@ -130,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
                           <p className={cn("text-sm font-medium truncate", !n.read ? "text-white" : "text-gray-400")}>
                             {n.title}
                           </p>
-                          {!n.read && <div className="w-2 h-2 rounded-full bg-[#7F56FF] shrink-0" />}
+                          {!n.read && <div className="w-2 h-2 rounded-full bg-neon-purple shrink-0" />}
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
                         <p className="text-xs text-gray-600 mt-1">{timeAgo(n.timestamp)}</p>
@@ -150,13 +150,13 @@ export const Header: React.FC<HeaderProps> = ({
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
             walletConnected
-              ? "bg-[#80FF56]/10 text-[#80FF56] border border-[#80FF56]/20 hover:bg-[#80FF56]/20"
-              : "bg-[#7F56FF] hover:bg-[#9675FF] text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
+              ? "bg-lime-green/10 text-lime-green border border-lime-green/20 hover:bg-lime-green/20"
+              : "bg-neon-purple hover:bg-neon-purple-hover text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
           )}
         >
           {walletConnected ? (
             <>
-              <div className="w-2 h-2 rounded-full bg-[#80FF56] animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-lime-green animate-pulse" />
               7aV...9Kp
               <LogOut size={14} className="ml-1 opacity-0 group-hover:opacity-100" />
             </>

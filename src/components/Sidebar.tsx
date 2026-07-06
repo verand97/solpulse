@@ -19,17 +19,17 @@ const navItems = [
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, collapsed, onToggleCollapse }) => {
   return (
     <div className={cn(
-      "bg-[#2B2D31] flex flex-col h-full border-r border-[#383A40] transition-all duration-300 ease-in-out shrink-0",
+      "bg-charcoal-light flex flex-col h-full border-r border-charcoal-lighter transition-all duration-300 ease-in-out shrink-0",
       collapsed ? "w-[72px]" : "w-64"
     )}>
       <div className={cn("p-6 flex items-center", collapsed ? "justify-center" : "justify-between")}>
         <h1 className="text-xl font-bold font-sans text-white tracking-tight flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7F56FF] to-[#80FF56] flex items-center justify-center shrink-0">
-            <Zap size={18} className="text-[#1E1F22]" />
+          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center shrink-0">
+            <Zap size={18} className="text-charcoal" />
           </div>
           {!collapsed && (
             <span className="whitespace-nowrap">
-              Sol<span className="text-[#7F56FF]">Pulse</span>
+              Sol<span className="text-neon-purple">Pulse</span>
             </span>
           )}
         </h1>
@@ -49,8 +49,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium',
                 collapsed && 'justify-center',
                 isActive
-                  ? 'bg-[rgba(127,86,255,0.15)] text-[#7F56FF] shadow-[inset_0_0_0_1px_rgba(127,86,255,0.2)]'
-                  : 'text-gray-400 hover:bg-[#383A40] hover:text-gray-200'
+                  ? 'bg-neon-purple-dim text-neon-purple shadow-[inset_0_0_0_1px_rgba(127,86,255,0.2)]'
+                  : 'text-gray-400 hover:bg-charcoal-lighter hover:text-gray-200'
               )}
             >
               <Icon size={18} className="shrink-0" />
@@ -60,11 +60,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
         })}
       </nav>
 
-      <div className="p-3 border-t border-[#383A40] space-y-1">
+      <div className="p-3 border-t border-charcoal-lighter space-y-1">
         <button 
           id="nav-settings"
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-gray-400 hover:bg-[#383A40] hover:text-gray-200",
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-gray-400 hover:bg-charcoal-lighter hover:text-gray-200",
             collapsed && 'justify-center'
           )}
           title={collapsed ? 'Settings' : undefined}
@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
           id="sidebar-toggle"
           onClick={onToggleCollapse}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-gray-500 hover:bg-[#383A40] hover:text-gray-200",
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-gray-500 hover:bg-charcoal-lighter hover:text-gray-200",
             collapsed && 'justify-center'
           )}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

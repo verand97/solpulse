@@ -38,7 +38,7 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Chart Card */}
-        <div className="col-span-1 md:col-span-2 bg-[#2B2D31] rounded-xl border border-[#383A40] p-6">
+        <div className="col-span-1 md:col-span-2 bg-charcoal-light rounded-xl border border-charcoal-lighter p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-gray-400 text-sm font-medium mb-1">Total Balance</p>
@@ -49,7 +49,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex items-center gap-2">
               <div className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-sm",
-                isPositivePnl ? "bg-[rgba(128,255,86,0.1)] text-[#80FF56]" : "bg-[rgba(255,86,86,0.1)] text-[#FF5656]"
+                isPositivePnl ? "bg-[rgba(128,255,86,0.1)] text-lime-green" : "bg-[rgba(255,86,86,0.1)] text-danger"
               )}>
                 {isPositivePnl ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                 {Math.abs(pnlPercent).toFixed(2)}% ({formatCurrency(Math.abs(totalPnl))})
@@ -58,14 +58,14 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Chart Range Selector */}
-          <div className="flex gap-1 mb-4 bg-[#1E1F22] p-1 rounded-lg w-fit border border-[#383A40]">
+          <div className="flex gap-1 mb-4 bg-charcoal p-1 rounded-lg w-fit border border-charcoal-lighter">
             {(['1h', '4h', '1d', '7d'] as const).map(range => (
               <button
                 key={range}
                 onClick={() => setChartRange(range)}
                 className={cn(
                   "px-3 py-1 text-xs font-medium rounded-md transition-colors",
-                  chartRange === range ? "bg-[#7F56FF] text-white" : "text-gray-400 hover:text-gray-200"
+                  chartRange === range ? "bg-neon-purple text-white" : "text-gray-400 hover:text-gray-200"
                 )}
               >
                 {range.toUpperCase()}
@@ -79,9 +79,9 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Assets Allocation */}
-        <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] p-6 flex flex-col">
+        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter p-6 flex flex-col">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <PieChart size={18} className="text-[#7F56FF]" /> Assets Allocation
+            <PieChart size={18} className="text-neon-purple" /> Assets Allocation
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto pr-2">
             {MOCK_PORTFOLIO.map((item) => {
@@ -91,10 +91,10 @@ export const Dashboard: React.FC = () => {
               const isGain = pnl >= 0;
 
               return (
-                <div key={item.token.id} className="p-4 rounded-lg bg-[#1E1F22] border border-[#383A40]">
+                <div key={item.token.id} className="p-4 rounded-lg bg-charcoal border border-charcoal-lighter">
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#2B2D31] flex items-center justify-center font-bold text-xs text-white">
+                      <div className="w-8 h-8 rounded-full bg-charcoal-light flex items-center justify-center font-bold text-xs text-white">
                         {item.token.symbol[0]}
                       </div>
                       <div>
@@ -104,15 +104,15 @@ export const Dashboard: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <div className="font-mono font-semibold text-white">{formatCurrency(value)}</div>
-                      <div className={cn("text-xs font-medium", isGain ? "text-[#80FF56]" : "text-[#FF5656]")}>
+                      <div className={cn("text-xs font-medium", isGain ? "text-lime-green" : "text-danger")}>
                         {isGain ? '+' : ''}{formatCurrency(pnl)}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-[#383A40] rounded-full h-1.5 overflow-hidden">
+                    <div className="flex-1 bg-charcoal-lighter rounded-full h-1.5 overflow-hidden">
                       <div 
-                        className="bg-[#7F56FF] h-1.5 rounded-full transition-all duration-500" 
+                        className="bg-neon-purple h-1.5 rounded-full transition-all duration-500" 
                         style={{ width: `${allocation}%` }}
                       />
                     </div>
@@ -127,31 +127,31 @@ export const Dashboard: React.FC = () => {
       
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] p-6">
+        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter p-6">
            <h3 className="text-gray-400 text-sm font-medium mb-1">Network Status</h3>
            <div className="flex items-center gap-3 mt-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#80FF56] shadow-[0_0_8px_#80FF56] animate-pulse" />
+              <div className="w-2.5 h-2.5 rounded-full bg-lime-green shadow-[0_0_8px_#80FF56] animate-pulse" />
               <span className="text-white font-medium">Solana Mainnet</span>
            </div>
            <p className="text-xs text-gray-500 mt-2 font-mono">
              TPS: <span className="text-gray-300">{tps.toLocaleString()}</span> • Ping: <span className="text-gray-300">{ping}ms</span>
            </p>
         </div>
-        <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] p-6">
+        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter p-6">
            <h3 className="text-gray-400 text-sm font-medium mb-1">Active Alerts</h3>
            <div className="flex items-center gap-3 mt-2">
-              <Activity size={20} className="text-[#7F56FF]" />
+              <Activity size={20} className="text-neon-purple" />
               <span className="text-white font-medium">12 triggers set</span>
            </div>
            <p className="text-xs text-gray-500 mt-2">3 triggered in last 24h</p>
         </div>
-        <div className="bg-[#2B2D31] rounded-xl border border-[#383A40] p-6">
+        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter p-6">
            <h3 className="text-gray-400 text-sm font-medium mb-1">24h Volume Analyzed</h3>
            <div className="flex items-center gap-3 mt-2">
-              <TrendingUp size={20} className="text-[#80FF56]" />
+              <TrendingUp size={20} className="text-lime-green" />
               <span className="text-2xl font-bold text-white font-mono">$4.2B</span>
            </div>
-           <p className="text-xs text-[#80FF56] mt-2">+15.2% vs yesterday</p>
+           <p className="text-xs text-lime-green mt-2">+15.2% vs yesterday</p>
         </div>
       </div>
     </div>
