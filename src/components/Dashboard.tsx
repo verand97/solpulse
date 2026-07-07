@@ -22,7 +22,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
   const isPositivePnl = totalPnl >= 0;
 
   const pointsMap = { '1h': 12, '4h': 48, '1d': 100, '7d': 168 };
-  const chartData = useMemo(() => generateMockChartData(totalValue || 15234.50, pnlPercent || 5.2, pointsMap[chartRange]), [chartRange, totalValue, pnlPercent]);
+  const chartData = useMemo(() => generateMockChartData(totalValue, pnlPercent, pointsMap[chartRange]), [chartRange, totalValue, pnlPercent]);
 
   // Simulate live TPS + Ping
   useEffect(() => {
@@ -94,6 +94,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
               <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
                 <Loader2 size={24} className="animate-spin text-neon-purple" />
                 Fetching portfolio data...
+              </div>
+            ) : portfolio.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full py-10 gap-2 text-gray-500">
+                <PieChart size={32} className="opacity-20" />
+                <p className="text-sm">No assets found</p>
+                <p className="text-xs">Connect a wallet with SOL or SPL tokens</p>
               </div>
             ) : portfolio.map((item) => {
               const value = item.balance * item.token.price;

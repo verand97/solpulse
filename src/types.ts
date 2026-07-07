@@ -48,4 +48,5 @@ export type SwapToken = {
   balance: number;
   price: number;
   icon: string;
+  imageUrl?: string;
 };

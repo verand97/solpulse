@@ -9,6 +9,7 @@ import { SettingsView } from './components/SettingsView';
 import { MOCK_NOTIFICATIONS } from './data';
 import { Notification, PortfolioAsset, SwapToken } from './types';
 import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
+import { useWalletPortfolio } from './hooks/useWalletPortfolio';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('screener');
@@ -17,31 +18,7 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { tokens, isLoading } = useDexScreenerTokens();
-
-  const portfolio = useMemo(() => {
-    if (!tokens.length) return [];
-    
-    // Create a dynamic portfolio based on real tokens
-    const assets: PortfolioAsset[] = [];
-    if (tokens.length > 0) assets.push({ token: tokens[0], balance: 45.5, avgBuyPrice: tokens[0].price * 0.8 }); // e.g., SOL
-    if (tokens.length > 1) assets.push({ token: tokens[1], balance: 1500, avgBuyPrice: tokens[1].price * 1.2 });
-    if (tokens.length > 2) assets.push({ token: tokens[2], balance: 25000, avgBuyPrice: tokens[2].price * 0.9 });
-    
-    return assets;
-  }, [tokens]);
-
-  const swapTokens = useMemo(() => {
-    if (!tokens.length) return [];
-    
-    return tokens.slice(0, 10).map((t, i) => ({
-      symbol: t.symbol,
-      name: t.name,
-      balance: i === 0 ? 42.5 : (i === 1 ? 1250.0 : 0),
-      price: t.price,
-      icon: t.symbol[0],
-      imageUrl: t.imageUrl
-    }));
-  }, [tokens]);
+  const { portfolio, swapTokens, isWalletLoading } = useWalletPortfolio(tokens);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
