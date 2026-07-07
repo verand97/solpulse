@@ -35,20 +35,36 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
 ];
 
-export const generateMockChartData = (startPrice: number, points: number = 50): ChartDataPoint[] => {
+export const generateMockChartData = (currentPrice: number, priceChangePct: number, points: number = 50): ChartDataPoint[] => {
   const data: ChartDataPoint[] = [];
-  let currentPrice = startPrice;
   const now = new Date();
   
+  // Calculate what the price was originally based on the percentage change
+  // priceChangePct is in percentage, e.g., 5.2 means +5.2%
+  const startPrice = currentPrice / (1 + priceChangePct / 100);
+  
+  let simulatedPrice = startPrice;
+  const trendPerPoint = (currentPrice - startPrice) / points;
+  
   for (let i = points; i >= 0; i--) {
-    const time = new Date(now.getTime() - i * 5 * 60000); // 5 minute intervals
-    // Random walk
-    const change = (Math.random() - 0.5) * 0.02 * currentPrice; 
-    currentPrice += change;
+    const time = new Date(now.getTime() - i * 30 * 60000); // 30 minute intervals
+    
+    if (i === points) {
+      simulatedPrice = startPrice;
+    } else if (i === 0) {
+      simulatedPrice = currentPrice;
+    } else {
+      // Add trend + random volatility (max 5% of current price per step)
+      const volatility = currentPrice * 0.05 * (Math.random() - 0.5);
+      simulatedPrice = simulatedPrice + trendPerPoint + volatility;
+      
+      // Ensure price doesn't go below zero
+      if (simulatedPrice <= 0) simulatedPrice = currentPrice * 0.01;
+    }
     
     data.push({
       time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      price: Number(currentPrice.toFixed(4)),
+      price: simulatedPrice, // Keep full precision, formatting happens in TokenChart
     });
   }
   return data;

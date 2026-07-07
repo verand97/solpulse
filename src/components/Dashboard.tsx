@@ -15,14 +15,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
   const [tps, setTps] = useState(2845);
   const [ping, setPing] = useState(12);
 
-  const pointsMap = { '1h': 12, '4h': 48, '1d': 100, '7d': 168 };
-  const chartData = useMemo(() => generateMockChartData(15234.50, pointsMap[chartRange]), [chartRange]);
-  
   const totalValue = portfolio.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
   const totalCost = portfolio.reduce((acc, item) => acc + (item.balance * item.avgBuyPrice), 0);
   const totalPnl = totalValue - totalCost;
-  const pnlPercent = (totalPnl / totalCost) * 100;
+  const pnlPercent = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
   const isPositivePnl = totalPnl >= 0;
+
+  const pointsMap = { '1h': 12, '4h': 48, '1d': 100, '7d': 168 };
+  const chartData = useMemo(() => generateMockChartData(totalValue || 15234.50, pnlPercent || 5.2, pointsMap[chartRange]), [chartRange, totalValue, pnlPercent]);
 
   // Simulate live TPS + Ping
   useEffect(() => {

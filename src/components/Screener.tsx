@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MOCK_TOKENS, generateMockChartData } from '../data';
+import { generateMockChartData } from '../data';
 import { Token } from '../types';
 import { formatCurrency, formatNumber, cn } from '../utils';
 import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2 } from 'lucide-react';
@@ -57,7 +57,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
 
   const chartData = useMemo(() => {
     if (!selectedToken) return [];
-    return generateMockChartData(selectedToken.price, 80);
+    return generateMockChartData(selectedToken.price, selectedToken.priceChange24h, 80);
   }, [selectedToken]);
 
   const SortHeader = ({ label, field, align = 'right' }: { label: string; field: SortKey; align?: string }) => (

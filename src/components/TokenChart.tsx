@@ -22,6 +22,13 @@ export const TokenChart: React.FC<TokenChartProps> = ({
     return { min: min - padding, max: max + padding };
   }, [data]);
 
+  const formatChartPrice = (val: number) => {
+    if (val >= 1) return val.toFixed(2);
+    if (val >= 0.01) return val.toFixed(4);
+    if (val >= 0.0001) return val.toFixed(6);
+    return val.toExponential(2); // Use exponential for extremely small numbers, or 8 decimals
+  };
+
   return (
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
@@ -45,12 +52,12 @@ export const TokenChart: React.FC<TokenChartProps> = ({
             axisLine={false} 
             tickLine={false} 
             tick={{ fill: '#6B7280', fontSize: 12 }}
-            tickFormatter={(val) => val < 0.01 ? val.toFixed(4) : val.toFixed(2)}
+            tickFormatter={(val) => val < 0.0001 ? val.toExponential(1) : (val < 0.01 ? val.toFixed(4) : val.toFixed(2))}
           />
           <Tooltip
             contentStyle={{ backgroundColor: '#2B2D31', border: '1px solid #383A40', borderRadius: '8px' }}
             itemStyle={{ color: '#F2F3F5' }}
-            formatter={(value: number) => [value < 0.01 ? value.toFixed(6) : value.toFixed(2), 'Price']}
+            formatter={(value: number) => [value < 0.0001 ? value.toExponential(3) : (value < 0.01 ? value.toFixed(6) : value.toFixed(2)), 'Price']}
             labelStyle={{ color: '#9CA3AF', marginBottom: '4px' }}
           />
           <Area 
