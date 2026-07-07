@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { LandingPage } from './components/LandingPage';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
@@ -13,6 +14,7 @@ import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
 import { useWalletPortfolio } from './hooks/useWalletPortfolio';
 
 export default function App() {
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [activeTab, setActiveTab] = useState('screener');
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
@@ -32,6 +34,10 @@ export default function App() {
   }, []);
 
   return (
+    <>
+      {showLandingPage ? (
+        <LandingPage onLaunch={() => setShowLandingPage(false)} />
+      ) : (
     <div className="flex h-screen bg-charcoal overflow-hidden selection:bg-neon-purple/30">
       <Sidebar 
         activeTab={activeTab} 
@@ -62,5 +68,7 @@ export default function App() {
         </main>
       </div>
     </div>
+      )}
+    </>
   );
 }
