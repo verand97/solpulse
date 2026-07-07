@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
 import { WhaleAlerts } from './components/WhaleAlerts';
+import { Watchlist } from './components/Watchlist';
 import { WalletView } from './components/WalletView';
 import { SettingsView } from './components/SettingsView';
 import { MOCK_NOTIFICATIONS } from './data';
@@ -53,6 +54,7 @@ export default function App() {
           <div className="mx-auto max-w-7xl h-full">
             {activeTab === 'dashboard' && <Dashboard portfolio={portfolio} isLoading={isLoading} />}
             {activeTab === 'screener' && <Screener searchQuery={searchQuery} tokens={tokens} isLoading={isLoading} />}
+            {activeTab === 'watchlist' && <Watchlist tokens={tokens} />}
             {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
             {activeTab === 'wallet' && <WalletView swapTokens={swapTokens} portfolio={portfolio} />}
             {activeTab === 'settings' && <SettingsView />}

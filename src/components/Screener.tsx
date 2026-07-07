@@ -2,9 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { generateMockChartData } from '../data';
 import { Token } from '../types';
 import { formatCurrency, formatNumber, cn } from '../utils';
-import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2, LayoutGrid, List } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2 } from 'lucide-react';
 import { TokenChart } from './TokenChart';
-import { BubbleMap } from './BubbleMap';
+import { useWatchlist } from '../hooks/useWatchlist';
+import { Star } from 'lucide-react';
 
 interface ScreenerProps {
   searchQuery: string;
@@ -15,7 +16,7 @@ interface ScreenerProps {
 type SortKey = 'price' | 'priceChange24h' | 'volume24h' | 'liquidity' | 'marketCap';
 
 export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoading }) => {
-  const [view, setView] = useState<'list' | 'bubbles'>('bubbles');
+  const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const [filter, setFilter] = useState<'all' | 'gainers' | 'losers' | 'new'>('all');
   const [sortBy, setSortBy] = useState<SortKey>('volume24h');
   const [sortAsc, setSortAsc] = useState(false);
@@ -111,23 +112,6 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
               <Clock size={14} /> New Pairs
             </button>
           </div>
-
-          <div className="flex bg-charcoal-light p-1 rounded-lg border border-charcoal-lighter">
-            <button 
-              onClick={() => setView('list')}
-              className={cn("p-1.5 rounded-md transition-colors", view === 'list' ? "bg-neon-purple text-white shadow-[0_0_10px_rgba(127,86,255,0.3)]" : "text-gray-400 hover:text-gray-200")}
-              title="List View"
-            >
-              <List size={18} />
-            </button>
-            <button 
-              onClick={() => setView('bubbles')}
-              className={cn("p-1.5 rounded-md transition-colors", view === 'bubbles' ? "bg-neon-purple text-white shadow-[0_0_10px_rgba(127,86,255,0.3)]" : "text-gray-400 hover:text-gray-200")}
-              title="Bubble Map"
-            >
-              <LayoutGrid size={18} />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -139,9 +123,8 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
         </div>
       )}
 
-      {view === 'list' ? (
-        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter overflow-hidden">
-          <div className="overflow-x-auto">
+      <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter overflow-hidden">
+        <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-charcoal border-b border-charcoal-lighter text-gray-400 text-xs uppercase tracking-wider">
@@ -230,9 +213,6 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
           </table>
         </div>
       </div>
-      ) : (
-        <BubbleMap tokens={filteredTokens} onSelectToken={setSelectedToken} />
-      )}
 
       {/* Token Detail Modal */}
       {selectedToken && (
@@ -241,7 +221,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
           onClick={() => setSelectedToken(null)}
         >
           <div
-            className="bg-charcoal-light border border-charcoal-lighter rounded-2xl w-full max-w-4xl shadow-2xl shadow-black/50 animate-[fadeIn_150ms_ease-out] flex flex-col max-h-[90vh]"
+            className="bg-charcoal-light border border-charcoal-lighter rounded-2xl overflow-hidden w-full max-w-4xl shadow-2xl shadow-black/50 animate-[fadeIn_150ms_ease-out] flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b border-charcoal-lighter">
@@ -260,28 +240,46 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
                   <p className="text-sm text-gray-400">{selectedToken.name}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleWatchlist(selectedToken.address)}
+                  className={cn(
+                    "transition-colors flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border",
+                    isInWatchlist(selectedToken.address)
+                      ? "bg-neon-purple/10 border-neon-purple text-neon-purple hover:bg-neon-purple/20"
+                      : "text-gray-300 hover:text-white hover:bg-charcoal border-charcoal-lighter"
+                  )}
+                  title={isInWatchlist(selectedToken.address) ? "Remove from Watchlist" : "Add to Watchlist"}
+                >
+                  <Star size={14} className={isInWatchlist(selectedToken.address) ? "fill-neon-purple" : ""} />
+                  <span className="hidden sm:inline">{isInWatchlist(selectedToken.address) ? "Saved" : "Watchlist"}</span>
+                </button>
                 <a
-                  href={`https://app.bubblemaps.io/sol/${selectedToken.address}`}
+                  href={`https://app.bubblemaps.io/sol/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-neon-purple transition-colors flex items-center gap-1 text-sm bg-charcoal px-3 py-1.5 rounded-lg border border-charcoal-lighter"
+                  className="text-gray-300 hover:text-white hover:bg-charcoal transition-colors flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-charcoal-lighter"
+                  title="Open Bubblemaps in new tab"
                 >
-                  <img src="https://bubblemaps.io/favicon.ico" alt="Bubblemaps" className="w-4 h-4 rounded-full" /> Open Bubblemaps <ExternalLink size={14} />
+                  <img src="https://bubblemaps.io/favicon.ico" alt="Bubblemaps" className="w-3.5 h-3.5 rounded-full" />
+                  <span className="hidden sm:inline">Bubblemaps</span>
+                  <ExternalLink size={12} />
                 </a>
                 <a
                   href={`https://solscan.io/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neon-purple hover:text-neon-purple-hover transition-colors flex items-center gap-1 text-sm bg-charcoal px-3 py-1.5 rounded-lg border border-charcoal-lighter"
+                  className="text-gray-300 hover:text-white hover:bg-charcoal transition-colors flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-charcoal-lighter"
+                  title="View on Solscan"
                 >
-                  Solscan <ExternalLink size={14} />
+                  <span className="hidden sm:inline">Solscan</span>
+                  <ExternalLink size={12} />
                 </a>
                 <button
                   onClick={() => setSelectedToken(null)}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-charcoal-lighter rounded-lg transition-colors ml-2"
+                  className="p-1.5 text-gray-400 hover:bg-danger/20 hover:text-danger rounded-lg transition-colors ml-1"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
             </div>

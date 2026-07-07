@@ -32,7 +32,7 @@ export const TokenChart: React.FC<TokenChartProps> = ({
   return (
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
-        <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
