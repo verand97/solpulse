@@ -63,9 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
       <div className="p-3 border-t border-charcoal-lighter space-y-1">
         <button 
           id="nav-settings"
+          onClick={() => setActiveTab('settings')}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-gray-400 hover:bg-charcoal-lighter hover:text-gray-200",
-            collapsed && 'justify-center'
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium",
+            collapsed ? 'justify-center' : '',
+            activeTab === 'settings' 
+              ? 'bg-neon-purple-dim text-neon-purple shadow-[inset_0_0_0_1px_rgba(127,86,255,0.2)]'
+              : 'text-gray-400 hover:bg-charcoal-lighter hover:text-gray-200'
           )}
           title={collapsed ? 'Settings' : undefined}
         >

@@ -1,17 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { Wallet as WalletIcon, Copy, ExternalLink, QrCode, ArrowRightLeft, Check, ChevronDown, AlertTriangle } from 'lucide-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { formatCurrency, formatAddress, cn } from '../utils';
 import { SwapToken, PortfolioAsset } from '../types';
 
 interface WalletViewProps {
-  walletConnected: boolean;
-  onConnect: () => void;
   swapTokens: SwapToken[];
   portfolio: PortfolioAsset[];
 }
 
-export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConnect, swapTokens, portfolio }) => {
-  const address = '7aVkR9pQm3nV2bZ8wT4jFgHsAcDrEf6YuN1oXi9Kp';
+export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio }) => {
+  const { connected: walletConnected, publicKey } = useWallet();
+  const { setVisible } = useWalletModal();
+  const address = publicKey?.toBase58() || '7aVkR9pQm3nV2bZ8wT4jFgHsAcDrEf6YuN1oXi9Kp';
   const totalValue = portfolio.reduce((acc, item) => acc + (item.balance * item.token.price), 0);
 
   const [payAmount, setPayAmount] = useState('');
@@ -120,7 +122,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ walletConnected, onConne
           <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
           <p className="text-gray-400 mb-6">Connect your Solana wallet to view balances, manage assets, and swap tokens instantly.</p>
           <button
-            onClick={onConnect}
+            onClick={() => setVisible(true)}
             className="bg-neon-purple hover:bg-neon-purple-hover text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-[0_0_20px_rgba(127,86,255,0.3)]"
           >
             Connect Wallet

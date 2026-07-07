@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
 import { WhaleAlerts } from './components/WhaleAlerts';
 import { WalletView } from './components/WalletView';
+import { SettingsView } from './components/SettingsView';
 import { MOCK_NOTIFICATIONS } from './data';
 import { Notification, PortfolioAsset, SwapToken } from './types';
 import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
@@ -13,7 +14,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('screener');
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
-  const [walletConnected, setWalletConnected] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { tokens, isLoading } = useDexScreenerTokens();
@@ -53,10 +53,6 @@ export default function App() {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   }, []);
 
-  const handleConnectWallet = useCallback(() => {
-    setWalletConnected(prev => !prev);
-  }, []);
-
   return (
     <div className="flex h-screen bg-charcoal overflow-hidden selection:bg-neon-purple/30">
       <Sidebar 
@@ -74,8 +70,6 @@ export default function App() {
           unreadCount={unreadCount}
           onMarkAllRead={handleMarkAllRead}
           onMarkRead={handleMarkRead}
-          walletConnected={walletConnected}
-          onConnectWallet={handleConnectWallet}
         />
         
         <main className="flex-1 overflow-y-auto scroll-smooth">
@@ -83,7 +77,8 @@ export default function App() {
             {activeTab === 'dashboard' && <Dashboard portfolio={portfolio} isLoading={isLoading} />}
             {activeTab === 'screener' && <Screener searchQuery={searchQuery} tokens={tokens} isLoading={isLoading} />}
             {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
-            {activeTab === 'wallet' && <WalletView walletConnected={walletConnected} onConnect={handleConnectWallet} swapTokens={swapTokens} portfolio={portfolio} />}
+            {activeTab === 'wallet' && <WalletView swapTokens={swapTokens} portfolio={portfolio} />}
+            {activeTab === 'settings' && <SettingsView />}
           </div>
         </main>
       </div>

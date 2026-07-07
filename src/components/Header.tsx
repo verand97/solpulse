@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, WalletCards, X, Check, CheckCheck, ShieldAlert, TrendingUp, Radio, LogOut } from 'lucide-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Notification } from '../types';
 import { cn } from '../utils';
 
@@ -10,8 +12,6 @@ interface HeaderProps {
   unreadCount: number;
   onMarkAllRead: () => void;
   onMarkRead: (id: string) => void;
-  walletConnected: boolean;
-  onConnectWallet: () => void;
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
@@ -27,11 +27,12 @@ export const Header: React.FC<HeaderProps> = ({
   unreadCount,
   onMarkAllRead,
   onMarkRead,
-  walletConnected,
-  onConnectWallet,
 }) => {
   const [showNotifs, setShowNotifs] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  
+  const { connected, publicKey, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -51,6 +52,19 @@ export const Header: React.FC<HeaderProps> = ({
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
     return `${Math.floor(hrs / 24)}d ago`;
+  };
+  
+  const handleWalletAction = () => {
+    if (connected) {
+      disconnect();
+    } else {
+      setVisible(true);
+    }
+  };
+
+  const shortenAddress = (addr: string | undefined) => {
+    if (!addr) return '';
+    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
   };
 
   return (
@@ -146,19 +160,20 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Wallet */}
         <button
           id="connect-wallet"
-          onClick={onConnectWallet}
+          onClick={handleWalletAction}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-            walletConnected
-              ? "bg-lime-green/10 text-lime-green border border-lime-green/20 hover:bg-lime-green/20"
+            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+            connected
+              ? "bg-lime-green/10 text-lime-green border border-lime-green/20 hover:bg-danger/10 hover:text-danger hover:border-danger/20"
               : "bg-neon-purple hover:bg-neon-purple-hover text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
           )}
         >
-          {walletConnected ? (
+          {connected ? (
             <>
-              <div className="w-2 h-2 rounded-full bg-lime-green animate-pulse" />
-              7aV...9Kp
-              <LogOut size={14} className="ml-1 opacity-0 group-hover:opacity-100" />
+              <div className="w-2 h-2 rounded-full bg-lime-green animate-pulse group-hover:bg-danger group-hover:animate-none" />
+              <span className="group-hover:hidden">{shortenAddress(publicKey?.toBase58())}</span>
+              <span className="hidden group-hover:inline">Disconnect</span>
+              <LogOut size={14} className="ml-1 opacity-0 group-hover:opacity-100 hidden group-hover:block" />
             </>
           ) : (
             <>
