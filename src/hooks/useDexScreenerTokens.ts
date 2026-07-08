@@ -12,14 +12,14 @@ export const useDexScreenerTokens = () => {
         const profilesResponse = await fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/token-profiles/latest/v1`);
         const profilesData = await profilesResponse.json();
         const newAddresses = Array.isArray(profilesData) 
-          ? profilesData.filter(p => p.chainId === 'solana').map(p => p.tokenAddress).slice(0, 200)
+          ? profilesData.map(p => p.tokenAddress).slice(0, 100)
           : [];
 
         // 2. Fetch trending/boosted tokens (currently hot)
         const boostsResponse = await fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/token-boosts/latest/v1`);
         const boostsData = await boostsResponse.json();
         const trendingAddresses = Array.isArray(boostsData)
-          ? boostsData.filter(p => p.chainId === 'solana').map(p => p.tokenAddress).slice(0, 200)
+          ? boostsData.map(p => p.tokenAddress).slice(0, 100)
           : [];
 
         // 3. Established Solana tokens (Top Market Cap/Volume)
@@ -59,7 +59,22 @@ export const useDexScreenerTokens = () => {
           '5mbK36SZ7J19L8jFcyy8B8mC2K7h8r6X6aQ1a5z1v2wX', // PONKE
           '63LfUcswYbcL9XkR3T9T4Gg5L7q5LqE8t3Q6b5fXpump', // GIGA
           '2x3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // HARAMBE
-          '6x3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'  // SC
+          '6x3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',  // SC
+          
+          // ETH Established
+          '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+          '0x6982508145454Ce325dDbE47a25d4ec3d2311933', // PEPE
+          '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', // SHIB
+          '0x514910771AF9Ca656af840dff83E8264EcF986CA', // LINK
+          
+          // Base Established
+          '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
+          '0x532f27101965dd16442E59d40670FaF5eBB142E4', // BRETT
+          '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', // DEGEN
+          
+          // BSC Established
+          '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB
+          '0x55d398326f99059fF775485246999027B3197955'  // USDT
         ];
 
         // Combine unique addresses
@@ -81,7 +96,7 @@ export const useDexScreenerTokens = () => {
         );
         
         // 5. Fetch multiple pages of diverse metas to get a wide variety of tokens
-        const searchTerms = ['solana', 'meme', 'pump', 'ai', 'dog', 'cat', 'wif', 'moon'];
+        const searchTerms = ['solana', 'base', 'eth', 'bsc', 'meme', 'pump', 'ai', 'dog', 'cat', 'wif'];
         const searchPromises = searchTerms.map(term => 
           fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/latest/dex/search?q=${term}`)
             .then(res => res.json())
@@ -105,7 +120,7 @@ export const useDexScreenerTokens = () => {
         
         if (allPairs.length > 0) {
           const parsedTokens: Token[] = allPairs
-            .filter((p: any) => p.chainId === 'solana' && p.baseToken && p.quoteToken)
+            .filter((p: any) => p.baseToken && p.quoteToken)
             .map((p: any) => ({
               id: p.pairAddress,
               symbol: p.baseToken.symbol,
@@ -116,18 +131,19 @@ export const useDexScreenerTokens = () => {
               liquidity: p.liquidity?.usd || 0,
               marketCap: p.marketCap || p.fdv || 0,
               address: p.baseToken.address,
+              chainId: p.chainId,
               createdAt: p.pairCreatedAt || Date.now(),
               imageUrl: p.info?.imageUrl,
             }));
             
-          // Deduplicate by symbol and take highest liquidity
+          // Deduplicate by symbol+chainId and take highest liquidity
           const uniqueTokens = new Map<string, Token>();
           parsedTokens.forEach(token => {
-            const sym = token.symbol.toUpperCase();
-            if (!uniqueTokens.has(sym) || uniqueTokens.get(sym)!.liquidity < token.liquidity) {
+            const key = `${token.symbol.toUpperCase()}_${token.chainId}`;
+            if (!uniqueTokens.has(key) || uniqueTokens.get(key)!.liquidity < token.liquidity) {
               // Only filter if liquidity < 100, we want to allow new meme coins
               if (token.liquidity > 100) {
-                uniqueTokens.set(sym, token);
+                uniqueTokens.set(key, token);
               }
             }
           });

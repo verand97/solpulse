@@ -8,6 +8,7 @@ export interface Token {
   liquidity: number;
   marketCap: number;
   address: string;
+  chainId: string;
   createdAt: number;
   imageUrl?: string;
 }

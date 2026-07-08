@@ -19,6 +19,7 @@ type SortKey = 'price' | 'priceChange24h' | 'volume24h' | 'liquidity' | 'marketC
 export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoading }) => {
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const [filter, setFilter] = useState<'all' | 'gainers' | 'losers' | 'new'>('all');
+  const [chainFilter, setChainFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortKey>('volume24h');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
@@ -35,6 +36,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
 
   const filteredTokens = useMemo(() => {
     let result = tokens.filter(t => {
+      if (chainFilter !== 'all' && t.chainId !== chainFilter) return false;
       if (filter === 'gainers') return t.priceChange24h > 0;
       if (filter === 'losers') return t.priceChange24h < 0;
       if (filter === 'new') return Date.now() - t.createdAt < 86400000 * 30;
@@ -58,7 +60,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
     });
 
     return result;
-  }, [tokens, filter, searchQuery, sortBy, sortAsc]);
+  }, [tokens, filter, chainFilter, searchQuery, sortBy, sortAsc]);
 
   const chartData = useMemo(() => {
     if (!selectedToken) return [];
@@ -84,10 +86,21 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white mb-1">DEX Screener</h2>
-          <p className="text-gray-400 text-sm">Real-time Solana token pairs and liquidity.</p>
+          <p className="text-gray-400 text-sm">Real-time cross-chain token pairs and liquidity.</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <select
+            value={chainFilter}
+            onChange={(e) => setChainFilter(e.target.value)}
+            className="bg-charcoal-light border border-charcoal-lighter rounded-lg px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:border-neon-purple cursor-pointer"
+          >
+            <option value="all">All Chains</option>
+            <option value="solana">Solana</option>
+            <option value="ethereum">Ethereum</option>
+            <option value="bsc">BSC</option>
+            <option value="base">Base</option>
+          </select>
           <div className="flex bg-charcoal-light p-1 rounded-lg border border-charcoal-lighter">
             <button 
               onClick={() => setFilter('all')}
@@ -174,7 +187,12 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
                             </div>
                           )}
                           <div>
-                            <div className="font-semibold text-white">{token.symbol}</div>
+                            <div className="font-semibold text-white flex items-center gap-2">
+                              {token.symbol}
+                              <span className="bg-charcoal-lighter text-gray-400 text-[10px] px-1.5 py-0.5 rounded border border-gray-700 uppercase">
+                                {token.chainId === 'ethereum' ? 'eth' : token.chainId}
+                              </span>
+                            </div>
                             <div className="text-xs text-gray-500">{token.name}</div>
                           </div>
                         </div>
