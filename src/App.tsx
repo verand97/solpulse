@@ -9,6 +9,7 @@ import { WhaleAlerts } from './components/WhaleAlerts';
 import { Watchlist } from './components/Watchlist';
 import { WalletView } from './components/WalletView';
 import { SettingsView } from './components/SettingsView';
+import { Footer } from './components/Footer';
 import { MOCK_NOTIFICATIONS } from './data';
 import { Notification, PortfolioAsset, SwapToken } from './types';
 import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
@@ -72,6 +73,8 @@ export default function App() {
             {activeTab === 'settings' && <SettingsView />}
           </div>
         </main>
+        
+        <Footer />
       </div>
     </div>
       )}
