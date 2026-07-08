@@ -96,7 +96,8 @@ export const useDexScreenerTokens = () => {
         );
         
         // 5. Fetch multiple pages of diverse metas to get a wide variety of tokens
-        const searchTerms = ['solana', 'base', 'eth', 'bsc', 'meme', 'pump', 'ai', 'dog', 'cat', 'wif'];
+        // DexScreener API doesn't have a "Get All Tokens By Chain" endpoint, so we use broad search terms
+        const searchTerms = ['solana', 'base', 'eth', 'bsc', 'bnb', 'meme', 'pepe', 'doge', 'wif', 'degen', 'usdc', 'weth'];
         const searchPromises = searchTerms.map(term => 
           fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/latest/dex/search?q=${term}`)
             .then(res => res.json())
