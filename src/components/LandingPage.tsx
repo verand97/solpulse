@@ -17,7 +17,7 @@ export function LandingPage({ onLaunch }: LandingPageProps) {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-charcoal overflow-hidden flex flex-col font-sans text-gray-200 selection:bg-neon-purple/30">
+    <div className="relative min-h-screen bg-charcoal flex flex-col font-sans text-gray-200 selection:bg-neon-purple/30 w-full">
       {/* Background Mesh & Grid */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30 z-0 pointer-events-none" />
       <div 
@@ -26,8 +26,11 @@ export function LandingPage({ onLaunch }: LandingPageProps) {
           background: `radial-gradient(800px circle at ${mousePos.x}px ${mousePos.y}px, rgba(127, 86, 255, 0.08), transparent 40%)`
         }}
       />
-      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-neon-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20 animate-pulse-glow z-0"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-lime-green rounded-full mix-blend-screen filter blur-[150px] opacity-10 animate-float-delayed z-0"></div>
+      {/* Background Glows (fixed to prevent layout shift) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-neon-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20 animate-pulse-glow"></div>
+        <div className="absolute top-[80%] right-[-10%] w-[50vw] h-[50vw] bg-lime-green rounded-full mix-blend-screen filter blur-[150px] opacity-10 animate-float-delayed"></div>
+      </div>
 
       {/* Navbar */}
       <nav className="relative z-20 flex justify-between items-center px-8 py-6 w-full max-w-7xl mx-auto border-b border-white/5 bg-charcoal/50 backdrop-blur-xl">
@@ -207,6 +210,73 @@ export function LandingPage({ onLaunch }: LandingPageProps) {
                 <div className="absolute inset-0 border border-neon-purple rounded-full animate-ping opacity-20"></div>
               </div>
             </SpotlightCard>
+          </div>
+        </div>
+
+        {/* Demo Section */}
+        <div id="demo" className="w-full max-w-7xl mx-auto px-6 mt-32 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Demo Langsung</h2>
+            <p className="text-gray-400">Rasakan sensasi terminal tanpa perlu mendaftar.</p>
+          </div>
+          <div className="relative rounded-3xl border border-white/10 bg-charcoal/50 p-8 md:p-16 flex flex-col items-center text-center overflow-hidden">
+            {/* Background effects for demo */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-neon-purple/20 via-transparent to-transparent opacity-50"></div>
+            
+            <div className="relative z-10 max-w-2xl">
+              <Activity className="w-16 h-16 text-lime-green mx-auto mb-6 animate-pulse" />
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">Akses Data Real-Time Sekarang Juga</h3>
+              <p className="text-gray-400 mb-8 text-lg">
+                Klik tombol di bawah ini untuk langsung mencoba fitur Screener dan Live Scanner kami secara gratis. Uji coba langsung bagaimana kami memfilter token yang aman untuk Anda.
+              </p>
+              <button
+                onClick={onLaunch}
+                className="group relative px-8 py-4 bg-lime-green text-charcoal font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(128,255,86,0.5)]"
+              >
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out"></div>
+                Coba Demo Interaktif
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Komunitas Section */}
+        <div id="komunitas" className="w-full max-w-7xl mx-auto px-6 mt-32 relative z-10 mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Bergabung dengan Elite</h2>
+              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+                Ribuan trader pro dan pemburu gem telah menggunakan SolPulse untuk mendapatkan keunggulan di pasar Solana, Base, dan Ethereum. Bergabunglah dengan grup Discord dan Telegram eksklusif kami.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#5865F2] text-white font-bold hover:bg-[#4752C4] transition-colors shadow-[0_0_20px_rgba(88,101,242,0.3)]">
+                  Discord
+                </a>
+                <a href="#" className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0088cc] text-white font-bold hover:bg-[#0077b5] transition-colors shadow-[0_0_20px_rgba(0,136,204,0.3)]">
+                  Telegram
+                </a>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 relative">
+              <div className="absolute inset-0 bg-neon-purple/20 blur-[100px] pointer-events-none"></div>
+              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md">
+                <div className="text-4xl font-black text-white mb-2">10k+</div>
+                <div className="text-sm text-gray-400">Trader Aktif</div>
+              </div>
+              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md translate-y-6">
+                <div className="text-4xl font-black text-lime-green mb-2">$2M+</div>
+                <div className="text-sm text-gray-400">Volume Terpantau Harian</div>
+              </div>
+              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md">
+                <div className="text-4xl font-black text-neon-purple mb-2">24/7</div>
+                <div className="text-sm text-gray-400">Pemindaian Keamanan</div>
+              </div>
+              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md translate-y-6">
+                <div className="text-4xl font-black text-white mb-2">99%</div>
+                <div className="text-sm text-gray-400">Akurasi RugCheck</div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
