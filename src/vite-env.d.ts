@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_DEXSCREENER_API_URL: string
   readonly VITE_SOLSCAN_URL: string
   readonly VITE_BUBBLEMAPS_URL: string
+  readonly VITE_RUGCHECK_API_URL: string
 }
 
 interface ImportMeta {

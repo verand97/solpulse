@@ -2,9 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { generateMockChartData } from '../data';
 import { Token } from '../types';
 import { formatCurrency, formatNumber, cn } from '../utils';
-import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2 } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Clock, Droplets, X, ExternalLink, ArrowUpDown, Loader2, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { TokenChart } from './TokenChart';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { useRugCheck } from '../hooks/useRugCheck';
 import { Star } from 'lucide-react';
 
 interface ScreenerProps {
@@ -21,6 +22,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
   const [sortBy, setSortBy] = useState<SortKey>('volume24h');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const rugCheck = useRugCheck(selectedToken?.address || null);
 
   const handleSort = (key: SortKey) => {
     if (sortBy === key) {
@@ -320,10 +322,19 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
                     <p className="text-sm font-mono text-white">{formatCurrency(selectedToken.marketCap)}</p>
                   </div>
                   <div className="bg-charcoal rounded-lg p-3 border border-charcoal-lighter overflow-hidden">
-                    <p className="text-xs text-gray-500 mb-1">Contract</p>
-                    <p className="text-sm font-mono text-white truncate" title={selectedToken.address}>
-                      {selectedToken.address.slice(0, 6)}...{selectedToken.address.slice(-4)}
-                    </p>
+                    <p className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Shield size={12}/> Security</p>
+                    {rugCheck.isLoading ? (
+                      <p className="text-sm font-mono text-gray-400 flex items-center gap-2"><Loader2 size={12} className="animate-spin"/> Scanning...</p>
+                    ) : rugCheck.error ? (
+                      <p className="text-sm font-mono text-gray-500" title={rugCheck.error}>Unavailable</p>
+                    ) : rugCheck.data ? (
+                      <div className={cn("text-sm font-mono flex items-center gap-1.5", rugCheck.data.isSafe ? "text-lime-green" : "text-danger")} title={rugCheck.data.risks.map(r => r.name).join(', ')}>
+                        {rugCheck.data.isSafe ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
+                        {rugCheck.data.isSafe ? 'Good' : 'Risky'}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-gray-500">Unknown</p>
+                    )}
                   </div>
                 </div>
               </div>
