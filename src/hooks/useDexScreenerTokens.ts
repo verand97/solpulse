@@ -9,14 +9,14 @@ export const useDexScreenerTokens = () => {
     const fetchTokens = async () => {
       try {
         // 1. Fetch latest token profiles (newly created tokens)
-        const profilesResponse = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
+        const profilesResponse = await fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/token-profiles/latest/v1`);
         const profilesData = await profilesResponse.json();
         const newAddresses = Array.isArray(profilesData) 
           ? profilesData.filter(p => p.chainId === 'solana').map(p => p.tokenAddress).slice(0, 200)
           : [];
 
         // 2. Fetch trending/boosted tokens (currently hot)
-        const boostsResponse = await fetch('https://api.dexscreener.com/token-boosts/latest/v1');
+        const boostsResponse = await fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/token-boosts/latest/v1`);
         const boostsData = await boostsResponse.json();
         const trendingAddresses = Array.isArray(boostsData)
           ? boostsData.filter(p => p.chainId === 'solana').map(p => p.tokenAddress).slice(0, 200)
@@ -75,7 +75,7 @@ export const useDexScreenerTokens = () => {
 
         // 4. Fetch price and volume data for all chunks in parallel
         const tokenPromises = chunks.map(chunk => 
-          fetch(`https://api.dexscreener.com/latest/dex/tokens/${chunk}`)
+          fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/latest/dex/tokens/${chunk}`)
             .then(res => res.json())
             .catch(() => ({ pairs: [] }))
         );
@@ -83,7 +83,7 @@ export const useDexScreenerTokens = () => {
         // 5. Fetch multiple pages of diverse metas to get a wide variety of tokens
         const searchTerms = ['solana', 'meme', 'pump', 'ai', 'dog', 'cat', 'wif', 'moon'];
         const searchPromises = searchTerms.map(term => 
-          fetch(`https://api.dexscreener.com/latest/dex/search?q=${term}`)
+          fetch(`${import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com'}/latest/dex/search?q=${term}`)
             .then(res => res.json())
             .catch(() => ({ pairs: [] }))
         );

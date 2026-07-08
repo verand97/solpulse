@@ -255,7 +255,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
                   <span className="hidden sm:inline">{isInWatchlist(selectedToken.address) ? "Saved" : "Watchlist"}</span>
                 </button>
                 <a
-                  href={`https://app.bubblemaps.io/sol/token/${selectedToken.address}`}
+                  href={`${import.meta.env.VITE_BUBBLEMAPS_URL || 'https://app.bubblemaps.io'}/sol/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white hover:bg-charcoal transition-colors flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-charcoal-lighter"
@@ -266,7 +266,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
                   <ExternalLink size={12} />
                 </a>
                 <a
-                  href={`https://solscan.io/token/${selectedToken.address}`}
+                  href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white hover:bg-charcoal transition-colors flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-charcoal-lighter"
@@ -332,7 +332,7 @@ export const Screener: React.FC<ScreenerProps> = ({ searchQuery, tokens, isLoadi
               <div className="flex-1 bg-charcoal hidden md:flex flex-col relative">
                 <div className="absolute inset-0 p-2">
                   <iframe 
-                    src={`https://app.bubblemaps.io/sol/token/${selectedToken.address}?embed=true`}
+                    src={`${import.meta.env.VITE_BUBBLEMAPS_URL || 'https://app.bubblemaps.io'}/sol/token/${selectedToken.address}?embed=true`}
                     title={`Bubblemaps for ${selectedToken.symbol}`}
                     className="w-full h-full border-0 rounded-xl"
                     allow="clipboard-write"

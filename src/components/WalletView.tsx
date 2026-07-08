@@ -164,7 +164,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
             
             <div className="flex gap-4 mt-8">
               <a
-                href={`https://solscan.io/account/${address}`}
+                href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/account/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 bg-white text-neon-purple font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2"

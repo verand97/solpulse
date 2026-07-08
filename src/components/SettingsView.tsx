@@ -23,7 +23,7 @@ export const SettingsView: React.FC = () => {
               <label className="block text-sm font-medium text-gray-400 mb-1.5">Solana RPC Endpoint</label>
               <input 
                 type="text" 
-                defaultValue="https://api.mainnet-beta.solana.com"
+                defaultValue={import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"}
                 className="w-full bg-charcoal border border-charcoal-lighter rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-purple transition-colors"
               />
             </div>
@@ -31,7 +31,7 @@ export const SettingsView: React.FC = () => {
               <label className="block text-sm font-medium text-gray-400 mb-1.5">WebSocket Endpoint</label>
               <input 
                 type="text" 
-                defaultValue="wss://api.mainnet-beta.solana.com"
+                defaultValue={(import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com").replace('http', 'ws')}
                 className="w-full bg-charcoal border border-charcoal-lighter rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-purple transition-colors"
               />
             </div>

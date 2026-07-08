@@ -197,7 +197,7 @@ export const WhaleAlerts: React.FC<WhaleAlertsProps> = ({ tokens }) => {
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Transaction</p>
                     <a
-                      href={`https://solscan.io/tx/${alert.txHash}`}
+                      href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/tx/${alert.txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -216,7 +216,7 @@ export const WhaleAlerts: React.FC<WhaleAlertsProps> = ({ tokens }) => {
                     <div className="bg-charcoal rounded-lg p-3 border border-charcoal-lighter">
                       <p className="text-xs text-gray-500 mb-1">Wallet Address</p>
                       <a
-                        href={`https://solscan.io/account/${alert.walletAddress}`}
+                        href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/account/${alert.walletAddress}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-neon-purple hover:text-neon-purple-hover font-mono flex items-center gap-1 transition-colors"
