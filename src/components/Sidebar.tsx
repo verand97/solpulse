@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, LineChart, Bell, Wallet, Settings, ChevronLeft, ChevronRight, Zap, Star } from 'lucide-react';
+import { LayoutDashboard, LineChart, Bell, Wallet, Settings, ChevronLeft, ChevronRight, Zap, Star, Radar } from 'lucide-react';
 import { cn } from '../utils';
 
 interface SidebarProps {
@@ -12,6 +12,7 @@ interface SidebarProps {
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'screener', label: 'Screener', icon: LineChart },
+  { id: 'livescanner', label: 'Live Scanner', icon: Radar },
   { id: 'watchlist', label: 'Watchlist', icon: Star },
   { id: 'alerts', label: 'Whale Alerts', icon: Bell },
   { id: 'wallet', label: 'Wallet', icon: Wallet },

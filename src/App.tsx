@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
+import { LiveScanner } from './components/LiveScanner';
 import { WhaleAlerts } from './components/WhaleAlerts';
 import { Watchlist } from './components/Watchlist';
 import { WalletView } from './components/WalletView';
@@ -64,6 +65,7 @@ export default function App() {
           <div className="mx-auto max-w-7xl h-full pb-8">
             {activeTab === 'dashboard' && <Dashboard portfolio={portfolio} isLoading={isLoading} />}
             {activeTab === 'screener' && <Screener searchQuery={searchQuery} tokens={tokens} isLoading={isLoading} />}
+            {activeTab === 'livescanner' && <LiveScanner />}
             {activeTab === 'watchlist' && <Watchlist tokens={tokens} />}
             {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
             {activeTab === 'wallet' && <WalletView swapTokens={swapTokens} portfolio={portfolio} />}
