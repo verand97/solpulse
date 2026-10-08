@@ -76,6 +76,8 @@ export const useLiveScanner = () => {
               volume24h: bestPair.volume?.h24 || 0,
               liquidity,
               marketCap: bestPair.marketCap || bestPair.fdv || 0,
+              chainId: bestPair.chainId || 'solana',
+              pairAddress: bestPair.pairAddress,
               imageUrl: token.icon || bestPair.info?.imageUrl,
               createdAt: Date.now(),
               rugCheckScore: rcData.score || 0,

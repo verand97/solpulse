@@ -1,5 +1,17 @@
 import React from 'react';
-import { LayoutDashboard, LineChart, Bell, Wallet, Settings, ChevronLeft, ChevronRight, Zap, Star, Radar } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  LineChart, 
+  Wallet, 
+  Settings, 
+  ChevronLeft, 
+  ChevronRight, 
+  Zap, 
+  Star, 
+  Radar, 
+  ShieldAlert,
+  Globe
+} from 'lucide-react';
 import { cn } from '../utils';
 
 interface SidebarProps {
@@ -7,18 +19,25 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  onOpenLanding?: () => void;
 }
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'screener', label: 'Screener', icon: LineChart },
+  { id: 'alerts', label: 'Whale Tracker', icon: ShieldAlert },
   { id: 'livescanner', label: 'Live Scanner', icon: Radar },
   { id: 'watchlist', label: 'Watchlist', icon: Star },
-  { id: 'alerts', label: 'Whale Alerts', icon: Bell },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, collapsed, onToggleCollapse }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  activeTab, 
+  setActiveTab, 
+  collapsed, 
+  onToggleCollapse,
+  onOpenLanding
+}) => {
   return (
     <div className={cn(
       "bg-charcoal/90 backdrop-blur-xl flex flex-col h-full border-r border-white/5 relative z-10 transition-all duration-300 ease-in-out shrink-0 overflow-visible",
@@ -28,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
       <div className="absolute right-0 top-0 w-px h-full bg-linear-to-b from-transparent via-neon-purple/50 to-transparent pointer-events-none" />
 
       <div className={cn("p-6 flex items-center relative", collapsed ? "justify-center" : "justify-between")}>
-        <h1 className="text-xl font-bold font-sans text-white tracking-widest uppercase flex items-center gap-3 overflow-hidden">
+        <h1 className="text-xl font-bold font-sans text-white tracking-widest uppercase flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => setActiveTab('dashboard')}>
           <div className="relative w-8 h-8 rounded-md bg-charcoal-light border border-white/10 flex items-center justify-center shrink-0 group shadow-[0_0_10px_rgba(127,86,255,0.2)]">
             <div className="absolute inset-0 bg-linear-to-br from-neon-purple to-lime-green opacity-20" />
             <Zap size={16} className="text-neon-purple drop-shadow-[0_0_5px_rgba(127,86,255,0.8)]" />
@@ -41,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
         </h1>
       </div>
 
-      <nav className="flex-1 px-3 py-2 space-y-2 mt-4 relative z-10">
+      <nav className="flex-1 px-3 py-2 space-y-2 mt-2 relative z-10">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -88,12 +107,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/5 space-y-2 relative z-10 bg-charcoal/50 backdrop-blur-md">
+      <div className="p-3 border-t border-white/5 space-y-1.5 relative z-10 bg-charcoal/50 backdrop-blur-md">
+        {onOpenLanding && (
+          <button 
+            onClick={onOpenLanding}
+            className={cn(
+              "w-full flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all duration-300 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-white hover:bg-white/5 group relative",
+              collapsed ? 'justify-center px-0' : ''
+            )}
+            title={collapsed ? 'Landing Page' : undefined}
+          >
+            <Globe size={18} className="shrink-0 text-gray-500 group-hover:text-neon-purple transition-colors" />
+            {!collapsed && <span>Portal Page</span>}
+          </button>
+        )}
+
         <button 
           id="nav-settings"
           onClick={() => setActiveTab('settings')}
           className={cn(
-            "w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-xs font-bold uppercase tracking-wider relative overflow-hidden group",
+            "w-full flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all duration-300 text-xs font-bold uppercase tracking-wider relative overflow-hidden group",
             collapsed ? 'justify-center px-0' : ''
           )}
           title={collapsed ? 'Settings' : undefined}
@@ -120,15 +153,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, colla
               "relative z-10 transition-colors duration-300 text-left w-full",
               activeTab === 'settings' ? "text-white" : "text-gray-500 group-hover:text-gray-300"
             )}>
-              Systems
+              Settings
             </span>
           )}
         </button>
+
         <button
           id="sidebar-toggle"
           onClick={onToggleCollapse}
           className={cn(
-            "w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-white/5 hover:text-gray-400 group relative",
+            "w-full flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all duration-300 text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-white/5 hover:text-gray-400 group relative",
             collapsed && 'justify-center px-0'
           )}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

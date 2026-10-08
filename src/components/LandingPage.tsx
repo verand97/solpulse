@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Zap, TrendingUp, ChevronRight, Shield, Globe, Play, BarChart2, BellRing, Rocket } from 'lucide-react';
+import { Activity, ChevronRight, Shield, Play, BarChart2, BellRing, Terminal, Cpu, Database, Crosshair, Zap } from 'lucide-react';
 
 interface LandingPageProps {
   onLaunch: () => void;
@@ -7,6 +7,7 @@ interface LandingPageProps {
 
 export function LandingPage({ onLaunch }: LandingPageProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [scrambleText, setScrambleText] = useState("INITIALIZING_CORE_SYSTEMS...");
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -16,327 +17,309 @@ export function LandingPage({ onLaunch }: LandingPageProps) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    const texts = [
+      "ESTABLISHING_SECURE_CONNECTION...",
+      "SYNCING_WITH_SOLANA_MAINNET...",
+      "LOADING_LIQUIDITY_POOLS...",
+      "SYSTEM_READY_V_2.0.4"
+    ];
+    let i = 0;
+    const interval = setInterval(() => {
+      setScrambleText(texts[i]);
+      i = (i + 1) % texts.length;
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="relative min-h-screen bg-charcoal flex flex-col font-sans text-gray-200 selection:bg-neon-purple/30 w-full">
-      {/* Background Mesh & Grid */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30 z-0 pointer-events-none" />
+    <div className="relative min-h-screen bg-[#0a0a0c] flex flex-col font-sans text-gray-300 selection:bg-neon-purple/30 w-full overflow-x-hidden selection:text-white">
+      {/* Scanlines & Grain */}
+      <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+      <div className="pointer-events-none fixed inset-0 z-40 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] opacity-20"></div>
+
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-20 z-0 pointer-events-none" />
       <div 
         className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
         style={{
-          background: `radial-gradient(800px circle at ${mousePos.x}px ${mousePos.y}px, rgba(127, 86, 255, 0.08), transparent 40%)`
+          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(127, 86, 255, 0.05), transparent 40%)`
         }}
       />
-      {/* Background Glows (fixed to prevent layout shift) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-neon-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20 animate-pulse-glow"></div>
-        <div className="absolute top-[80%] right-[-10%] w-[50vw] h-[50vw] bg-lime-green rounded-full mix-blend-screen filter blur-[150px] opacity-10 animate-float-delayed"></div>
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 flex items-center justify-center">
+        <div className="w-[80vw] h-[80vw] bg-neon-purple rounded-full mix-blend-screen filter blur-[200px] opacity-[0.07] animate-pulse-glow"></div>
       </div>
 
-      {/* Navbar */}
-      <nav className="relative z-20 flex justify-between items-center px-8 py-6 w-full max-w-7xl mx-auto border-b border-white/5 bg-charcoal/50 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center shadow-[0_0_30px_rgba(127,86,255,0.4)]">
-            <Activity className="w-6 h-6 text-charcoal font-bold" />
+      {/* Navbar: HUD Style */}
+      <nav className="relative z-20 flex justify-between items-center px-6 py-4 w-full border-b border-white/5 bg-[#0a0a0c]/80 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <div className="relative flex items-center justify-center w-10 h-10 border border-white/10 bg-black">
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-lime-green"></div>
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-lime-green"></div>
+            <Activity className="w-5 h-5 text-lime-green" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-white font-mono">
-            Sol<span className="text-lime-green">Pulse</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-widest text-white font-mono uppercase">
+              Sol<span className="text-lime-green">Pulse</span>
+            </span>
+            <span className="text-[10px] text-neon-purple font-mono uppercase tracking-[0.2em]">{scrambleText}</span>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-          <a href="#fitur" className="hover:text-white transition-colors">Fitur</a>
-          <a href="#demo" className="hover:text-white transition-colors">Demo</a>
-          <a href="#komunitas" className="hover:text-white transition-colors">Komunitas</a>
+        
+        <div className="hidden md:flex items-center gap-8 text-xs font-mono text-gray-500 uppercase tracking-widest">
+          <a href="#intel" className="hover:text-lime-green transition-colors relative group">
+            <span className="opacity-0 group-hover:opacity-100 absolute -left-3 text-lime-green transition-opacity">{'>'}</span> Intel
+          </a>
+          <a href="#terminal" className="hover:text-lime-green transition-colors relative group">
+            <span className="opacity-0 group-hover:opacity-100 absolute -left-3 text-lime-green transition-opacity">{'>'}</span> Terminal
+          </a>
+          <a href="#network" className="hover:text-lime-green transition-colors relative group">
+            <span className="opacity-0 group-hover:opacity-100 absolute -left-3 text-lime-green transition-opacity">{'>'}</span> Network
+          </a>
         </div>
+        
         <button 
           onClick={onLaunch}
-          className="text-sm font-bold text-white bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-full transition-all duration-300 flex items-center gap-2 group hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          className="relative px-6 py-2 text-xs font-mono font-bold text-black bg-lime-green hover:bg-lime-green/90 transition-all duration-300 flex items-center gap-2 group overflow-hidden"
         >
-          Masuk <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+          <span className="relative z-10 flex items-center gap-2">
+            ACCESS_TERMINAL <ChevronRight className="w-4 h-4" />
+          </span>
         </button>
       </nav>
 
-      {/* Hero Section */}
-      <main className="relative z-10 flex-1 flex flex-col items-center pt-20 pb-32 mx-auto w-full">
+      {/* Main Hero - Asymmetric Data Layout */}
+      <main className="relative z-10 flex-1 w-full max-w-[1400px] mx-auto px-6 py-12 md:py-24 flex flex-col md:flex-row gap-12 items-center">
         
-        <div className="px-6 flex flex-col items-center text-center max-w-4xl mx-auto z-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-purple/10 border border-neon-purple/30 text-neon-purple text-xs font-bold mb-8 animate-fade-in-up uppercase tracking-widest shadow-[0_0_20px_rgba(127,86,255,0.15)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-purple opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-purple"></span>
-            </span>
-            Platform Intelijen Dex v2.0
+        {/* Left Column: Typography */}
+        <div className="flex-1 w-full flex flex-col gap-6">
+          <div className="inline-flex items-center gap-3 px-3 py-1.5 border border-white/10 bg-black/50 text-xs font-mono text-gray-400 uppercase tracking-wider w-fit">
+            <span className="w-2 h-2 bg-lime-green animate-pulse"></span>
+            Live Mainnet Data Stream
           </div>
-
-          <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter text-white mb-8 animate-fade-in-up leading-[1.1]" style={{ animationDelay: '0.1s' }}>
-            Dominasi Pasar <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-neon-purple via-purple-400 to-lime-green drop-shadow-[0_0_40px_rgba(127,86,255,0.5)]">
-              Kecepatan Cahaya
+          
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white leading-[0.9] font-mono">
+            Unfair <br/>
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-neon-purple to-lime-green">
+              Advantage.
             </span>
           </h1>
           
-          <p className="max-w-2xl text-lg md:text-2xl text-gray-400 mb-10 animate-fade-in-up font-light" style={{ animationDelay: '0.2s' }}>
-            Pantau pergerakan paus, lacak portofolio real-time, dan temukan gem Solana berikutnya sebelum yang lain. Antarmuka pro untuk trader pro.
+          <p className="max-w-xl text-sm md:text-base text-gray-400 font-mono leading-relaxed border-l-2 border-neon-purple/50 pl-4 py-2 bg-gradient-to-r from-neon-purple/5 to-transparent">
+            Execute trades with institutional precision. SolPulse delivers raw, unfiltered Solana network data directly to your terminal. Track whale wallets, intercept liquidity pools, and bypass aggregator latency.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 items-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="flex flex-col sm:flex-row gap-4 mt-4 font-mono text-sm">
             <button
               onClick={onLaunch}
-              className="group relative px-10 py-5 bg-neon-purple text-white font-bold text-lg rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(127,86,255,0.6)] border border-white/20"
+              className="relative px-8 py-4 bg-neon-purple text-white font-bold tracking-widest hover:bg-neon-purple/80 transition-all border border-neon-purple shadow-[0_0_20px_rgba(127,86,255,0.3)] group"
             >
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out z-0"></div>
-              <div className="relative z-10 flex items-center gap-3">
-                <Rocket className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                Luncurkan Terminal
-              </div>
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white opacity-50"></div>
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white opacity-50"></div>
+              [ INITIALIZE_SYSTEM ]
             </button>
             
-            <button onClick={onLaunch} className="flex items-center gap-3 px-8 py-5 rounded-2xl font-semibold text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/10">
-              <Play className="w-5 h-5 text-lime-green" />
-              Lihat Cara Kerja
+            <button className="px-8 py-4 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center justify-center gap-2 group">
+              <Play className="w-4 h-4 text-lime-green group-hover:scale-110 transition-transform" />
+              VIEW_TELEMETRY
             </button>
+          </div>
+
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 border-t border-white/10 pt-8">
+            <div>
+              <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Latency</div>
+              <div className="text-lg font-mono text-lime-green">{"<"} 400ms</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">RPC Nodes</div>
+              <div className="text-lg font-mono text-white">Tier 1</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Pairs Tracked</div>
+              <div className="text-lg font-mono text-white">45,291</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Uptime</div>
+              <div className="text-lg font-mono text-lime-green">99.99%</div>
+            </div>
           </div>
         </div>
 
-        {/* Dashboard Preview / Mockup */}
-        <div className="w-full max-w-6xl mx-auto px-6 mt-20 animate-fade-in-up relative z-10" style={{ animationDelay: '0.5s' }}>
-          <div className="relative rounded-3xl border border-white/10 bg-charcoal/80 backdrop-blur-2xl shadow-[0_30px_100px_-20px_rgba(127,86,255,0.4)] overflow-hidden">
-            {/* Window Header */}
-            <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5 bg-charcoal-light/50">
-              <div className="w-3 h-3 rounded-full bg-danger"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-lime-green"></div>
-              <div className="ml-4 px-3 py-1 bg-black/30 rounded-md text-xs font-mono text-gray-500 border border-white/5">app.solpulse.io/terminal</div>
+        {/* Right Column: Terminal Mockup (Non-Generic) */}
+        <div className="flex-1 w-full relative">
+          {/* Decorative frame */}
+          <div className="absolute -inset-4 border border-white/5 bg-white/[0.01] backdrop-blur-sm z-0 hidden md:block">
+            <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/20"></div>
+            <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/20"></div>
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/20"></div>
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/20"></div>
+          </div>
+
+          <div className="relative z-10 bg-[#0a0a0c] border border-white/10 shadow-2xl flex flex-col font-mono text-xs overflow-hidden h-[500px]">
+            {/* Terminal Header */}
+            <div className="flex justify-between items-center px-4 py-2 bg-black/60 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <Terminal className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-500">solpulse/sys/monitor</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-lime-green rounded-full animate-pulse"></div>
+                <span className="text-lime-green text-[10px]">LIVE</span>
+              </div>
             </div>
-            
-            {/* Fake Dashboard Content */}
-            <div className="grid grid-cols-1 md:grid-cols-4 h-[400px]">
-              {/* Sidebar fake */}
-              <div className="hidden md:block col-span-1 border-r border-white/5 p-4">
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className={`h-10 rounded-xl ${i === 0 ? 'bg-neon-purple/20 border border-neon-purple/30' : 'bg-white/5'} animate-pulse`} style={{ animationDelay: `${i * 0.1}s` }}></div>
+
+            {/* Terminal Grid Content */}
+            <div className="flex-1 grid grid-cols-3 grid-rows-3 gap-[1px] bg-white/10 p-[1px]">
+              {/* Main Chart Area */}
+              <div className="col-span-2 row-span-2 bg-[#0a0a0c] p-4 relative overflow-hidden flex flex-col justify-end group">
+                <div className="absolute top-4 left-4 z-10">
+                  <div className="text-white text-lg font-bold">SOL/USDC</div>
+                  <div className="text-lime-green">142.58 <span className="text-[10px]">+2.4%</span></div>
+                </div>
+                {/* Fake Chart Bars */}
+                <div className="flex items-end gap-1 h-32 opacity-50 group-hover:opacity-100 transition-opacity">
+                  {[...Array(30)].map((_, i) => {
+                    const h = 20 + Math.random() * 80;
+                    const isUp = Math.random() > 0.5;
+                    return (
+                      <div 
+                        key={i} 
+                        className={`w-full ${isUp ? 'bg-lime-green' : 'bg-red-500'}`} 
+                        style={{ height: `${h}%` }}
+                      ></div>
+                    )
+                  })}
+                </div>
+                {/* Crosshair effect */}
+                <div className="absolute inset-0 border border-transparent group-hover:border-white/10 transition-colors pointer-events-none">
+                  <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-lime-green/20"></div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-lime-green/20"></div>
+                </div>
+              </div>
+
+              {/* Order Book */}
+              <div className="col-span-1 row-span-3 bg-[#0a0a0c] p-2 flex flex-col text-[10px] leading-relaxed">
+                <div className="text-gray-500 border-b border-white/10 pb-1 mb-2">ORDER_BOOK</div>
+                <div className="flex-1 flex flex-col justify-end text-red-400 gap-1 overflow-hidden">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={`ask-${i}`} className="flex justify-between relative z-10">
+                      <span>142.{60 + i}</span>
+                      <span>{(Math.random() * 100).toFixed(2)}</span>
+                      <div className="absolute right-0 top-0 bottom-0 bg-red-900/20 z-[-1]" style={{width: `${20 + Math.random() * 80}%`}}></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="py-2 text-white text-center font-bold text-sm">142.58</div>
+                <div className="flex-1 flex flex-col text-lime-green gap-1 overflow-hidden">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={`bid-${i}`} className="flex justify-between relative z-10">
+                      <span>142.{57 - i}</span>
+                      <span>{(Math.random() * 100).toFixed(2)}</span>
+                      <div className="absolute right-0 top-0 bottom-0 bg-green-900/20 z-[-1]" style={{width: `${20 + Math.random() * 80}%`}}></div>
+                    </div>
                   ))}
                 </div>
               </div>
-              {/* Main content fake */}
-              <div className="col-span-1 md:col-span-3 p-6 flex flex-col gap-4 relative overflow-hidden">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="h-8 w-48 bg-white/10 rounded-lg animate-pulse"></div>
-                  <div className="h-8 w-24 bg-neon-purple/30 rounded-lg animate-pulse"></div>
-                </div>
-                
-                {/* Scrolling Rows */}
-                <div className="flex-1 overflow-hidden relative rounded-xl border border-white/5 bg-black/20">
-                  <div className="absolute inset-0 flex flex-col animate-dash-scroll">
-                    {[...Array(20)].map((_, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-linear-to-br from-neon-purple to-lime-green opacity-80"></div>
-                          <div>
-                            <div className="w-20 h-4 bg-white/20 rounded mb-1"></div>
-                            <div className="w-12 h-3 bg-white/10 rounded"></div>
-                          </div>
-                        </div>
-                        <div className="w-24 h-4 bg-lime-green/20 rounded"></div>
-                        <div className="w-32 h-4 bg-white/10 rounded hidden sm:block"></div>
-                        <div className="w-16 h-8 bg-white/10 rounded-lg"></div>
+
+              {/* Recent Trades / Event Log */}
+              <div className="col-span-2 row-span-1 bg-[#0a0a0c] p-2 overflow-hidden flex flex-col">
+                <div className="text-gray-500 border-b border-white/10 pb-1 mb-2">EVENT_LOG</div>
+                <div className="flex-1 flex flex-col gap-1 text-[10px] font-mono animate-dash-scroll">
+                  {[...Array(15)].map((_, i) => {
+                    const isBuy = Math.random() > 0.5;
+                    const amount = (Math.random() * 50).toFixed(2);
+                    const hash = Math.random().toString(36).substring(2, 10);
+                    return (
+                      <div key={i} className="flex justify-between border-b border-white/5 py-1">
+                        <span className="text-gray-600">[{new Date().toLocaleTimeString()}]</span>
+                        <span className={isBuy ? 'text-lime-green' : 'text-red-500'}>{isBuy ? 'BUY' : 'SELL'} {amount} SOL</span>
+                        <span className="text-neon-purple opacity-70">Tx:{hash}...</span>
                       </div>
-                    ))}
-                  </div>
+                    )
+                  })}
                 </div>
-              </div>
-            </div>
-            
-            {/* Glossy Reflection overlay */}
-            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none"></div>
-          </div>
-        </div>
-
-        {/* Bento Grid Features */}
-        <div id="fitur" className="w-full max-w-7xl mx-auto px-6 mt-32 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Persenjatai Diri Anda</h2>
-            <p className="text-gray-400">Teknologi institusional kini di tangan Anda.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Large Card */}
-            <SpotlightCard className="md:col-span-2 p-10 flex flex-col justify-between min-h-[300px]">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-lime-green/10 flex items-center justify-center border border-lime-green/20 mb-6">
-                  <Activity className="w-7 h-7 text-lime-green" />
-                </div>
-                <h3 className="text-3xl font-bold text-white mb-3">Live Screener Tanpa Delay</h3>
-                <p className="text-gray-400 text-lg max-w-md">Koneksi langsung ke jaringan Solana memastikan Anda menerima pembaruan harga dan likuiditas sebelum agregator lain memprosesnya.</p>
-              </div>
-              {/* Decorative chart lines */}
-              <div className="absolute right-0 bottom-0 w-1/2 h-1/2 opacity-20 pointer-events-none">
-                <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="w-full h-full text-lime-green stroke-current stroke-2 fill-none">
-                  <path d="M0,50 L20,30 L40,40 L60,10 L80,20 L100,0" />
-                </svg>
-              </div>
-            </SpotlightCard>
-
-            {/* Small Card 1 */}
-            <SpotlightCard className="p-8">
-              <div className="w-12 h-12 rounded-2xl bg-neon-purple/10 flex items-center justify-center border border-neon-purple/20 mb-6">
-                <BellRing className="w-6 h-6 text-neon-purple" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Whale Alerts</h3>
-              <p className="text-gray-400">Deteksi otomatis aliran dana masif. Ikuti pergerakan paus (*smart money*) dan posisikan diri Anda sebelum lonjakan harga terjadi.</p>
-            </SpotlightCard>
-
-            {/* Small Card 2 */}
-            <SpotlightCard className="p-8">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 mb-6">
-                <BarChart2 className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Manajemen Portofolio</h3>
-              <p className="text-gray-400">Pantau performa aset, analisis PnL riwayat transaksi, dan kelola dompet Anda dalam satu antarmuka yang sangat bersih.</p>
-            </SpotlightCard>
-
-            {/* Medium Card */}
-            <SpotlightCard className="md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 bg-linear-to-r from-neon-purple/5 to-transparent">
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-3">Keamanan Eksekusi Maksimal</h3>
-                <p className="text-gray-400 mb-6">Analisis audit token bawaan, mendeteksi honeypot, mint authority, dan rug-pull secara real-time sebelum Anda melakukan swap.</p>
-                <div className="flex gap-2">
-                  <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-lime-green flex items-center gap-1"><Shield className="w-3 h-3"/> LP Locked</span>
-                  <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-lime-green flex items-center gap-1"><Shield className="w-3 h-3"/> Mint Revoked</span>
-                </div>
-              </div>
-              <div className="w-full md:w-1/3 aspect-square rounded-full border border-neon-purple/30 bg-neon-purple/10 flex items-center justify-center relative animate-pulse-glow">
-                <Shield className="w-16 h-16 text-neon-purple" />
-                <div className="absolute inset-0 border border-neon-purple rounded-full animate-ping opacity-20"></div>
-              </div>
-            </SpotlightCard>
-          </div>
-        </div>
-
-        {/* Demo Section */}
-        <div id="demo" className="w-full max-w-7xl mx-auto px-6 mt-32 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Demo Langsung</h2>
-            <p className="text-gray-400">Rasakan sensasi terminal tanpa perlu mendaftar.</p>
-          </div>
-          <div className="relative rounded-3xl border border-white/10 bg-charcoal/50 p-8 md:p-16 flex flex-col items-center text-center overflow-hidden">
-            {/* Background effects for demo */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-neon-purple/20 via-transparent to-transparent opacity-50"></div>
-            
-            <div className="relative z-10 max-w-2xl">
-              <Activity className="w-16 h-16 text-lime-green mx-auto mb-6 animate-pulse" />
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">Akses Data Real-Time Sekarang Juga</h3>
-              <p className="text-gray-400 mb-8 text-lg">
-                Klik tombol di bawah ini untuk langsung mencoba fitur Screener dan Live Scanner kami secara gratis. Uji coba langsung bagaimana kami memfilter token yang aman untuk Anda.
-              </p>
-              <button
-                onClick={onLaunch}
-                className="group relative px-8 py-4 bg-lime-green text-charcoal font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(128,255,86,0.5)]"
-              >
-                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out"></div>
-                Coba Demo Interaktif
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Komunitas Section */}
-        <div id="komunitas" className="w-full max-w-7xl mx-auto px-6 mt-32 relative z-10 mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Bergabung dengan Elite</h2>
-              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                Ribuan trader pro dan pemburu gem telah menggunakan SolPulse untuk mendapatkan keunggulan di pasar Solana, Base, dan Ethereum. Bergabunglah dengan grup Discord dan Telegram eksklusif kami.
-              </p>
-              <div className="flex gap-4">
-                <a href="#" className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#5865F2] text-white font-bold hover:bg-[#4752C4] transition-colors shadow-[0_0_20px_rgba(88,101,242,0.3)]">
-                  Discord
-                </a>
-                <a href="#" className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0088cc] text-white font-bold hover:bg-[#0077b5] transition-colors shadow-[0_0_20px_rgba(0,136,204,0.3)]">
-                  Telegram
-                </a>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 relative">
-              <div className="absolute inset-0 bg-neon-purple/20 blur-[100px] pointer-events-none"></div>
-              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md">
-                <div className="text-4xl font-black text-white mb-2">10k+</div>
-                <div className="text-sm text-gray-400">Trader Aktif</div>
-              </div>
-              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md translate-y-6">
-                <div className="text-4xl font-black text-lime-green mb-2">$2M+</div>
-                <div className="text-sm text-gray-400">Volume Terpantau Harian</div>
-              </div>
-              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md">
-                <div className="text-4xl font-black text-neon-purple mb-2">24/7</div>
-                <div className="text-sm text-gray-400">Pemindaian Keamanan</div>
-              </div>
-              <div className="bg-charcoal-light/50 border border-white/5 p-6 rounded-2xl backdrop-blur-md translate-y-6">
-                <div className="text-4xl font-black text-white mb-2">99%</div>
-                <div className="text-sm text-gray-400">Akurasi RugCheck</div>
               </div>
             </div>
           </div>
         </div>
       </main>
-      
-      {/* Footer */}
-      <footer className="relative z-20 border-t border-white/10 py-12 bg-black/40">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 font-mono">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Activity className="w-5 h-5 text-neon-purple" />
-            <span className="text-white font-bold tracking-widest">SOLPULSE</span>
-            <span>© 2026</span>
+
+      {/* Feature Data Modules */}
+      <section id="intel" className="relative z-10 w-full max-w-[1400px] mx-auto px-6 py-24 border-t border-white/5">
+        <div className="mb-16">
+          <h2 className="text-sm font-mono text-lime-green mb-2 uppercase">/ Modules / Capabilities</h2>
+          <p className="text-3xl md:text-4xl font-bold text-white font-mono uppercase tracking-tight">System Architecture</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
+          {/* Feature 1 */}
+          <div className="border border-white/10 bg-black/40 p-6 hover:bg-black/80 transition-colors group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-neon-purple/10 rounded-bl-full -z-10 group-hover:scale-150 transition-transform"></div>
+            <Cpu className="w-8 h-8 text-neon-purple mb-6" />
+            <div className="text-white text-lg font-bold mb-2 uppercase">Sub-second Sync</div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Bypass conventional nodes. Direct RPC connection processes block data instantly, delivering liquidity pool updates before they render on commercial dashboards.
+            </p>
+            <div className="w-full h-1 bg-white/5 mt-auto relative">
+              <div className="absolute top-0 left-0 h-full bg-neon-purple w-0 group-hover:w-full transition-all duration-1000"></div>
+            </div>
           </div>
-          <div className="flex gap-8">
-            <a href="#" className="hover:text-lime-green transition-colors">Dokumentasi</a>
-            <a href="#" className="hover:text-lime-green transition-colors">API</a>
-            <a href="#" className="hover:text-lime-green transition-colors">Twitter</a>
-            <div className="flex items-center gap-2 text-lime-green">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-green opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-lime-green"></span>
-              </span>
-              Sistem Operasional
+
+          {/* Feature 2 */}
+          <div className="border border-white/10 bg-black/40 p-6 hover:bg-black/80 transition-colors group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-lime-green/10 rounded-bl-full -z-10 group-hover:scale-150 transition-transform"></div>
+            <Crosshair className="w-8 h-8 text-lime-green mb-6" />
+            <div className="text-white text-lg font-bold mb-2 uppercase">Whale Telemetry</div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Track massive capital flows autonomously. The system parses wallet transactions in real-time, tagging smart money movements and potential market manipulation.
+            </p>
+            <div className="w-full h-1 bg-white/5 mt-auto relative">
+              <div className="absolute top-0 left-0 h-full bg-lime-green w-0 group-hover:w-full transition-all duration-1000"></div>
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="border border-white/10 bg-black/40 p-6 hover:bg-black/80 transition-colors group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-full -z-10 group-hover:scale-150 transition-transform"></div>
+            <Shield className="w-8 h-8 text-gray-300 mb-6" />
+            <div className="text-white text-lg font-bold mb-2 uppercase">Contract Audit Log</div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Instantmatic threat detection. Evaluates token contracts for mint privileges, freeze authorities, and rug-pull vulnerabilities before you expose capital.
+            </p>
+            <div className="w-full h-1 bg-white/5 mt-auto relative">
+              <div className="absolute top-0 left-0 h-full bg-white w-0 group-hover:w-full transition-all duration-1000"></div>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Access Footer */}
+      <footer id="network" className="relative z-20 border-t border-white/10 bg-black py-12 mt-auto">
+        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+          <div className="font-mono">
+            <div className="flex items-center gap-3 mb-4">
+              <Activity className="w-6 h-6 text-lime-green" />
+              <span className="text-white font-bold tracking-widest text-xl uppercase">SOLPULSE</span>
+            </div>
+            <p className="text-gray-500 text-xs">
+              CORE_SYSTEM_VERSION: 2.0.4<br/>
+              STATUS: <span className="text-lime-green">OPERATIONAL</span><br/>
+              ENCRYPTION: AES-256
+            </p>
+          </div>
+          
+          <div className="flex flex-col md:items-end gap-4 font-mono text-xs text-gray-500">
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-white transition-colors">[ DOCUMENTATION ]</a>
+              <a href="#" className="hover:text-white transition-colors">[ API_ACCESS ]</a>
+              <a href="#" className="hover:text-white transition-colors">[ DISCORD_RELAY ]</a>
+            </div>
+            <div>© 2026 SOLPULSE NETWORK. ALL RIGHTS RESERVED.</div>
+          </div>
+        </div>
       </footer>
-    </div>
-  );
-}
-
-// Spotlight Component for Premium Hover Effects
-function SpotlightCard({ children, className = "" }: { children: React.ReactNode, className?: string }) {
-  const divRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [opacity, setOpacity] = useState(0);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return;
-    const rect = divRef.current.getBoundingClientRect();
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
-
-  return (
-    <div
-      ref={divRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setOpacity(1)}
-      onMouseLeave={() => setOpacity(0)}
-      className={`relative overflow-hidden rounded-3xl border border-white/5 bg-charcoal-light/30 backdrop-blur-md transition-all duration-500 hover:border-white/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] ${className}`}
-    >
-      <div
-        className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
-        style={{
-          opacity,
-          background: `radial-gradient(500px circle at ${position.x}px ${position.y}px, rgba(127, 86, 255, 0.15), transparent 40%)`,
-        }}
-      />
-      <div className="relative z-10 h-full">
-        {children}
-      </div>
     </div>
   );
 }
