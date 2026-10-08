@@ -1,3 +1,4 @@
+// SolPulse Terminal - Sidebar Navigation
 import React from 'react';
 import { 
   LayoutDashboard, 
@@ -42,14 +43,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <div
       className={cn(
         'flex flex-col h-full shrink-0 transition-all duration-200 ease-in-out',
-        'border-r border-[#222226] bg-[#0A0A0B]',
+        'border-r border-border bg-bg',
         collapsed ? 'w-14' : 'w-56'
       )}
     >
       {/* Logo */}
       <div
         className={cn(
-          'h-12 flex items-center border-b border-[#222226] px-4 gap-2.5 cursor-pointer select-none shrink-0',
+          'h-12 flex items-center border-b border-border px-4 gap-2.5 cursor-pointer select-none shrink-0',
           collapsed && 'justify-center px-0'
         )}
         onClick={() => setActiveTab('dashboard')}
@@ -79,8 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium',
                 collapsed && 'justify-center px-0',
                 isActive
-                  ? 'bg-[#1A1A2E] text-blue-400'
-                  : 'text-[#8A8A96] hover:text-[#EEEFF2] hover:bg-[#17171A]'
+                  ? 'bg-blue-500/10 text-blue-400'
+                  : 'text-txt-2 hover:text-txt hover:bg-surface-2'
               )}
             >
               <Icon
@@ -99,12 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Bottom */}
-      <div className="py-2 px-1.5 border-t border-[#222226] space-y-0.5">
+      <div className="py-2 px-1.5 border-t border-border space-y-0.5">
         {onOpenLanding && (
           <button
             onClick={onOpenLanding}
             className={cn(
-              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A]',
+              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium text-txt-3 hover:text-txt-2 hover:bg-surface-2',
               collapsed && 'justify-center px-0'
             )}
             title={collapsed ? 'Portal Page' : undefined}
@@ -120,8 +121,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium',
             collapsed && 'justify-center px-0',
             activeTab === 'settings'
-              ? 'bg-[#1A1A2E] text-blue-400'
-              : 'text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A]'
+              ? 'bg-blue-500/10 text-blue-400'
+              : 'text-txt-3 hover:text-txt-2 hover:bg-surface-2'
           )}
           title={collapsed ? 'Settings' : undefined}
         >
@@ -133,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id="sidebar-toggle"
           onClick={onToggleCollapse}
           className={cn(
-            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A]',
+            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-[12.5px] font-medium text-txt-3 hover:text-txt-2 hover:bg-surface-2',
             collapsed && 'justify-center px-0'
           )}
         >

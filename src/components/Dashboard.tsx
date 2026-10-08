@@ -1,3 +1,4 @@
+// SolPulse Terminal - Dashboard Overview
 import React, { useMemo, useState, useEffect } from 'react';
 import { generateMockChartData } from '../data';
 import { PortfolioAsset } from '../types';
@@ -48,22 +49,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
   return (
     <div className="p-6 space-y-5">
       {/* Page heading */}
-      <div className="flex items-center justify-between border-b border-[#222226] pb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
-          <h1 className="text-[16px] font-bold text-[#EEEFF2]">Dashboard</h1>
-          <p className="text-[11px] text-[#52525E] mt-0.5">Connected wallet overview</p>
+          <h1 className="text-[16px] font-bold text-txt">Dashboard</h1>
+          <p className="text-[11px] text-txt-3 mt-0.5">Connected wallet overview</p>
         </div>
       </div>
 
       {/* Top row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Portfolio chart */}
-        <div className="col-span-1 lg:col-span-2 bg-[#111113] border border-[#222226] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#222226]">
+        <div className="col-span-1 lg:col-span-2 bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
             <div>
-              <p className="text-[10px] text-[#52525E] uppercase tracking-wide mb-1">Portfolio Value</p>
+              <p className="text-[10px] text-txt-3 uppercase tracking-wide mb-1">Portfolio Value</p>
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[26px] font-bold font-mono text-[#EEEFF2] tracking-tighter">
+                <span className="text-[26px] font-bold font-mono text-txt tracking-tighter">
                   {formatCurrency(totalValue)}
                 </span>
                 <span className={cn(
@@ -76,12 +77,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
                   {Math.abs(pnlPercent).toFixed(2)}%
                 </span>
               </div>
-              <p className="text-[11px] text-[#52525E] font-mono mt-0.5">
+              <p className="text-[11px] text-txt-3 font-mono mt-0.5">
                 {isPositive ? '+' : ''}{formatCurrency(totalPnl)} all time
               </p>
             </div>
             {/* Range selector */}
-            <div className="flex items-center gap-0.5 bg-[#17171A] border border-[#222226] rounded-md p-0.5">
+            <div className="flex items-center gap-0.5 bg-surface-2 border border-border rounded-md p-0.5">
               {(['1h', '4h', '1d', '7d'] as const).map(r => (
                 <button
                   key={r}
@@ -89,8 +90,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
                   className={cn(
                     'px-2.5 py-1 rounded text-[11px] font-bold transition-colors',
                     chartRange === r
-                      ? 'bg-[#1A1A2E] text-blue-400'
-                      : 'text-[#52525E] hover:text-[#8A8A96]'
+                      ? 'bg-blue-500/10 text-blue-400'
+                      : 'text-txt-3 hover:text-txt-2'
                   )}
                 >
                   {r.toUpperCase()}
@@ -104,21 +105,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
         </div>
 
         {/* Asset allocation */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg overflow-hidden flex flex-col">
-          <div className="flex items-center gap-2 px-4 py-3.5 border-b border-[#222226]">
-            <PieChart size={13} className="text-[#52525E]" />
-            <span className="text-[11px] font-semibold text-[#8A8A96] uppercase tracking-wide">Allocation</span>
+        <div className="bg-surface border border-border rounded-lg overflow-hidden flex flex-col">
+          <div className="flex items-center gap-2 px-4 py-3.5 border-b border-border">
+            <PieChart size={13} className="text-txt-3" />
+            <span className="text-[11px] font-semibold text-txt-2 uppercase tracking-wide">Allocation</span>
           </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-[#17171A]">
+          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-surface-2">
             {isLoading ? (
               <div className="flex items-center justify-center h-full py-12">
                 <Loader2 size={20} className="animate-spin text-blue-400" />
               </div>
             ) : portfolio.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full py-12 gap-2 text-[#52525E]">
+              <div className="flex flex-col items-center justify-center h-full py-12 gap-2 text-txt-3">
                 <PieChart size={24} className="opacity-30" />
                 <p className="text-[12px]">No assets</p>
-                <p className="text-[11px] text-center max-w-[180px]">Connect a wallet with SOL or SPL tokens</p>
+                <p className="text-[11px] text-center max-w-45">Connect a wallet with SOL or SPL tokens</p>
               </div>
             ) : (
               portfolio.map((item) => {
@@ -128,35 +129,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
                 const isGain = pnl >= 0;
 
                 return (
-                  <div key={item.token.id} className="px-4 py-3 hover:bg-[#17171A] transition-colors">
+                  <div key={item.token.id} className="px-4 py-3 hover:bg-surface-2 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-surface-2 border border-border flex items-center justify-center overflow-hidden shrink-0">
                           {item.token.imageUrl
                             ? <img src={item.token.imageUrl} alt={item.token.symbol} className="w-full h-full object-cover" />
-                            : <span className="text-[10px] font-bold text-[#8A8A96]">{item.token.symbol[0]}</span>
+                            : <span className="text-[10px] font-bold text-txt-2">{item.token.symbol[0]}</span>
                           }
                         </div>
                         <div>
-                          <div className="text-[12.5px] font-bold text-[#EEEFF2]">{item.token.symbol}</div>
-                          <div className="text-[10px] text-[#52525E] font-mono">{item.balance.toLocaleString()}</div>
+                          <div className="text-[12.5px] font-bold text-txt">{item.token.symbol}</div>
+                          <div className="text-[10px] text-txt-3 font-mono">{item.balance.toLocaleString()}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-[12.5px] font-bold font-mono text-[#EEEFF2]">{formatCurrency(value)}</div>
+                        <div className="text-[12.5px] font-bold font-mono text-txt">{formatCurrency(value)}</div>
                         <div className={cn('text-[10px] font-mono', isGain ? 'text-green-400' : 'text-red-400')}>
                           {isGain ? '+' : ''}{formatCurrency(pnl)}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1 bg-[#1E1E22] rounded-full overflow-hidden">
+                      <div className="flex-1 h-1 bg-surface-3 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500 rounded-full"
                           style={{ width: `${alloc}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-[#52525E] w-9 text-right">{alloc.toFixed(1)}%</span>
+                      <span className="text-[10px] font-mono text-txt-3 w-9 text-right">{alloc.toFixed(1)}%</span>
                     </div>
                   </div>
                 );
@@ -169,57 +170,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Network */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg p-4">
+        <div className="bg-surface border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Wifi size={13} className="text-[#52525E]" />
-            <span className="text-[10px] font-semibold text-[#52525E] uppercase tracking-wide">Network</span>
+            <Wifi size={13} className="text-txt-3" />
+            <span className="text-[10px] font-semibold text-txt-3 uppercase tracking-wide">Network</span>
           </div>
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 rounded-full bg-green-400" />
-            <span className="text-[13px] font-bold text-[#EEEFF2]">Solana Mainnet</span>
+            <span className="text-[13px] font-bold text-txt">Solana Mainnet</span>
           </div>
-          <div className="flex gap-5 pt-3 border-t border-[#1E1E22]">
+          <div className="flex gap-5 pt-3 border-t border-surface-3">
             <div>
-              <p className="text-[10px] text-[#52525E] uppercase tracking-wide mb-1">TPS</p>
+              <p className="text-[10px] text-txt-3 uppercase tracking-wide mb-1">TPS</p>
               <p className="text-[13px] font-bold font-mono text-green-400">{tps.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-[10px] text-[#52525E] uppercase tracking-wide mb-1">Latency</p>
-              <p className="text-[13px] font-bold font-mono text-[#EEEFF2]">{ping}ms</p>
+              <p className="text-[10px] text-txt-3 uppercase tracking-wide mb-1">Latency</p>
+              <p className="text-[13px] font-bold font-mono text-txt">{ping}ms</p>
             </div>
           </div>
         </div>
 
         {/* Whale Alerts */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg p-4">
+        <div className="bg-surface border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Activity size={13} className="text-[#52525E]" />
-            <span className="text-[10px] font-semibold text-[#52525E] uppercase tracking-wide">Whale Alerts</span>
+            <Activity size={13} className="text-txt-3" />
+            <span className="text-[10px] font-semibold text-txt-3 uppercase tracking-wide">Whale Alerts</span>
           </div>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
               <Activity size={15} className="text-blue-400" />
             </div>
             <div>
-              <span className="text-[15px] font-bold text-[#EEEFF2]">12</span>
-              <span className="text-[11px] text-[#52525E] ml-1.5">active monitors</span>
+              <span className="text-[15px] font-bold text-txt">12</span>
+              <span className="text-[11px] text-txt-3 ml-1.5">active monitors</span>
             </div>
           </div>
-          <p className="text-[11px] text-[#52525E] font-mono pt-3 border-t border-[#1E1E22]">
+          <p className="text-[11px] text-txt-3 font-mono pt-3 border-t border-surface-3">
             <span className="text-blue-400 font-bold">3</span> triggers fired in last 24h
           </p>
         </div>
 
         {/* Volume */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg p-4">
+        <div className="bg-surface border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart2 size={13} className="text-[#52525E]" />
-            <span className="text-[10px] font-semibold text-[#52525E] uppercase tracking-wide">Global DEX Volume</span>
+            <BarChart2 size={13} className="text-txt-3" />
+            <span className="text-[10px] font-semibold text-txt-3 uppercase tracking-wide">Global DEX Volume</span>
           </div>
           <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-[24px] font-bold font-mono text-[#EEEFF2] tracking-tighter">$4.2B</span>
+            <span className="text-[24px] font-bold font-mono text-txt tracking-tighter">$4.2B</span>
           </div>
-          <p className="text-[11px] text-green-400 font-mono flex items-center gap-1 pt-3 border-t border-[#1E1E22]">
+          <p className="text-[11px] text-green-400 font-mono flex items-center gap-1 pt-3 border-t border-surface-3">
             <ArrowUpRight size={12} /> +15.2% vs 24h prior
           </p>
         </div>

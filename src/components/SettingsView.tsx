@@ -19,33 +19,33 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0A0A0B] overflow-y-auto custom-scrollbar">
+    <div className="flex flex-col h-full bg-bg overflow-y-auto custom-scrollbar">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-[#222226] bg-[#0A0A0B]">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-bg">
         <div>
-          <h1 className="text-[14px] font-bold text-[#EEEFF2] uppercase tracking-wide">System Settings</h1>
-          <p className="text-[11px] text-[#52525E]">Network endpoints, node configuration and notification thresholds</p>
+          <h1 className="text-[14px] font-bold text-txt uppercase tracking-wide">System Settings</h1>
+          <p className="text-[11px] text-txt-3">Network endpoints, node configuration and notification thresholds</p>
         </div>
       </div>
 
       <div className="p-6 max-w-3xl mx-auto w-full space-y-5">
         {/* RPC Settings */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg p-5">
+        <div className="bg-surface border border-border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <Zap size={14} className="text-blue-400" />
-            <h2 className="text-[13px] font-bold text-[#EEEFF2] uppercase tracking-wide">Solana RPC Configuration</h2>
+            <h2 className="text-[13px] font-bold text-txt uppercase tracking-wide">Solana RPC Configuration</h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-[11px] font-medium text-[#8A8A96] mb-1.5 uppercase font-mono">
+              <label className="block text-[11px] font-medium text-txt-2 mb-1.5 uppercase font-mono">
                 Primary RPC Endpoint
               </label>
               <input
                 type="text"
                 value={selectedRpc}
                 onChange={(e) => setSelectedRpc(e.target.value)}
-                className="w-full h-8 px-3 bg-[#17171A] border border-[#222226] rounded text-[12px] font-mono text-[#EEEFF2] focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full h-8 px-3 bg-surface-2 border border-border rounded text-[12px] font-mono text-txt focus:outline-none focus:border-blue-500 transition-colors"
               />
               <div className="flex gap-2 mt-2">
                 {[
@@ -60,7 +60,7 @@ export const SettingsView: React.FC = () => {
                       'text-[10px] font-mono px-2 py-0.5 rounded border transition-colors',
                       selectedRpc === item.url
                         ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                        : 'bg-[#17171A] border-[#222226] text-[#52525E] hover:text-[#8A8A96]'
+                        : 'bg-surface-2 border-border text-txt-3 hover:text-txt-2'
                     )}
                   >
                     {item.name}
@@ -70,50 +70,50 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[#8A8A96] mb-1.5 uppercase font-mono">
+              <label className="block text-[11px] font-medium text-txt-2 mb-1.5 uppercase font-mono">
                 WebSocket Endpoint
               </label>
               <input
                 type="text"
                 value={wsUrl}
                 onChange={(e) => setWsUrl(e.target.value)}
-                className="w-full h-8 px-3 bg-[#17171A] border border-[#222226] rounded text-[12px] font-mono text-[#EEEFF2] focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full h-8 px-3 bg-surface-2 border border-border rounded text-[12px] font-mono text-txt focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Security & Alerts */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg p-5">
+        <div className="bg-surface border border-border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <Shield size={14} className="text-blue-400" />
-            <h2 className="text-[13px] font-bold text-[#EEEFF2] uppercase tracking-wide">Security & Subscriptions</h2>
+            <h2 className="text-[13px] font-bold text-txt uppercase tracking-wide">Security & Subscriptions</h2>
           </div>
 
           <div className="space-y-3">
-            <label className="flex items-center justify-between p-3 bg-[#17171A] border border-[#222226] rounded cursor-pointer hover:border-[#2E2E34] transition-colors">
+            <label className="flex items-center justify-between p-3 bg-surface-2 border border-border rounded cursor-pointer hover:border-border-2 transition-colors">
               <div>
-                <div className="text-[12.5px] font-medium text-[#EEEFF2]">Whale Movement Push Alerts</div>
-                <div className="text-[11px] text-[#52525E]">Notify in UI when monitored whales execute orders &gt; $50,000</div>
+                <div className="text-[12.5px] font-medium text-txt">Whale Movement Push Alerts</div>
+                <div className="text-[11px] text-txt-3">Notify in UI when monitored whales execute orders &gt; $50,000</div>
               </div>
               <input
                 type="checkbox"
                 checked={whaleAlertsEnabled}
                 onChange={(e) => setWhaleAlertsEnabled(e.target.checked)}
-                className="w-4 h-4 rounded bg-[#111113] border-[#222226] text-blue-500 focus:ring-0"
+                className="w-4 h-4 rounded bg-surface border-border text-blue-500 focus:ring-0"
               />
             </label>
 
-            <label className="flex items-center justify-between p-3 bg-[#17171A] border border-[#222226] rounded cursor-pointer hover:border-[#2E2E34] transition-colors">
+            <label className="flex items-center justify-between p-3 bg-surface-2 border border-border rounded cursor-pointer hover:border-border-2 transition-colors">
               <div>
-                <div className="text-[12.5px] font-medium text-[#EEEFF2]">Automatic Wallet Timeout</div>
-                <div className="text-[11px] text-[#52525E]">Safely disconnect hardware/extension wallet after 30m idle</div>
+                <div className="text-[12.5px] font-medium text-txt">Automatic Wallet Timeout</div>
+                <div className="text-[11px] text-txt-3">Safely disconnect hardware/extension wallet after 30m idle</div>
               </div>
               <input
                 type="checkbox"
                 checked={autoDisconnect}
                 onChange={(e) => setAutoDisconnect(e.target.checked)}
-                className="w-4 h-4 rounded bg-[#111113] border-[#222226] text-blue-500 focus:ring-0"
+                className="w-4 h-4 rounded bg-surface border-border text-blue-500 focus:ring-0"
               />
             </label>
           </div>

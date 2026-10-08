@@ -1,3 +1,4 @@
+// SolPulse Terminal - Solana Analytics
 import React, { useState, useCallback, useMemo } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { Sidebar } from './components/Sidebar';
@@ -53,7 +54,7 @@ export default function App() {
       {showLandingPage ? (
         <LandingPage onLaunch={handleEnterTerminal} />
       ) : (
-        <div className="flex h-screen bg-[#0A0A0B] overflow-hidden">
+        <div className="flex h-screen bg-bg overflow-hidden">
           <Sidebar 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 

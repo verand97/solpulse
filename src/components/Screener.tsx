@@ -117,7 +117,7 @@ export const Screener: React.FC<ScreenerProps> = ({
 
   const Th = ({ label, field }: { label: string; field: SortKey }) => (
     <th
-      className="px-3 py-2.5 text-right text-[11px] font-medium text-[#52525E] uppercase tracking-wide cursor-pointer hover:text-[#8A8A96] select-none transition-colors whitespace-nowrap"
+      className="px-3 py-2.5 text-right text-[11px] font-medium text-txt-3 uppercase tracking-wide cursor-pointer hover:text-txt-2 select-none transition-colors whitespace-nowrap"
       onClick={() => handleSort(field)}
     >
       {label}
@@ -130,12 +130,12 @@ export const Screener: React.FC<ScreenerProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#222226] bg-[#0A0A0B] flex-wrap">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-bg flex-wrap">
         {/* Chain */}
         <select
           value={chainFilter}
           onChange={e => setChainFilter(e.target.value)}
-          className="h-7 px-2 bg-[#17171A] border border-[#222226] rounded-md text-[12px] text-[#EEEFF2] focus:outline-none focus:border-blue-500 cursor-pointer"
+          className="h-7 px-2 bg-surface-2 border border-border rounded-md text-[12px] text-txt focus:outline-none focus:border-blue-500 cursor-pointer"
         >
           <option value="solana">Solana</option>
           <option value="all">All Chains</option>
@@ -145,7 +145,7 @@ export const Screener: React.FC<ScreenerProps> = ({
         </select>
 
         {/* Preset tabs */}
-        <div className="flex items-center gap-0.5 bg-[#17171A] border border-[#222226] rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 bg-surface-2 border border-border rounded-md p-0.5">
           {PRESETS.map(p => (
             <button
               key={p.id}
@@ -153,8 +153,8 @@ export const Screener: React.FC<ScreenerProps> = ({
               className={cn(
                 'px-2.5 py-1 rounded text-[11.5px] font-medium transition-colors',
                 filter === p.id
-                  ? 'bg-[#1A1A2E] text-blue-400'
-                  : 'text-[#52525E] hover:text-[#8A8A96]'
+                  ? 'bg-blue-500/10 text-blue-400'
+                  : 'text-txt-3 hover:text-txt-2'
               )}
             >
               {p.label}
@@ -168,8 +168,8 @@ export const Screener: React.FC<ScreenerProps> = ({
           className={cn(
             'h-7 flex items-center gap-1.5 px-2.5 rounded-md text-[12px] font-medium transition-colors border',
             showFilters || minLiquidity > 0 || minVolume > 0
-              ? 'bg-[#1A1A2E] text-blue-400 border-[#222246]'
-              : 'text-[#52525E] border-[#222226] hover:text-[#8A8A96] hover:bg-[#17171A]'
+              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+              : 'text-txt-3 border-border hover:text-txt-2 hover:bg-surface-2'
           )}
         >
           <SlidersHorizontal size={12} />
@@ -187,7 +187,7 @@ export const Screener: React.FC<ScreenerProps> = ({
               placeholder="Paste contract address..."
               value={caInput}
               onChange={e => { setCaInput(e.target.value); setCaError(''); }}
-              className="h-7 w-60 px-2.5 bg-[#17171A] border border-[#222226] rounded-md text-[11.5px] font-mono text-[#EEEFF2] placeholder-[#52525E] focus:outline-none focus:border-blue-500 transition-colors"
+              className="h-7 w-60 px-2.5 bg-surface-2 border border-border rounded-md text-[11.5px] font-mono text-txt placeholder-txt-3 focus:outline-none focus:border-blue-500 transition-colors"
             />
             {caError && (
               <span className="absolute -bottom-4 left-0 text-[10px] text-red-400">{caError}</span>
@@ -206,13 +206,13 @@ export const Screener: React.FC<ScreenerProps> = ({
 
       {/* Filter drawer */}
       {showFilters && (
-        <div className="flex items-center gap-4 px-4 py-2 border-b border-[#222226] bg-[#111113]">
+        <div className="flex items-center gap-4 px-4 py-2 border-b border-border bg-surface">
           <div className="flex items-center gap-2">
-            <label className="text-[11px] text-[#52525E] whitespace-nowrap">Min Liquidity</label>
+            <label className="text-[11px] text-txt-3 whitespace-nowrap">Min Liquidity</label>
             <select
               value={minLiquidity}
               onChange={e => setMinLiquidity(Number(e.target.value))}
-              className="h-6 px-2 bg-[#17171A] border border-[#222226] rounded text-[11.5px] text-[#EEEFF2] focus:outline-none focus:border-blue-500"
+              className="h-6 px-2 bg-surface-2 border border-border rounded text-[11.5px] text-txt focus:outline-none focus:border-blue-500"
             >
               <option value={0}>Any</option>
               <option value={5000}>$5K+</option>
@@ -222,11 +222,11 @@ export const Screener: React.FC<ScreenerProps> = ({
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[11px] text-[#52525E] whitespace-nowrap">Min Volume 24h</label>
+            <label className="text-[11px] text-txt-3 whitespace-nowrap">Min Volume 24h</label>
             <select
               value={minVolume}
               onChange={e => setMinVolume(Number(e.target.value))}
-              className="h-6 px-2 bg-[#17171A] border border-[#222226] rounded text-[11.5px] text-[#EEEFF2] focus:outline-none focus:border-blue-500"
+              className="h-6 px-2 bg-surface-2 border border-border rounded text-[11.5px] text-txt focus:outline-none focus:border-blue-500"
             >
               <option value={0}>Any</option>
               <option value={10000}>$10K+</option>
@@ -237,7 +237,7 @@ export const Screener: React.FC<ScreenerProps> = ({
           </div>
           <button
             onClick={() => { setMinLiquidity(0); setMinVolume(0); setFilter('all'); }}
-            className="text-[11px] text-[#52525E] hover:text-[#8A8A96] transition-colors"
+            className="text-[11px] text-txt-3 hover:text-txt-2 transition-colors"
           >
             Reset
           </button>
@@ -247,30 +247,30 @@ export const Screener: React.FC<ScreenerProps> = ({
       {/* Token table */}
       <div className="flex-1 overflow-auto custom-scrollbar">
         <table className="w-full text-left border-collapse">
-          <thead className="sticky top-0 bg-[#0A0A0B] z-10">
-            <tr className="border-b border-[#222226]">
-              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-[#52525E] uppercase tracking-wide w-8" />
-              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-[#52525E] uppercase tracking-wide">Token</th>
+          <thead className="sticky top-0 bg-bg z-10">
+            <tr className="border-b border-border">
+              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-txt-3 uppercase tracking-wide w-8" />
+              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-txt-3 uppercase tracking-wide">Token</th>
               <Th label="Price"     field="price" />
               <Th label="24h %"     field="priceChange24h" />
               <Th label="1h %"      field="priceChange1h" />
               <Th label="Volume 24h" field="volume24h" />
               <Th label="Liquidity" field="liquidity" />
               <Th label="Mkt Cap"   field="marketCap" />
-              <th className="px-3 py-2.5 text-right text-[11px] font-medium text-[#52525E] uppercase tracking-wide">Actions</th>
+              <th className="px-3 py-2.5 text-right text-[11px] font-medium text-txt-3 uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[12.5px] font-mono">
             {isLoading && tokens.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-20 text-center text-[#52525E]">
+                <td colSpan={9} className="py-20 text-center text-txt-3">
                   <Loader2 size={20} className="animate-spin mx-auto mb-2 text-blue-400" />
                   <p className="font-sans text-[12px]">Loading token data...</p>
                 </td>
               </tr>
             ) : filteredTokens.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-20 text-center text-[#52525E] font-sans text-[12px]">
+                <td colSpan={9} className="py-20 text-center text-txt-3 font-sans text-[12px]">
                   No tokens match current filters
                 </td>
               </tr>
@@ -284,7 +284,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                   <tr
                     key={`${token.address}-${token.id}`}
                     onClick={() => { setSelectedToken(token); setModalTab('chart'); }}
-                    className="border-b border-[#17171A] hover:bg-[#111113] transition-colors cursor-pointer group"
+                    className="border-b border-surface-2 hover:bg-surface transition-colors cursor-pointer group"
                   >
                     {/* Watchlist star */}
                     <td className="px-3 py-2.5">
@@ -292,7 +292,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                         onClick={e => { e.stopPropagation(); toggleWatchlist(token.address); }}
                         className={cn(
                           'transition-colors',
-                          inWatch ? 'text-yellow-400' : 'text-[#2A2A30] hover:text-[#52525E]'
+                          inWatch ? 'text-yellow-400' : 'text-border-2 hover:text-txt-3'
                         )}
                       >
                         <Star size={13} className={cn(inWatch && 'fill-yellow-400')} />
@@ -302,24 +302,24 @@ export const Screener: React.FC<ScreenerProps> = ({
                     {/* Token identity */}
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-surface-2 border border-border flex items-center justify-center overflow-hidden shrink-0">
                           {token.imageUrl
                             ? <img src={token.imageUrl} alt={token.symbol} className="w-full h-full object-cover" />
-                            : <span className="text-[11px] font-bold text-[#8A8A96] font-sans">{token.symbol[0]}</span>
+                            : <span className="text-[11px] font-bold text-txt-2 font-sans">{token.symbol[0]}</span>
                           }
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-[#EEEFF2] font-sans text-[13px] group-hover:text-white">{token.symbol}</span>
-                            <span className="text-[9px] px-1 py-0.5 rounded bg-[#17171A] text-[#52525E] border border-[#222226] uppercase font-sans">{token.chainId}</span>
+                            <span className="font-semibold text-txt font-sans text-[13px] group-hover:text-white">{token.symbol}</span>
+                            <span className="text-[9px] px-1 py-0.5 rounded bg-surface-2 text-txt-3 border border-border uppercase font-sans">{token.chainId}</span>
                           </div>
-                          <p className="text-[10.5px] text-[#52525E] font-sans truncate max-w-32">{token.name}</p>
+                          <p className="text-[10.5px] text-txt-3 font-sans truncate max-w-32">{token.name}</p>
                         </div>
                       </div>
                     </td>
 
                     {/* Price */}
-                    <td className="px-3 py-2.5 text-right text-[#EEEFF2] font-semibold">
+                    <td className="px-3 py-2.5 text-right text-txt font-semibold">
                       {formatCurrency(token.price)}
                     </td>
 
@@ -343,21 +343,21 @@ export const Screener: React.FC<ScreenerProps> = ({
                         )}>
                           {pos1h ? '+' : ''}{token.priceChange1h.toFixed(2)}%
                         </span>
-                      ) : <span className="text-[#52525E]">—</span>}
+                      ) : <span className="text-txt-3">—</span>}
                     </td>
 
                     {/* Volume */}
-                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                    <td className="px-3 py-2.5 text-right text-txt-2">
                       {formatCurrency(token.volume24h)}
                     </td>
 
                     {/* Liquidity */}
-                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                    <td className="px-3 py-2.5 text-right text-txt-2">
                       {formatCurrency(token.liquidity)}
                     </td>
 
                     {/* Mkt cap */}
-                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                    <td className="px-3 py-2.5 text-right text-txt-2">
                       {formatCurrency(token.marketCap)}
                     </td>
 
@@ -366,7 +366,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => { setSelectedToken(token); setModalTab('chart'); }}
-                          className="px-2 py-1 rounded bg-[#17171A] hover:bg-[#1E1E22] border border-[#222226] text-[11px] font-sans text-[#8A8A96] hover:text-[#EEEFF2] transition-colors"
+                          className="px-2 py-1 rounded bg-surface-2 hover:bg-surface-3 border border-border text-[11px] font-sans text-txt-2 hover:text-txt transition-colors"
                         >
                           Chart
                         </button>
@@ -389,8 +389,8 @@ export const Screener: React.FC<ScreenerProps> = ({
       </div>
 
       {/* Footer count */}
-      <div className="px-4 py-2 border-t border-[#222226] bg-[#0A0A0B] flex items-center gap-3">
-        <span className="text-[11px] text-[#52525E]">
+      <div className="px-4 py-2 border-t border-border bg-bg flex items-center gap-3">
+        <span className="text-[11px] text-txt-3">
           {filteredTokens.length} pairs
           {chainFilter !== 'all' && ` on ${chainFilter}`}
         </span>
@@ -408,24 +408,24 @@ export const Screener: React.FC<ScreenerProps> = ({
           onClick={() => setSelectedToken(null)}
         >
           <div
-            className="bg-[#111113] border border-[#222226] rounded-lg w-full max-w-5xl flex flex-col max-h-[90vh] shadow-2xl"
+            className="bg-surface border border-border rounded-lg w-full max-w-5xl flex flex-col max-h-[90vh] shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#222226]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#17171A] border border-[#222226] overflow-hidden flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-surface-2 border border-border overflow-hidden flex items-center justify-center">
                   {selectedToken.imageUrl
                     ? <img src={selectedToken.imageUrl} alt={selectedToken.symbol} className="w-full h-full object-cover" />
-                    : <span className="text-[12px] font-bold text-[#8A8A96]">{selectedToken.symbol[0]}</span>
+                    : <span className="text-[12px] font-bold text-txt-2">{selectedToken.symbol[0]}</span>
                   }
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-bold text-[#EEEFF2]">{selectedToken.symbol}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#17171A] text-[#52525E] border border-[#222226] uppercase">{selectedToken.chainId}</span>
+                    <span className="text-[15px] font-bold text-txt">{selectedToken.symbol}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 text-txt-3 border border-border uppercase">{selectedToken.chainId}</span>
                   </div>
-                  <p className="text-[10.5px] text-[#52525E] font-mono">{selectedToken.address}</p>
+                  <p className="text-[10.5px] text-txt-3 font-mono">{selectedToken.address}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -441,13 +441,13 @@ export const Screener: React.FC<ScreenerProps> = ({
                   href={`https://solscan.io/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-7 px-3 rounded-md bg-[#17171A] border border-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] text-[12px] font-medium flex items-center gap-1.5 transition-colors"
+                  className="h-7 px-3 rounded-md bg-surface-2 border border-border text-txt-2 hover:text-txt text-[12px] font-medium flex items-center gap-1.5 transition-colors"
                 >
                   Solscan <ExternalLink size={11} />
                 </a>
                 <button
                   onClick={() => setSelectedToken(null)}
-                  className="w-7 h-7 flex items-center justify-center rounded-md text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A] transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-txt-3 hover:text-txt-2 hover:bg-surface-2 transition-colors"
                 >
                   <X size={15} />
                 </button>
@@ -455,20 +455,20 @@ export const Screener: React.FC<ScreenerProps> = ({
             </div>
 
             {/* Metrics strip */}
-            <div className="grid grid-cols-4 border-b border-[#222226]">
+            <div className="grid grid-cols-4 border-b border-border">
               {[
                 { label: 'Price',      value: formatCurrency(selectedToken.price), colored: false },
                 { label: '24h Change', value: `${selectedToken.priceChange24h >= 0 ? '+' : ''}${selectedToken.priceChange24h.toFixed(2)}%`, colored: true, positive: selectedToken.priceChange24h >= 0 },
                 { label: 'Liquidity',  value: formatCurrency(selectedToken.liquidity), colored: false },
                 { label: 'Market Cap', value: formatCurrency(selectedToken.marketCap), colored: false },
               ].map(m => (
-                <div key={m.label} className="px-4 py-2.5 border-r border-[#222226] last:border-0">
-                  <p className="text-[10px] text-[#52525E] uppercase tracking-wide mb-0.5">{m.label}</p>
+                <div key={m.label} className="px-4 py-2.5 border-r border-border last:border-0">
+                  <p className="text-[10px] text-txt-3 uppercase tracking-wide mb-0.5">{m.label}</p>
                   <p className={cn(
                     'text-[14px] font-bold font-mono',
                     m.colored
                       ? (m.positive ? 'text-green-400' : 'text-red-400')
-                      : 'text-[#EEEFF2]'
+                      : 'text-txt'
                   )}>
                     {m.value}
                   </p>
@@ -477,7 +477,7 @@ export const Screener: React.FC<ScreenerProps> = ({
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-[#222226]">
+            <div className="flex border-b border-border">
               {[
                 { id: 'chart',    label: 'Chart' },
                 { id: 'security', label: 'RugCheck' },
@@ -490,7 +490,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                     'px-4 py-2.5 text-[12px] font-medium border-b-2 transition-colors',
                     modalTab === t.id
                       ? 'border-blue-400 text-blue-400'
-                      : 'border-transparent text-[#52525E] hover:text-[#8A8A96]'
+                      : 'border-transparent text-txt-3 hover:text-txt-2'
                   )}
                 >
                   {t.label}
@@ -521,7 +521,7 @@ export const Screener: React.FC<ScreenerProps> = ({
               {modalTab === 'security' && (
                 <div className="p-4 space-y-3">
                   {rugCheck.isLoading ? (
-                    <div className="py-16 text-center text-[#52525E]">
+                    <div className="py-16 text-center text-txt-3">
                       <Loader2 size={20} className="animate-spin mx-auto mb-2 text-blue-400" />
                       <p className="text-[12px]">Running RugCheck analysis...</p>
                     </div>
@@ -573,7 +573,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                       </div>
                     </>
                   ) : (
-                    <div className="py-12 text-center text-[#52525E] text-[12px]">
+                    <div className="py-12 text-center text-txt-3 text-[12px]">
                       <p>Report unavailable.</p>
                       <a href={`https://rugcheck.xyz/tokens/${selectedToken.address}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline mt-1 inline-block">
                         View on RugCheck.xyz →

@@ -121,13 +121,13 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
   // Disconnected state
   if (!walletConnected) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-[#0A0A0B]">
-        <div className="max-w-md w-full bg-[#111113] border border-[#222226] rounded-lg p-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center mx-auto mb-4 text-[#8A8A96]">
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-bg">
+        <div className="max-w-md w-full bg-surface border border-border rounded-lg p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 border border-border flex items-center justify-center mx-auto mb-4 text-txt-2">
             <WalletIcon size={20} />
           </div>
-          <h2 className="text-[16px] font-bold text-[#EEEFF2] mb-1.5">Connect Solana Wallet</h2>
-          <p className="text-[12px] text-[#52525E] mb-6 leading-relaxed">
+          <h2 className="text-[16px] font-bold text-txt mb-1.5">Connect Solana Wallet</h2>
+          <p className="text-[12px] text-txt-3 mb-6 leading-relaxed">
             Connect your Phantom, Solflare, or Backpack wallet to inspect portfolio balances and execute zero-fee DEX swaps directly on mainnet.
           </p>
           <button
@@ -142,16 +142,16 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0A0A0B] overflow-y-auto custom-scrollbar">
+    <div className="flex flex-col h-full bg-bg overflow-y-auto custom-scrollbar">
       {/* Top Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-[#222226] bg-[#0A0A0B]">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-bg">
         <div>
-          <h1 className="text-[14px] font-bold text-[#EEEFF2] uppercase tracking-wide">Wallet & DEX Swap</h1>
-          <p className="text-[11px] text-[#52525E]">Direct on-chain custody and liquidity execution</p>
+          <h1 className="text-[14px] font-bold text-txt uppercase tracking-wide">Wallet & DEX Swap</h1>
+          <p className="text-[11px] text-txt-3">Direct on-chain custody and liquidity execution</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-400" />
-          <span className="text-[11px] text-[#8A8A96] font-mono">Connected</span>
+          <span className="text-[11px] text-txt-2 font-mono">Connected</span>
         </div>
       </div>
 
@@ -159,41 +159,41 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
         {/* Top Grid: Overview Card & Swap Terminal */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Account Overview (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col justify-between bg-[#111113] border border-[#222226] rounded-lg p-5">
+          <div className="lg:col-span-7 flex flex-col justify-between bg-surface border border-border rounded-lg p-5">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] text-[#52525E] uppercase font-mono tracking-wider">Account Overview</span>
-                <div className="flex items-center gap-1.5 bg-[#17171A] border border-[#222226] rounded px-2 py-0.5">
-                  <span className="text-[11px] text-[#8A8A96] font-mono">{formatAddress(address, 5)}</span>
-                  <button onClick={handleCopy} className="text-[#52525E] hover:text-[#EEEFF2] transition-colors">
+                <span className="text-[10px] text-txt-3 uppercase font-mono tracking-wider">Account Overview</span>
+                <div className="flex items-center gap-1.5 bg-surface-2 border border-border rounded px-2 py-0.5">
+                  <span className="text-[11px] text-txt-2 font-mono">{formatAddress(address, 5)}</span>
+                  <button onClick={handleCopy} className="text-txt-3 hover:text-txt transition-colors">
                     {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
                   </button>
                 </div>
               </div>
 
               <div className="mb-6">
-                <p className="text-[11px] text-[#52525E] uppercase mb-1">Total Net Worth</p>
-                <div className="text-[32px] font-bold font-mono text-[#EEEFF2] tracking-tight">
+                <p className="text-[11px] text-txt-3 uppercase mb-1">Total Net Worth</p>
+                <div className="text-[32px] font-bold font-mono text-txt tracking-tight">
                   {formatCurrency(totalValue)}
                 </div>
-                <p className="text-[12px] font-mono text-[#52525E] mt-0.5">
+                <p className="text-[12px] font-mono text-txt-3 mt-0.5">
                   ≈ {(totalValue / 145.23).toFixed(3)} SOL
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-4 border-t border-[#17171A]">
+            <div className="flex items-center gap-3 pt-4 border-t border-surface-2">
               <a
                 href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/account/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-8 px-3 rounded bg-[#17171A] hover:bg-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#222226] text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
+                className="h-8 px-3 rounded bg-surface-2 hover:bg-border text-txt-2 hover:text-txt border border-border text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
               >
                 Solscan Explorer <ExternalLink size={11} />
               </a>
               <button
                 onClick={handleCopy}
-                className="h-8 px-3 rounded bg-[#17171A] hover:bg-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#222226] text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
+                className="h-8 px-3 rounded bg-surface-2 hover:bg-border text-txt-2 hover:text-txt border border-border text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
               >
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                 Copy Public Key
@@ -202,18 +202,18 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
           </div>
 
           {/* Quick Swap Panel (5 cols) */}
-          <div className="lg:col-span-5 bg-[#111113] border border-[#222226] rounded-lg p-5 flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-surface border border-border rounded-lg p-5 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold text-[#EEEFF2] uppercase tracking-wide flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-txt uppercase tracking-wide flex items-center gap-1.5">
                 <Zap size={13} className="text-blue-400" /> Instant Swap
               </span>
-              <span className="text-[10px] text-[#52525E] font-mono">Slippage: 0.5%</span>
+              <span className="text-[10px] text-txt-3 font-mono">Slippage: 0.5%</span>
             </div>
 
             <div className="space-y-2">
               {/* Pay Input */}
-              <div className="bg-[#17171A] border border-[#222226] rounded-md p-3">
-                <div className="flex justify-between text-[11px] text-[#52525E] mb-1.5 font-mono">
+              <div className="bg-surface-2 border border-border rounded-md p-3">
+                <div className="flex justify-between text-[11px] text-txt-3 mb-1.5 font-mono">
                   <span>You Pay</span>
                   <div className="flex items-center gap-1">
                     <span>Bal: {payToken.balance.toLocaleString()}</span>
@@ -234,7 +234,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                     value={payAmount}
                     onChange={(e) => handlePayChange(e.target.value)}
                     className={cn(
-                      'bg-transparent text-[20px] font-mono text-[#EEEFF2] outline-none w-full min-w-0 font-bold',
+                      'bg-transparent text-[20px] font-mono text-txt outline-none w-full min-w-0 font-bold',
                       insufficientBalance && payAmount && 'text-red-400'
                     )}
                   />
@@ -243,25 +243,25 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                   <div className="relative">
                     <button
                       onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
-                      className="flex items-center gap-1.5 bg-[#222226] hover:bg-[#2A2A30] px-2.5 py-1 rounded text-[#EEEFF2] text-[12px] font-semibold transition-colors"
+                      className="flex items-center gap-1.5 bg-border hover:bg-border-2 px-2.5 py-1 rounded text-txt text-[12px] font-semibold transition-colors"
                     >
                       <span>{payToken.symbol}</span>
-                      <ChevronDown size={12} className="text-[#52525E]" />
+                      <ChevronDown size={12} className="text-txt-3" />
                     </button>
 
                     {showPaySelect && (
-                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-[#17171A] border border-[#222226] rounded-md shadow-xl z-50 overflow-hidden divide-y divide-[#222226]">
+                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface-2 border border-border rounded-md shadow-xl z-50 overflow-hidden divide-y divide-border">
                         {swapTokens.map(token => (
                           <button
                             key={token.symbol}
                             onClick={() => selectPayToken(token)}
                             className={cn(
-                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#222226] transition-colors',
-                              token.symbol === payToken.symbol && 'bg-[#222226]'
+                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-border transition-colors',
+                              token.symbol === payToken.symbol && 'bg-border'
                             )}
                           >
-                            <span className="text-[12px] font-semibold text-[#EEEFF2]">{token.symbol}</span>
-                            <span className="text-[11px] font-mono text-[#52525E]">{token.balance}</span>
+                            <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            <span className="text-[11px] font-mono text-txt-3">{token.balance}</span>
                           </button>
                         ))}
                       </div>
@@ -274,15 +274,15 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
               <div className="flex justify-center -my-1 relative z-10">
                 <button
                   onClick={handleSwapTokens}
-                  className="w-7 h-7 rounded-full bg-[#222226] hover:bg-[#2A2A30] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#2A2A30] flex items-center justify-center transition-colors shadow-sm"
+                  className="w-7 h-7 rounded-full bg-border hover:bg-border-2 text-txt-2 hover:text-txt border border-border-2 flex items-center justify-center transition-colors shadow-sm"
                 >
                   <ArrowRightLeft size={11} className="rotate-90" />
                 </button>
               </div>
 
               {/* Receive Input */}
-              <div className="bg-[#17171A] border border-[#222226] rounded-md p-3">
-                <div className="flex justify-between text-[11px] text-[#52525E] mb-1.5 font-mono">
+              <div className="bg-surface-2 border border-border rounded-md p-3">
+                <div className="flex justify-between text-[11px] text-txt-3 mb-1.5 font-mono">
                   <span>You Receive</span>
                   <span>Bal: {receiveToken.balance.toLocaleString()}</span>
                 </div>
@@ -294,32 +294,32 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                     placeholder="0.00"
                     value={receiveAmount}
                     onChange={(e) => handleReceiveChange(e.target.value)}
-                    className="bg-transparent text-[20px] font-mono text-[#EEEFF2] outline-none w-full min-w-0 font-bold"
+                    className="bg-transparent text-[20px] font-mono text-txt outline-none w-full min-w-0 font-bold"
                   />
 
                   {/* Token select */}
                   <div className="relative">
                     <button
                       onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
-                      className="flex items-center gap-1.5 bg-[#222226] hover:bg-[#2A2A30] px-2.5 py-1 rounded text-[#EEEFF2] text-[12px] font-semibold transition-colors"
+                      className="flex items-center gap-1.5 bg-border hover:bg-border-2 px-2.5 py-1 rounded text-txt text-[12px] font-semibold transition-colors"
                     >
                       <span>{receiveToken.symbol}</span>
-                      <ChevronDown size={12} className="text-[#52525E]" />
+                      <ChevronDown size={12} className="text-txt-3" />
                     </button>
 
                     {showReceiveSelect && (
-                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-[#17171A] border border-[#222226] rounded-md shadow-xl z-50 overflow-hidden divide-y divide-[#222226]">
+                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface-2 border border-border rounded-md shadow-xl z-50 overflow-hidden divide-y divide-border">
                         {swapTokens.map(token => (
                           <button
                             key={token.symbol}
                             onClick={() => selectReceiveToken(token)}
                             className={cn(
-                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#222226] transition-colors',
-                              token.symbol === receiveToken.symbol && 'bg-[#222226]'
+                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-border transition-colors',
+                              token.symbol === receiveToken.symbol && 'bg-border'
                             )}
                           >
-                            <span className="text-[12px] font-semibold text-[#EEEFF2]">{token.symbol}</span>
-                            <span className="text-[11px] font-mono text-[#52525E]">{token.balance}</span>
+                            <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            <span className="text-[11px] font-mono text-txt-3">{token.balance}</span>
                           </button>
                         ))}
                       </div>
@@ -330,7 +330,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
             </div>
 
             {exchangeRate && (
-              <div className="text-[11px] font-mono text-[#52525E] text-center my-2">
+              <div className="text-[11px] font-mono text-txt-3 text-center my-2">
                 {exchangeRate}
               </div>
             )}
@@ -350,7 +350,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                   ? 'bg-green-500 text-white'
                   : canSwap
                     ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                    : 'bg-[#17171A] text-[#52525E] cursor-not-allowed border border-[#222226]'
+                    : 'bg-surface-2 text-txt-3 cursor-not-allowed border border-border'
               )}
             >
               {swapSuccess ? '✓ Order Confirmed on Solana' : insufficientBalance ? 'Insufficient Balance' : 'Swap via Jupiter Routing'}
@@ -359,22 +359,22 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
         </div>
 
         {/* Holdings Table */}
-        <div className="bg-[#111113] border border-[#222226] rounded-lg overflow-hidden">
-          <div className="px-5 py-3 border-b border-[#222226] bg-[#0A0A0B] flex items-center justify-between">
-            <h2 className="text-[12px] font-bold text-[#EEEFF2] uppercase tracking-wide">Wallet Holdings</h2>
-            <span className="text-[11px] font-mono text-[#52525E]">{portfolio.length} assets</span>
+        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="px-5 py-3 border-b border-border bg-bg flex items-center justify-between">
+            <h2 className="text-[12px] font-bold text-txt uppercase tracking-wide">Wallet Holdings</h2>
+            <span className="text-[11px] font-mono text-txt-3">{portfolio.length} assets</span>
           </div>
 
           <table className="w-full text-left border-collapse text-[12px]">
             <thead>
-              <tr className="border-b border-[#17171A] font-mono text-[10px] text-[#52525E] uppercase tracking-wide bg-[#0D0D0F]">
+              <tr className="border-b border-surface-2 font-mono text-[10px] text-txt-3 uppercase tracking-wide bg-surface">
                 <th className="px-5 py-2.5">Asset</th>
                 <th className="px-5 py-2.5 text-right">Balance</th>
                 <th className="px-5 py-2.5 text-right">Value (USD)</th>
                 <th className="px-5 py-2.5 text-right">P&L</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#17171A] text-[#8A8A96]">
+            <tbody className="divide-y divide-surface-2 text-txt-2">
               {portfolio.map(item => {
                 const value = item.balance * item.token.price;
                 const cost = item.balance * item.avgBuyPrice;
@@ -383,29 +383,29 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                 const isGain = pnl >= 0;
 
                 return (
-                  <tr key={item.token.id} className="hover:bg-[#17171A] transition-colors">
+                  <tr key={item.token.id} className="hover:bg-surface-2 transition-colors">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2.5">
                         {item.token.imageUrl ? (
-                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-6 h-6 rounded-full object-cover border border-[#222226]" />
+                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-6 h-6 rounded-full object-cover border border-border" />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center font-bold text-[10px] text-[#EEEFF2]">
+                          <div className="w-6 h-6 rounded-full bg-surface-2 border border-border flex items-center justify-center font-bold text-[10px] text-txt">
                             {item.token.symbol[0]}
                           </div>
                         )}
                         <div>
-                          <div className="font-bold text-[#EEEFF2] text-[12.5px]">{item.token.symbol}</div>
-                          <div className="text-[10px] text-[#52525E]">{item.token.name}</div>
+                          <div className="font-bold text-txt text-[12.5px]">{item.token.symbol}</div>
+                          <div className="text-[10px] text-txt-3">{item.token.name}</div>
                         </div>
                       </div>
                     </td>
 
                     <td className="px-5 py-3 text-right font-mono">
-                      <div className="text-[#EEEFF2]">{item.balance.toLocaleString()}</div>
-                      <div className="text-[10px] text-[#52525E]">@ ${item.avgBuyPrice.toFixed(2)}</div>
+                      <div className="text-txt">{item.balance.toLocaleString()}</div>
+                      <div className="text-[10px] text-txt-3">@ ${item.avgBuyPrice.toFixed(2)}</div>
                     </td>
 
-                    <td className="px-5 py-3 text-right font-mono text-[#EEEFF2] font-medium">
+                    <td className="px-5 py-3 text-right font-mono text-txt font-medium">
                       {formatCurrency(value)}
                     </td>
 
