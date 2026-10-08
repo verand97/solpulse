@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, WalletCards, X, Check, CheckCheck, ShieldAlert, TrendingUp, Radio, LogOut } from 'lucide-react';
+import { Search, Bell, X, Check, CheckCheck, ShieldAlert, TrendingUp, Radio, LogOut, Wallet } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Notification } from '../types';
@@ -15,9 +15,18 @@ interface HeaderProps {
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
-  whale: <ShieldAlert size={16} className="text-danger drop-shadow-[0_0_5px_rgba(255,86,86,0.5)]" />,
-  price: <TrendingUp size={16} className="text-lime-green drop-shadow-[0_0_5px_rgba(128,255,86,0.5)]" />,
-  system: <Radio size={16} className="text-neon-purple drop-shadow-[0_0_5px_rgba(127,86,255,0.5)]" />,
+  whale: <ShieldAlert size={14} className="text-blue-400" />,
+  price: <TrendingUp size={14} className="text-green-400" />,
+  system: <Radio size={14} className="text-[#8A8A96]" />,
+};
+
+const timeAgo = (ts: number) => {
+  const mins = Math.floor((Date.now() - ts) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,12 +39,10 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showNotifs, setShowNotifs] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  
+
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
@@ -46,137 +53,101 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const timeAgo = (ts: number) => {
-    const mins = Math.floor((Date.now() - ts) / 60000);
-    if (mins < 1) return 'SYS.NOW';
-    if (mins < 60) return `-${mins}M`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `-${hrs}H`;
-    return `-${Math.floor(hrs / 24)}D`;
-  };
-  
-  const handleWalletAction = () => {
-    if (connected) {
-      disconnect();
-    } else {
-      setVisible(true);
-    }
-  };
-
-  const shortenAddress = (addr: string | undefined) => {
-    if (!addr) return '';
-    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
-  };
+  const shortenAddress = (addr?: string) =>
+    addr ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
   return (
-    <header className="h-20 bg-charcoal/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-40">
-      <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
-      
+    <header className="h-12 flex items-center justify-between px-4 border-b border-[#222226] bg-[#0A0A0B] shrink-0">
       {/* Search */}
-      <div className="flex-1 max-w-xl">
-        <div className={cn(
-          "relative group transition-all duration-300 rounded-lg",
-          isFocused ? "shadow-[0_0_20px_rgba(127,86,255,0.15)]" : ""
-        )}>
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search size={16} className={cn("transition-colors duration-300", isFocused ? "text-neon-purple" : "text-gray-500 group-hover:text-gray-400")} />
-          </div>
+      <div className="flex-1 max-w-80">
+        <div className="relative">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#52525E] pointer-events-none" />
           <input
             id="search-input"
             type="text"
             value={searchQuery}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-11 pr-10 py-2.5 bg-black/40 border border-white/5 rounded-lg leading-5 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-neon-purple/50 focus:bg-charcoal/50 sm:text-sm transition-all duration-300 font-mono"
-            placeholder="SCAN ASSETS..."
+            placeholder="Search tokens..."
+            className="w-full h-8 pl-8 pr-8 bg-[#17171A] border border-[#222226] rounded-md text-[12.5px] text-[#EEEFF2] placeholder-[#52525E] focus:outline-none focus:border-[#3B82F6] transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-neon-purple hover:text-white transition-colors"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#52525E] hover:text-[#8A8A96]"
             >
-              <X size={16} />
+              <X size={12} />
             </button>
           )}
-          
-          {/* Cyberpunk accent lines for search */}
-          <div className={cn(
-            "absolute -bottom-px left-2 right-2 h-px bg-neon-purple transition-all duration-500",
-            isFocused ? "opacity-100" : "opacity-0 scale-x-0"
-          )} />
         </div>
       </div>
 
-      <div className="flex items-center gap-4 ml-4">
+      <div className="flex items-center gap-1.5 ml-3">
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
             id="notif-button"
             onClick={() => setShowNotifs(prev => !prev)}
             className={cn(
-              "p-2.5 rounded-lg transition-all duration-300 relative group border",
+              'relative h-8 w-8 flex items-center justify-center rounded-md transition-colors',
               showNotifs || unreadCount > 0
-                ? "bg-neon-purple/10 text-neon-purple border-neon-purple/30 shadow-[0_0_15px_rgba(127,86,255,0.15)]" 
-                : "bg-transparent text-gray-400 border-transparent hover:bg-white/5 hover:border-white/10 hover:text-gray-200"
+                ? 'bg-[#17171A] text-blue-400 border border-[#222226]'
+                : 'text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A]'
             )}
           >
-            <Bell size={20} className={cn(unreadCount > 0 ? "animate-pulse" : "")} />
+            <Bell size={15} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-md bg-neon-purple text-[10px] text-white font-bold font-mono flex items-center justify-center shadow-[0_0_10px_#7F56FF]">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 text-[9px] text-white font-bold flex items-center justify-center">
                 {unreadCount}
               </span>
             )}
           </button>
 
           {showNotifs && (
-            <div className="absolute right-0 top-14 w-96 bg-charcoal/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50 animate-fade-in-up before:content-[''] before:absolute before:inset-0 before:bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] before:bg-size-[100%_4px] before:pointer-events-none">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 relative z-10 bg-black/20">
-                <h3 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
-                  <Radio size={14} className="text-neon-purple animate-pulse" /> Comm Link
-                </h3>
+            <div className="absolute right-0 top-10 w-80 bg-[#111113] border border-[#222226] rounded-lg shadow-2xl overflow-hidden z-50">
+              <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#222226]">
+                <span className="text-[11px] font-semibold text-[#8A8A96] uppercase tracking-wider">
+                  Notifications
+                </span>
                 {unreadCount > 0 && (
                   <button
                     onClick={onMarkAllRead}
-                    className="text-[10px] text-neon-purple hover:text-white uppercase tracking-wider font-bold flex items-center gap-1 transition-colors"
+                    className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
                   >
-                    <CheckCheck size={14} /> Clear All
+                    <CheckCheck size={12} /> Mark all read
                   </button>
                 )}
               </div>
-              <div className="max-h-[400px] overflow-y-auto divide-y divide-white/5 custom-scrollbar relative z-10">
+              <div className="max-h-80 overflow-y-auto divide-y divide-[#1E1E22] custom-scrollbar">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center flex flex-col items-center justify-center gap-3">
-                    <ShieldAlert size={32} className="text-gray-600" />
-                    <span className="text-gray-500 text-xs font-mono uppercase tracking-widest">No Active Alerts</span>
+                  <div className="py-8 text-center text-[#52525E] text-[12px]">
+                    No notifications
                   </div>
                 ) : (
-                  notifications.map((n, i) => (
+                  notifications.map((n) => (
                     <div
                       key={n.id}
                       onClick={() => onMarkRead(n.id)}
                       className={cn(
-                        "px-5 py-4 flex gap-4 cursor-pointer transition-all duration-300 relative group overflow-hidden",
-                        !n.read ? "bg-neon-purple/5 hover:bg-neon-purple/15" : "hover:bg-white/5"
+                        'px-3 py-3 flex gap-3 cursor-pointer transition-colors',
+                        !n.read ? 'bg-[#17171A]' : 'hover:bg-[#17171A]'
                       )}
-                      style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      {!n.read && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-neon-purple shadow-[0_0_10px_#7F56FF]" />
-                      )}
-                      
-                      <div className="mt-1 shrink-0 p-2 rounded-lg bg-black/40 border border-white/5">
-                        {NOTIF_ICONS[n.type]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <p className={cn("text-sm font-bold truncate tracking-wide", !n.read ? "text-white drop-shadow-md" : "text-gray-400")}>
+                      <div className="mt-0.5 shrink-0">{NOTIF_ICONS[n.type]}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <p className={cn(
+                            'text-[12px] font-medium truncate',
+                            !n.read ? 'text-[#EEEFF2]' : 'text-[#8A8A96]'
+                          )}>
                             {n.title}
                           </p>
-                          <p className="text-[10px] text-neon-purple font-mono font-bold shrink-0 mt-0.5 opacity-80">{timeAgo(n.timestamp)}</p>
+                          <span className="text-[10px] text-[#52525E] shrink-0">{timeAgo(n.timestamp)}</span>
                         </div>
-                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{n.message}</p>
+                        <p className="text-[11px] text-[#52525E] line-clamp-2">{n.message}</p>
                       </div>
+                      {!n.read && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
+                      )}
                     </div>
                   ))
                 )}
@@ -188,30 +159,24 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Wallet */}
         <button
           id="connect-wallet"
-          onClick={handleWalletAction}
+          onClick={connected ? disconnect : () => setVisible(true)}
           className={cn(
-            "flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group relative overflow-hidden",
+            'h-8 flex items-center gap-2 px-3 rounded-md text-[12px] font-medium transition-colors border',
             connected
-              ? "bg-charcoal border border-lime-green/30 text-lime-green hover:border-danger/50 hover:text-danger hover:shadow-[0_0_15px_rgba(255,86,86,0.2)]"
-              : "bg-neon-purple text-white shadow-[0_0_20px_rgba(127,86,255,0.4)] hover:shadow-[0_0_30px_rgba(127,86,255,0.6)] border border-neon-purple-hover"
+              ? 'bg-[#17171A] text-[#8A8A96] border-[#222226] hover:border-[#2A2A30] hover:text-[#EEEFF2]'
+              : 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600'
           )}
         >
           {connected ? (
             <>
-              <div className="absolute inset-0 bg-lime-green/5 group-hover:bg-danger/10 transition-colors" />
-              <div className="relative flex items-center justify-center w-2 h-2 group-hover:hidden">
-                <div className="absolute w-full h-full rounded-full bg-lime-green animate-ping opacity-75" />
-                <div className="relative w-1.5 h-1.5 rounded-full bg-lime-green" />
-              </div>
-              <span className="relative font-mono group-hover:hidden">{shortenAddress(publicKey?.toBase58())}</span>
-              <span className="relative hidden group-hover:inline">Disconnect</span>
-              <LogOut size={14} className="relative ml-1 hidden group-hover:block drop-shadow-[0_0_5px_rgba(255,86,86,0.8)]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+              <span className="font-mono">{shortenAddress(publicKey?.toBase58())}</span>
+              <LogOut size={12} className="text-[#52525E]" />
             </>
           ) : (
             <>
-              <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-              <WalletCards size={16} className="relative drop-shadow-md" />
-              <span className="relative">Uplink Wallet</span>
+              <Wallet size={13} />
+              Connect Wallet
             </>
           )}
         </button>

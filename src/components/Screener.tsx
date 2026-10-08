@@ -1,27 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { Token } from '../types';
-import { formatCurrency, formatNumber, formatAddress, cn } from '../utils';
-import { 
-  Search, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock, 
-  Droplets, 
-  X, 
-  ExternalLink, 
-  ArrowUpDown, 
-  Loader2, 
-  Shield, 
-  ShieldAlert, 
+import { formatCurrency, formatAddress, cn } from '../utils';
+import {
+  Search,
+  TrendingUp,
+  TrendingDown,
+  X,
+  ExternalLink,
+  ArrowUpDown,
+  Loader2,
+  ShieldAlert,
   ShieldCheck,
   Star,
-  Flame,
-  Zap,
-  BarChart2,
   SlidersHorizontal,
-  ChevronDown,
   RefreshCw,
-  Wallet
 } from 'lucide-react';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useRugCheck } from '../hooks/useRugCheck';
@@ -34,84 +26,62 @@ interface ScreenerProps {
   fetchTokenByAddress?: (addr: string) => Promise<Token | null>;
 }
 
-type SortKey = 'price' | 'priceChange24h' | 'priceChange1h' | 'volume24h' | 'liquidity' | 'marketCap' | 'createdAt';
+type SortKey = 'price' | 'priceChange24h' | 'priceChange1h' | 'volume24h' | 'liquidity' | 'marketCap';
 type PresetFilter = 'all' | 'trending' | 'gainers' | 'losers' | 'new' | 'high_volume' | 'micro_cap';
 
-export const Screener: React.FC<ScreenerProps> = ({ 
-  searchQuery, 
-  tokens, 
+const PRESETS: { id: PresetFilter; label: string }[] = [
+  { id: 'all',         label: 'All' },
+  { id: 'trending',    label: 'Trending' },
+  { id: 'gainers',     label: 'Gainers' },
+  { id: 'losers',      label: 'Losers' },
+  { id: 'new',         label: 'New' },
+  { id: 'high_volume', label: 'High Vol' },
+  { id: 'micro_cap',   label: 'Micro Cap' },
+];
+
+export const Screener: React.FC<ScreenerProps> = ({
+  searchQuery,
+  tokens,
   isLoading,
   onSearchChange,
-  fetchTokenByAddress
+  fetchTokenByAddress,
 }) => {
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
-  const [filter, setFilter] = useState<PresetFilter>('all');
-  const [chainFilter, setChainFilter] = useState<string>('solana'); // default to Solana for solpulse
-  const [sortBy, setSortBy] = useState<SortKey>('volume24h');
-  const [sortAsc, setSortAsc] = useState(false);
-  
-  // Custom numeric filters
+  const [filter, setFilter]           = useState<PresetFilter>('all');
+  const [chainFilter, setChainFilter] = useState<string>('solana');
+  const [sortBy, setSortBy]           = useState<SortKey>('volume24h');
+  const [sortAsc, setSortAsc]         = useState(false);
   const [minLiquidity, setMinLiquidity] = useState<number>(0);
-  const [minVolume, setMinVolume] = useState<number>(0);
-  const [showFiltersDrawer, setShowFiltersDrawer] = useState(false);
+  const [minVolume, setMinVolume]       = useState<number>(0);
+  const [showFilters, setShowFilters]   = useState(false);
 
-  // Modal State
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
-  const [modalTab, setModalTab] = useState<'chart' | 'security' | 'bubbles'>('chart');
-  const [addressLookupInput, setAddressLookupInput] = useState('');
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
-  const [lookupError, setLookupError] = useState('');
+  const [modalTab, setModalTab]           = useState<'chart' | 'security' | 'bubbles'>('chart');
+  const [caInput, setCaInput]             = useState('');
+  const [caSearching, setCaSearching]     = useState(false);
+  const [caError, setCaError]             = useState('');
 
   const rugCheck = useRugCheck(selectedToken?.address || null);
 
   const handleSort = (key: SortKey) => {
-    if (sortBy === key) {
-      setSortAsc(prev => !prev);
-    } else {
-      setSortBy(key);
-      setSortAsc(false);
-    }
-  };
-
-  const handleDirectAddressSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!addressLookupInput.trim()) return;
-    setLookupError('');
-    setIsSearchingAddress(true);
-
-    if (fetchTokenByAddress) {
-      const found = await fetchTokenByAddress(addressLookupInput.trim());
-      if (found) {
-        setSelectedToken(found);
-        setAddressLookupInput('');
-      } else {
-        setLookupError('Token address not found on DEXes.');
-      }
-    }
-    setIsSearchingAddress(false);
+    if (sortBy === key) setSortAsc(p => !p);
+    else { setSortBy(key); setSortAsc(false); }
   };
 
   const filteredTokens = useMemo(() => {
     let result = tokens.filter(t => {
-      // Chain filter
       if (chainFilter !== 'all' && t.chainId.toLowerCase() !== chainFilter.toLowerCase()) return false;
-      
-      // Numeric thresholds
       if (minLiquidity > 0 && t.liquidity < minLiquidity) return false;
-      if (minVolume > 0 && t.volume24h < minVolume) return false;
-
-      // Presets
-      if (filter === 'gainers') return t.priceChange24h > 0;
-      if (filter === 'losers') return t.priceChange24h < 0;
-      if (filter === 'new') return Date.now() - t.createdAt < 86400000 * 7; // < 7 days
+      if (minVolume    > 0 && t.volume24h < minVolume)    return false;
+      if (filter === 'gainers')     return t.priceChange24h > 0;
+      if (filter === 'losers')      return t.priceChange24h < 0;
+      if (filter === 'new')         return Date.now() - t.createdAt < 86400000 * 7;
       if (filter === 'high_volume') return t.volume24h >= 100000;
-      if (filter === 'micro_cap') return t.marketCap > 0 && t.marketCap <= 1000000;
-      if (filter === 'trending') return (t.priceChange24h > 5 && t.volume24h > 50000) || t.volume24h > 250000;
-      
+      if (filter === 'micro_cap')   return t.marketCap > 0 && t.marketCap <= 1000000;
+      if (filter === 'trending')    return (t.priceChange24h > 5 && t.volume24h > 50000) || t.volume24h > 250000;
       return true;
     });
 
-    // Apply text search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(t =>
@@ -121,560 +91,504 @@ export const Screener: React.FC<ScreenerProps> = ({
       );
     }
 
-    // Sort
     result.sort((a, b) => {
-      const valA = (a[sortBy] as number) || 0;
-      const valB = (b[sortBy] as number) || 0;
-      return sortAsc ? valA - valB : valB - valA;
+      const vA = (a[sortBy] as number) || 0;
+      const vB = (b[sortBy] as number) || 0;
+      return sortAsc ? vA - vB : vB - vA;
     });
 
     return result;
   }, [tokens, filter, chainFilter, minLiquidity, minVolume, searchQuery, sortBy, sortAsc]);
 
-  const SortHeader = ({ label, field, align = 'right' }: { label: string; field: SortKey; align?: string }) => (
+  const handleCaSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!caInput.trim() || !fetchTokenByAddress) return;
+    setCaError('');
+    setCaSearching(true);
+    const found = await fetchTokenByAddress(caInput.trim());
+    if (found) {
+      setSelectedToken(found);
+      setCaInput('');
+    } else {
+      setCaError('Not found');
+    }
+    setCaSearching(false);
+  };
+
+  const Th = ({ label, field }: { label: string; field: SortKey }) => (
     <th
-      className={cn("px-4 py-3.5 font-bold uppercase tracking-wider cursor-pointer hover:text-white transition-colors select-none text-xs", align === 'right' && 'text-right')}
+      className="px-3 py-2.5 text-right text-[11px] font-medium text-[#52525E] uppercase tracking-wide cursor-pointer hover:text-[#8A8A96] select-none transition-colors whitespace-nowrap"
       onClick={() => handleSort(field)}
     >
-      <span className="inline-flex items-center gap-1">
-        {label}
-        {sortBy === field && (
-          <ArrowUpDown size={12} className={cn("text-neon-purple transition-transform", sortAsc && "rotate-180")} />
-        )}
-      </span>
+      {label}
+      {sortBy === field && (
+        <ArrowUpDown size={10} className={cn('inline ml-1 text-blue-400', sortAsc && 'rotate-180')} />
+      )}
     </th>
   );
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in-up">
-      {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-white/5 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lime-green text-xs font-bold tracking-widest uppercase flex items-center gap-1.5">
-              <Zap size={14} className="text-lime-green" /> Real-Time Screener
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-            DEX Coin Screener
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Scan and filter tokens by liquidity, volume, price momentum, and automated RugCheck security audits.
-          </p>
+    <div className="flex flex-col h-full">
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#222226] bg-[#0A0A0B] flex-wrap">
+        {/* Chain */}
+        <select
+          value={chainFilter}
+          onChange={e => setChainFilter(e.target.value)}
+          className="h-7 px-2 bg-[#17171A] border border-[#222226] rounded-md text-[12px] text-[#EEEFF2] focus:outline-none focus:border-blue-500 cursor-pointer"
+        >
+          <option value="solana">Solana</option>
+          <option value="all">All Chains</option>
+          <option value="base">Base</option>
+          <option value="ethereum">Ethereum</option>
+          <option value="bsc">BSC</option>
+        </select>
+
+        {/* Preset tabs */}
+        <div className="flex items-center gap-0.5 bg-[#17171A] border border-[#222226] rounded-md p-0.5">
+          {PRESETS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setFilter(p.id)}
+              className={cn(
+                'px-2.5 py-1 rounded text-[11.5px] font-medium transition-colors',
+                filter === p.id
+                  ? 'bg-[#1A1A2E] text-blue-400'
+                  : 'text-[#52525E] hover:text-[#8A8A96]'
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
 
-        {/* Direct Contract Address Quick Search */}
-        <form onSubmit={handleDirectAddressSearch} className="flex items-center gap-2 w-full lg:w-auto">
-          <div className="relative flex-1 sm:w-80">
+        {/* Filters toggle */}
+        <button
+          onClick={() => setShowFilters(p => !p)}
+          className={cn(
+            'h-7 flex items-center gap-1.5 px-2.5 rounded-md text-[12px] font-medium transition-colors border',
+            showFilters || minLiquidity > 0 || minVolume > 0
+              ? 'bg-[#1A1A2E] text-blue-400 border-[#222246]'
+              : 'text-[#52525E] border-[#222226] hover:text-[#8A8A96] hover:bg-[#17171A]'
+          )}
+        >
+          <SlidersHorizontal size={12} />
+          Filters
+          {(minLiquidity > 0 || minVolume > 0) && (
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          )}
+        </button>
+
+        {/* CA search */}
+        <form onSubmit={handleCaSearch} className="flex items-center gap-1.5 ml-auto">
+          <div className="relative">
             <input
               type="text"
-              placeholder="Paste CA / Mint Address..."
-              value={addressLookupInput}
-              onChange={(e) => setAddressLookupInput(e.target.value)}
-              className="w-full bg-charcoal-light border border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-gray-500 focus:outline-none focus:border-neon-purple"
+              placeholder="Paste contract address..."
+              value={caInput}
+              onChange={e => { setCaInput(e.target.value); setCaError(''); }}
+              className="h-7 w-60 px-2.5 bg-[#17171A] border border-[#222226] rounded-md text-[11.5px] font-mono text-[#EEEFF2] placeholder-[#52525E] focus:outline-none focus:border-blue-500 transition-colors"
             />
-            {lookupError && (
-              <span className="absolute -bottom-5 left-0 text-[10px] text-danger">{lookupError}</span>
+            {caError && (
+              <span className="absolute -bottom-4 left-0 text-[10px] text-red-400">{caError}</span>
             )}
           </div>
           <button
             type="submit"
-            disabled={isSearchingAddress}
-            className="px-3.5 py-2 rounded-xl bg-neon-purple/20 hover:bg-neon-purple/30 border border-neon-purple/40 text-neon-purple text-xs font-bold uppercase transition-all flex items-center gap-1 shrink-0"
+            disabled={caSearching}
+            className="h-7 px-2.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
-            {isSearchingAddress ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-            Lookup
+            {caSearching ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+            Look up
           </button>
         </form>
       </div>
 
-      {/* Filter and Presets Toolbar */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Chain Selector */}
+      {/* Filter drawer */}
+      {showFilters && (
+        <div className="flex items-center gap-4 px-4 py-2 border-b border-[#222226] bg-[#111113]">
           <div className="flex items-center gap-2">
+            <label className="text-[11px] text-[#52525E] whitespace-nowrap">Min Liquidity</label>
             <select
-              value={chainFilter}
-              onChange={(e) => setChainFilter(e.target.value)}
-              className="bg-charcoal border border-white/10 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider text-white focus:outline-none focus:border-neon-purple cursor-pointer shadow-inner"
+              value={minLiquidity}
+              onChange={e => setMinLiquidity(Number(e.target.value))}
+              className="h-6 px-2 bg-[#17171A] border border-[#222226] rounded text-[11.5px] text-[#EEEFF2] focus:outline-none focus:border-blue-500"
             >
-              <option value="solana">⚡ Solana</option>
-              <option value="all">🌐 All Chains</option>
-              <option value="base">🔵 Base</option>
-              <option value="ethereum">💎 Ethereum</option>
-              <option value="bsc">🟡 BSC</option>
+              <option value={0}>Any</option>
+              <option value={5000}>$5K+</option>
+              <option value={25000}>$25K+</option>
+              <option value={100000}>$100K+</option>
+              <option value={500000}>$500K+</option>
             </select>
-
-            <button
-              onClick={() => setShowFiltersDrawer(prev => !prev)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border",
-                showFiltersDrawer || minLiquidity > 0 || minVolume > 0
-                  ? "bg-neon-purple/20 text-neon-purple border-neon-purple/40"
-                  : "bg-charcoal text-gray-400 border-white/10 hover:text-white"
-              )}
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] text-[#52525E] whitespace-nowrap">Min Volume 24h</label>
+            <select
+              value={minVolume}
+              onChange={e => setMinVolume(Number(e.target.value))}
+              className="h-6 px-2 bg-[#17171A] border border-[#222226] rounded text-[11.5px] text-[#EEEFF2] focus:outline-none focus:border-blue-500"
             >
-              <SlidersHorizontal size={14} /> Filters
-              {(minLiquidity > 0 || minVolume > 0) && <span className="w-2 h-2 rounded-full bg-lime-green" />}
-            </button>
+              <option value={0}>Any</option>
+              <option value={10000}>$10K+</option>
+              <option value={50000}>$50K+</option>
+              <option value={250000}>$250K+</option>
+              <option value={1000000}>$1M+</option>
+            </select>
           </div>
-
-          {/* Quick Preset Buttons */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-charcoal/80 p-1 rounded-xl border border-white/5">
-            {[
-              { id: 'all', label: 'All Pairs' },
-              { id: 'trending', label: '🔥 Trending' },
-              { id: 'gainers', label: '🚀 Gainers' },
-              { id: 'losers', label: '🩸 Losers' },
-              { id: 'new', label: '✨ New' },
-              { id: 'high_volume', label: '💎 High Vol' },
-              { id: 'micro_cap', label: '🎯 Micro Cap' },
-            ].map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => setFilter(preset.id as PresetFilter)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200",
-                  filter === preset.id
-                    ? "bg-neon-purple text-white shadow-[0_0_12px_rgba(127,86,255,0.4)]"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                )}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={() => { setMinLiquidity(0); setMinVolume(0); setFilter('all'); }}
+            className="text-[11px] text-[#52525E] hover:text-[#8A8A96] transition-colors"
+          >
+            Reset
+          </button>
         </div>
+      )}
 
-        {/* Expandable Numeric Filters Drawer */}
-        {showFiltersDrawer && (
-          <div className="bg-charcoal-light/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up">
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
-                Min Liquidity (USD)
-              </label>
-              <select
-                value={minLiquidity}
-                onChange={(e) => setMinLiquidity(Number(e.target.value))}
-                className="w-full bg-charcoal border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-neon-purple"
-              >
-                <option value={0}>Any Liquidity</option>
-                <option value={5000}>&gt; $5,000</option>
-                <option value={25000}>&gt; $25,000</option>
-                <option value={100000}>&gt; $100,000</option>
-                <option value={500000}>&gt; $500,000</option>
-              </select>
-            </div>
+      {/* Token table */}
+      <div className="flex-1 overflow-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse">
+          <thead className="sticky top-0 bg-[#0A0A0B] z-10">
+            <tr className="border-b border-[#222226]">
+              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-[#52525E] uppercase tracking-wide w-8" />
+              <th className="px-3 py-2.5 text-left text-[11px] font-medium text-[#52525E] uppercase tracking-wide">Token</th>
+              <Th label="Price"     field="price" />
+              <Th label="24h %"     field="priceChange24h" />
+              <Th label="1h %"      field="priceChange1h" />
+              <Th label="Volume 24h" field="volume24h" />
+              <Th label="Liquidity" field="liquidity" />
+              <Th label="Mkt Cap"   field="marketCap" />
+              <th className="px-3 py-2.5 text-right text-[11px] font-medium text-[#52525E] uppercase tracking-wide">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="text-[12.5px] font-mono">
+            {isLoading && tokens.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="py-20 text-center text-[#52525E]">
+                  <Loader2 size={20} className="animate-spin mx-auto mb-2 text-blue-400" />
+                  <p className="font-sans text-[12px]">Loading token data...</p>
+                </td>
+              </tr>
+            ) : filteredTokens.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="py-20 text-center text-[#52525E] font-sans text-[12px]">
+                  No tokens match current filters
+                </td>
+              </tr>
+            ) : (
+              filteredTokens.map(token => {
+                const pos24h = token.priceChange24h >= 0;
+                const pos1h  = (token.priceChange1h || 0) >= 0;
+                const inWatch = isInWatchlist(token.address);
 
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
-                Min 24h Volume (USD)
-              </label>
-              <select
-                value={minVolume}
-                onChange={(e) => setMinVolume(Number(e.target.value))}
-                className="w-full bg-charcoal border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-neon-purple"
-              >
-                <option value={0}>Any Volume</option>
-                <option value={10000}>&gt; $10,000</option>
-                <option value={50000}>&gt; $50,000</option>
-                <option value={250000}>&gt; $250,000</option>
-                <option value={1000000}>&gt; $1,000,000</option>
-              </select>
-            </div>
+                return (
+                  <tr
+                    key={`${token.address}-${token.id}`}
+                    onClick={() => { setSelectedToken(token); setModalTab('chart'); }}
+                    className="border-b border-[#17171A] hover:bg-[#111113] transition-colors cursor-pointer group"
+                  >
+                    {/* Watchlist star */}
+                    <td className="px-3 py-2.5">
+                      <button
+                        onClick={e => { e.stopPropagation(); toggleWatchlist(token.address); }}
+                        className={cn(
+                          'transition-colors',
+                          inWatch ? 'text-yellow-400' : 'text-[#2A2A30] hover:text-[#52525E]'
+                        )}
+                      >
+                        <Star size={13} className={cn(inWatch && 'fill-yellow-400')} />
+                      </button>
+                    </td>
 
-            <div className="sm:col-span-2 flex items-end justify-end gap-2">
-              <button
-                onClick={() => {
-                  setMinLiquidity(0);
-                  setMinVolume(0);
-                  setFilter('all');
-                }}
-                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-xs font-bold uppercase transition-colors"
-              >
-                Reset Filters
-              </button>
-            </div>
-          </div>
+                    {/* Token identity */}
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center overflow-hidden shrink-0">
+                          {token.imageUrl
+                            ? <img src={token.imageUrl} alt={token.symbol} className="w-full h-full object-cover" />
+                            : <span className="text-[11px] font-bold text-[#8A8A96] font-sans">{token.symbol[0]}</span>
+                          }
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-[#EEEFF2] font-sans text-[13px] group-hover:text-white">{token.symbol}</span>
+                            <span className="text-[9px] px-1 py-0.5 rounded bg-[#17171A] text-[#52525E] border border-[#222226] uppercase font-sans">{token.chainId}</span>
+                          </div>
+                          <p className="text-[10.5px] text-[#52525E] font-sans truncate max-w-32">{token.name}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Price */}
+                    <td className="px-3 py-2.5 text-right text-[#EEEFF2] font-semibold">
+                      {formatCurrency(token.price)}
+                    </td>
+
+                    {/* 24h change */}
+                    <td className="px-3 py-2.5 text-right">
+                      <span className={cn(
+                        'inline-flex items-center gap-0.5 text-[11.5px] font-semibold px-1.5 py-0.5 rounded',
+                        pos24h ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
+                      )}>
+                        {pos24h ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                        {pos24h ? '+' : ''}{token.priceChange24h.toFixed(2)}%
+                      </span>
+                    </td>
+
+                    {/* 1h change */}
+                    <td className="px-3 py-2.5 text-right">
+                      {token.priceChange1h !== undefined ? (
+                        <span className={cn(
+                          'text-[11.5px] font-semibold',
+                          pos1h ? 'text-green-400' : 'text-red-400'
+                        )}>
+                          {pos1h ? '+' : ''}{token.priceChange1h.toFixed(2)}%
+                        </span>
+                      ) : <span className="text-[#52525E]">—</span>}
+                    </td>
+
+                    {/* Volume */}
+                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                      {formatCurrency(token.volume24h)}
+                    </td>
+
+                    {/* Liquidity */}
+                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                      {formatCurrency(token.liquidity)}
+                    </td>
+
+                    {/* Mkt cap */}
+                    <td className="px-3 py-2.5 text-right text-[#8A8A96]">
+                      {formatCurrency(token.marketCap)}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-2.5 text-right" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => { setSelectedToken(token); setModalTab('chart'); }}
+                          className="px-2 py-1 rounded bg-[#17171A] hover:bg-[#1E1E22] border border-[#222226] text-[11px] font-sans text-[#8A8A96] hover:text-[#EEEFF2] transition-colors"
+                        >
+                          Chart
+                        </button>
+                        <a
+                          href={`https://jup.ag/swap/SOL-${token.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-[11px] font-sans text-blue-400 transition-colors flex items-center gap-1"
+                        >
+                          Trade <ExternalLink size={9} />
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer count */}
+      <div className="px-4 py-2 border-t border-[#222226] bg-[#0A0A0B] flex items-center gap-3">
+        <span className="text-[11px] text-[#52525E]">
+          {filteredTokens.length} pairs
+          {chainFilter !== 'all' && ` on ${chainFilter}`}
+        </span>
+        {isLoading && (
+          <span className="text-[11px] text-blue-400 flex items-center gap-1">
+            <RefreshCw size={10} className="animate-spin" /> Updating...
+          </span>
         )}
       </div>
 
-      {/* Tokens Table */}
-      <div className="bg-charcoal-light/50 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-charcoal/90 border-b border-white/10 text-gray-400">
-                <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Asset</th>
-                <SortHeader label="Price" field="price" />
-                <SortHeader label="24h Change" field="priceChange24h" />
-                <SortHeader label="1h Change" field="priceChange1h" />
-                <SortHeader label="24h Volume" field="volume24h" />
-                <SortHeader label="Liquidity" field="liquidity" />
-                <SortHeader label="Market Cap" field="marketCap" />
-                <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Quick Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 font-mono text-sm">
-              {isLoading && tokens.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-16 text-center text-gray-400">
-                    <Loader2 size={32} className="animate-spin text-neon-purple mx-auto mb-3" />
-                    <p className="font-sans font-bold text-white">Streaming Live Token Data from DexScreener...</p>
-                    <p className="text-xs text-gray-500 mt-1">Fetching latest liquidity pools &amp; price feeds</p>
-                  </td>
-                </tr>
-              ) : filteredTokens.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-16 text-center text-gray-400">
-                    <p className="font-sans font-bold text-white text-base">No matching tokens found</p>
-                    <p className="text-xs text-gray-500 mt-1">Try relaxing filters or search with contract address</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredTokens.map((token) => {
-                  const isPositive = token.priceChange24h >= 0;
-                  const isPositive1h = (token.priceChange1h || 0) >= 0;
-                  const inWatch = isInWatchlist(token.address);
-
-                  return (
-                    <tr
-                      key={`${token.address}-${token.id}`}
-                      onClick={() => setSelectedToken(token)}
-                      className="hover:bg-white/5 transition-colors cursor-pointer group"
-                    >
-                      {/* Asset Identity */}
-                      <td className="px-4 py-4 font-sans">
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleWatchlist(token.address);
-                            }}
-                            className="p-1 rounded text-gray-600 hover:text-neon-purple transition-colors"
-                            title={inWatch ? "Remove from Watchlist" : "Add to Watchlist"}
-                          >
-                            <Star size={16} className={cn(inWatch && "fill-neon-purple text-neon-purple")} />
-                          </button>
-
-                          <div className="relative w-9 h-9 rounded-full bg-charcoal border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-                            {token.imageUrl ? (
-                              <img src={token.imageUrl} alt={token.symbol} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="font-bold text-xs text-white">{token.symbol[0]}</span>
-                            )}
-                          </div>
-
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white group-hover:text-neon-purple transition-colors">
-                                {token.symbol}
-                              </span>
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-gray-400 border border-white/5 uppercase">
-                                {token.chainId}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500 font-sans truncate max-w-32.5">
-                              {token.name}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Price */}
-                      <td className="px-4 py-4 text-right text-white font-bold">
-                        {formatCurrency(token.price)}
-                      </td>
-
-                      {/* 24h Change */}
-                      <td className="px-4 py-4 text-right">
-                        <span className={cn(
-                          "inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded",
-                          isPositive ? "text-lime-green bg-lime-green/10" : "text-danger bg-danger/10"
-                        )}>
-                          {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                          {isPositive ? '+' : ''}{token.priceChange24h.toFixed(2)}%
-                        </span>
-                      </td>
-
-                      {/* 1h Change */}
-                      <td className="px-4 py-4 text-right text-xs">
-                        {token.priceChange1h !== undefined ? (
-                          <span className={isPositive1h ? "text-lime-green" : "text-danger"}>
-                            {isPositive1h ? '+' : ''}{token.priceChange1h.toFixed(2)}%
-                          </span>
-                        ) : (
-                          <span className="text-gray-500">-</span>
-                        )}
-                      </td>
-
-                      {/* 24h Volume */}
-                      <td className="px-4 py-4 text-right text-gray-300">
-                        {formatCurrency(token.volume24h)}
-                      </td>
-
-                      {/* Liquidity */}
-                      <td className="px-4 py-4 text-right text-gray-300">
-                        {formatCurrency(token.liquidity)}
-                      </td>
-
-                      {/* Market Cap */}
-                      <td className="px-4 py-4 text-right text-gray-300">
-                        {formatCurrency(token.marketCap)}
-                      </td>
-
-                      {/* Quick Actions */}
-                      <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => setSelectedToken(token)}
-                            className="px-2.5 py-1 rounded-lg bg-neon-purple/10 hover:bg-neon-purple/20 text-neon-purple text-xs font-bold font-sans transition-colors"
-                          >
-                            Chart
-                          </button>
-                          <a
-                            href={`https://jup.ag/swap/SOL-${token.address}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 rounded-lg bg-lime-green/10 hover:bg-lime-green/20 text-lime-green text-xs font-bold font-sans transition-colors flex items-center gap-1"
-                            title="Trade on Jupiter"
-                          >
-                            Trade <ExternalLink size={10} />
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* REAL TOKEN DETAIL MODAL */}
+      {/* TOKEN DETAIL MODAL */}
       {selectedToken && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6"
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedToken(null)}
         >
           <div
-            className="bg-charcoal border border-white/15 rounded-2xl overflow-hidden w-full max-w-5xl shadow-2xl shadow-black/80 flex flex-col max-h-[92vh] animate-fade-in-up"
-            onClick={(e) => e.stopPropagation()}
+            className="bg-[#111113] border border-[#222226] rounded-lg w-full max-w-5xl flex flex-col max-h-[90vh] shadow-2xl"
+            onClick={e => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-white/10 flex flex-wrap items-center justify-between gap-4 bg-black/40">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#222226]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-charcoal-light border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
-                  {selectedToken.imageUrl ? (
-                    <img src={selectedToken.imageUrl} alt={selectedToken.symbol} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="font-bold text-sm text-white">{selectedToken.symbol[0]}</span>
-                  )}
+                <div className="w-8 h-8 rounded-full bg-[#17171A] border border-[#222226] overflow-hidden flex items-center justify-center">
+                  {selectedToken.imageUrl
+                    ? <img src={selectedToken.imageUrl} alt={selectedToken.symbol} className="w-full h-full object-cover" />
+                    : <span className="text-[12px] font-bold text-[#8A8A96]">{selectedToken.symbol[0]}</span>
+                  }
                 </div>
-
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-white">{selectedToken.symbol}</h3>
-                    <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-gray-300 font-mono uppercase">
-                      {selectedToken.chainId}
-                    </span>
+                    <span className="text-[15px] font-bold text-[#EEEFF2]">{selectedToken.symbol}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#17171A] text-[#52525E] border border-[#222226] uppercase">{selectedToken.chainId}</span>
                   </div>
-                  <p className="text-xs text-gray-400 font-mono truncate max-w-xs">
-                    CA: {selectedToken.address}
-                  </p>
+                  <p className="text-[10.5px] text-[#52525E] font-mono">{selectedToken.address}</p>
                 </div>
               </div>
-
-              {/* Action buttons in header */}
               <div className="flex items-center gap-2">
                 <a
                   href={`https://jup.ag/swap/SOL-${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-lime-green/20 hover:bg-lime-green/30 text-lime-green border border-lime-green/40 text-xs font-bold uppercase transition-all flex items-center gap-1.5"
+                  className="h-7 px-3 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium flex items-center gap-1.5 transition-colors"
                 >
-                  Swap Jupiter <ExternalLink size={12} />
+                  Swap <ExternalLink size={11} />
                 </a>
-
                 <a
                   href={`https://solscan.io/token/${selectedToken.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs font-mono transition-all flex items-center gap-1.5"
+                  className="h-7 px-3 rounded-md bg-[#17171A] border border-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] text-[12px] font-medium flex items-center gap-1.5 transition-colors"
                 >
-                  Solscan <ExternalLink size={12} />
+                  Solscan <ExternalLink size={11} />
                 </a>
-
                 <button
                   onClick={() => setSelectedToken(null)}
-                  className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 ml-2"
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-[#52525E] hover:text-[#8A8A96] hover:bg-[#17171A] transition-colors"
                 >
-                  <X size={20} />
+                  <X size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Quick Metrics Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-charcoal-light/40 border-b border-white/5 font-mono text-xs">
-              <div className="p-2.5 rounded-lg bg-charcoal/60 border border-white/5">
-                <span className="text-gray-500 uppercase text-[10px] block">Price</span>
-                <span className="text-base font-bold text-white">{formatCurrency(selectedToken.price)}</span>
-              </div>
-              <div className="p-2.5 rounded-lg bg-charcoal/60 border border-white/5">
-                <span className="text-gray-500 uppercase text-[10px] block">24h Change</span>
-                <span className={cn("text-base font-bold", selectedToken.priceChange24h >= 0 ? "text-lime-green" : "text-danger")}>
-                  {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(2)}%
-                </span>
-              </div>
-              <div className="p-2.5 rounded-lg bg-charcoal/60 border border-white/5">
-                <span className="text-gray-500 uppercase text-[10px] block">Liquidity</span>
-                <span className="text-base font-bold text-white">{formatCurrency(selectedToken.liquidity)}</span>
-              </div>
-              <div className="p-2.5 rounded-lg bg-charcoal/60 border border-white/5">
-                <span className="text-gray-500 uppercase text-[10px] block">Market Cap</span>
-                <span className="text-base font-bold text-white">{formatCurrency(selectedToken.marketCap)}</span>
-              </div>
+            {/* Metrics strip */}
+            <div className="grid grid-cols-4 border-b border-[#222226]">
+              {[
+                { label: 'Price',      value: formatCurrency(selectedToken.price), colored: false },
+                { label: '24h Change', value: `${selectedToken.priceChange24h >= 0 ? '+' : ''}${selectedToken.priceChange24h.toFixed(2)}%`, colored: true, positive: selectedToken.priceChange24h >= 0 },
+                { label: 'Liquidity',  value: formatCurrency(selectedToken.liquidity), colored: false },
+                { label: 'Market Cap', value: formatCurrency(selectedToken.marketCap), colored: false },
+              ].map(m => (
+                <div key={m.label} className="px-4 py-2.5 border-r border-[#222226] last:border-0">
+                  <p className="text-[10px] text-[#52525E] uppercase tracking-wide mb-0.5">{m.label}</p>
+                  <p className={cn(
+                    'text-[14px] font-bold font-mono',
+                    m.colored
+                      ? (m.positive ? 'text-green-400' : 'text-red-400')
+                      : 'text-[#EEEFF2]'
+                  )}>
+                    {m.value}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            {/* Tabs (Chart / RugCheck Security / Bubblemaps) */}
-            <div className="flex border-b border-white/10 px-4 bg-charcoal">
-              <button
-                onClick={() => setModalTab('chart')}
-                className={cn(
-                  "py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all",
-                  modalTab === 'chart'
-                    ? "border-neon-purple text-white text-shadow"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
-                )}
-              >
-                📊 Live TradingView Chart
-              </button>
-              <button
-                onClick={() => setModalTab('security')}
-                className={cn(
-                  "py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-1.5",
-                  modalTab === 'security'
-                    ? "border-neon-purple text-white text-shadow"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
-                )}
-              >
-                🛡️ RugCheck Audit
-                {rugCheck.data && (
-                  <span className={cn(
-                    "w-2 h-2 rounded-full",
-                    rugCheck.data.isSafe ? "bg-lime-green" : "bg-danger"
-                  )} />
-                )}
-              </button>
-              <button
-                onClick={() => setModalTab('bubbles')}
-                className={cn(
-                  "py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all",
-                  modalTab === 'bubbles'
-                    ? "border-neon-purple text-white text-shadow"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
-                )}
-              >
-                🫧 Bubblemaps Clusters
-              </button>
+            {/* Tabs */}
+            <div className="flex border-b border-[#222226]">
+              {[
+                { id: 'chart',    label: 'Chart' },
+                { id: 'security', label: 'RugCheck' },
+                { id: 'bubbles',  label: 'Bubblemaps' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setModalTab(t.id as any)}
+                  className={cn(
+                    'px-4 py-2.5 text-[12px] font-medium border-b-2 transition-colors',
+                    modalTab === t.id
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-[#52525E] hover:text-[#8A8A96]'
+                  )}
+                >
+                  {t.label}
+                  {t.id === 'security' && rugCheck.data && (
+                    <span className={cn(
+                      'ml-1.5 inline-block w-1.5 h-1.5 rounded-full',
+                      rugCheck.data.isSafe ? 'bg-green-400' : 'bg-red-400'
+                    )} />
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* Tab Contents */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-120">
-              {/* TAB 1: REAL DEXSCREENER TRADINGVIEW EMBED */}
+            {/* Tab content */}
+            <div className="flex-1 overflow-auto custom-scrollbar">
+              {/* Chart */}
               {modalTab === 'chart' && (
-                <div className="w-full h-120 rounded-xl overflow-hidden bg-black/60 border border-white/10">
+                <div className="w-full h-120">
                   <iframe
                     src={`https://dexscreener.com/${selectedToken.chainId}/${selectedToken.pairAddress || selectedToken.address}?embed=1&theme=dark&trades=0&info=0`}
-                    title={`Chart for ${selectedToken.symbol}`}
+                    title={`Chart ${selectedToken.symbol}`}
                     className="w-full h-full border-0"
                   />
                 </div>
               )}
 
-              {/* TAB 2: RUGCHECK SECURITY AUDIT */}
+              {/* Security */}
               {modalTab === 'security' && (
-                <div className="space-y-4">
+                <div className="p-4 space-y-3">
                   {rugCheck.isLoading ? (
-                    <div className="p-16 text-center text-gray-400">
-                      <Loader2 size={32} className="animate-spin text-neon-purple mx-auto mb-2" />
-                      <p className="font-bold text-white">Running RugCheck Smart Contract Analysis...</p>
+                    <div className="py-16 text-center text-[#52525E]">
+                      <Loader2 size={20} className="animate-spin mx-auto mb-2 text-blue-400" />
+                      <p className="text-[12px]">Running RugCheck analysis...</p>
                     </div>
                   ) : rugCheck.data ? (
-                    <div className="space-y-4">
-                      {/* Security Header Banner */}
+                    <>
                       <div className={cn(
-                        "p-4 rounded-xl border flex items-center justify-between",
+                        'flex items-center justify-between p-3 rounded-lg border',
                         rugCheck.data.isSafe
-                          ? "bg-lime-green/10 border-lime-green/30 text-lime-green"
-                          : "bg-danger/10 border-danger/30 text-danger"
+                          ? 'bg-green-400/5 border-green-400/20 text-green-400'
+                          : 'bg-red-400/5 border-red-400/20 text-red-400'
                       )}>
-                        <div className="flex items-center gap-3">
-                          {rugCheck.data.isSafe ? <ShieldCheck size={28} /> : <ShieldAlert size={28} />}
+                        <div className="flex items-center gap-2.5">
+                          {rugCheck.data.isSafe ? <ShieldCheck size={18} /> : <ShieldAlert size={18} />}
                           <div>
-                            <h4 className="font-bold text-base">
-                              {rugCheck.data.isSafe ? 'Token Audit: Passed (Low Risk)' : 'Security Warnings Detected!'}
-                            </h4>
-                            <p className="text-xs opacity-80">
-                              {rugCheck.data.isSafe 
-                                ? 'No critical danger flags found in token contract.' 
-                                : 'Contract contains high-risk vulnerabilities or dangerous authorities.'}
+                            <p className="text-[13px] font-semibold">
+                              {rugCheck.data.isSafe ? 'Audit Passed — Low Risk' : 'Warnings Detected'}
+                            </p>
+                            <p className="text-[11px] opacity-70 mt-0.5">
+                              {rugCheck.data.isSafe
+                                ? 'No critical danger flags in contract'
+                                : 'Contract has high-risk flags — trade with caution'}
                             </p>
                           </div>
                         </div>
-
                         <div className="text-right font-mono">
-                          <span className="text-xs uppercase block">Risk Score</span>
-                          <span className="text-2xl font-bold">{rugCheck.data.score}</span>
+                          <p className="text-[10px] opacity-60 uppercase">Risk Score</p>
+                          <p className="text-[22px] font-bold">{rugCheck.data.score}</p>
                         </div>
                       </div>
 
-                      {/* Risks List */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {rugCheck.data.risks?.map((risk, idx) => (
-                          <div 
-                            key={idx} 
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {rugCheck.data.risks?.map((risk, i) => (
+                          <div
+                            key={i}
                             className={cn(
-                              "p-3.5 rounded-xl border text-xs",
-                              risk.level === 'danger' ? "bg-danger/10 border-danger/20 text-danger" :
-                              risk.level === 'warn' ? "bg-amber-500/10 border-amber-500/20 text-amber-300" :
-                              "bg-lime-green/10 border-lime-green/20 text-lime-green"
+                              'p-3 rounded-lg border text-[12px]',
+                              risk.level === 'danger' ? 'bg-red-400/5 border-red-400/20 text-red-400' :
+                              risk.level === 'warn'   ? 'bg-amber-400/5 border-amber-400/20 text-amber-400' :
+                              'bg-green-400/5 border-green-400/20 text-green-400'
                             )}
                           >
-                            <div className="flex items-center justify-between font-bold mb-1">
+                            <div className="flex items-center justify-between font-semibold mb-1">
                               <span>{risk.name}</span>
-                              <span className="uppercase text-[10px] px-1.5 py-0.5 rounded bg-black/30">
-                                {risk.level}
-                              </span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/30 uppercase">{risk.level}</span>
                             </div>
-                            <p className="opacity-90">{risk.description || risk.value}</p>
+                            <p className="opacity-80 text-[11px]">{risk.description || risk.value}</p>
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </>
                   ) : (
-                    <div className="p-12 text-center text-gray-500">
-                      <p>Security report currently unavailable for this token.</p>
-                      <a
-                        href={`https://rugcheck.xyz/tokens/${selectedToken.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-neon-purple hover:underline text-xs mt-2 inline-block"
-                      >
-                        Inspect directly on RugCheck.xyz &rarr;
+                    <div className="py-12 text-center text-[#52525E] text-[12px]">
+                      <p>Report unavailable.</p>
+                      <a href={`https://rugcheck.xyz/tokens/${selectedToken.address}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline mt-1 inline-block">
+                        View on RugCheck.xyz →
                       </a>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* TAB 3: BUBBLEMAPS CLUSTERS */}
+              {/* Bubblemaps */}
               {modalTab === 'bubbles' && (
-                <div className="w-full h-120 rounded-xl overflow-hidden bg-black/60 border border-white/10">
+                <div className="w-full h-120">
                   <iframe
                     src={`https://app.bubblemaps.io/sol/token/${selectedToken.address}?embed=true`}
-                    title={`Bubblemaps for ${selectedToken.symbol}`}
+                    title={`Bubblemaps ${selectedToken.symbol}`}
                     className="w-full h-full border-0"
                     allow="clipboard-write"
                   />

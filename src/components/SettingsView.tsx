@@ -1,73 +1,139 @@
-import React from 'react';
-import { Save, Wallet, Shield, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Save, Shield, Zap, Server, Bell, Check } from 'lucide-react';
 import { cn } from '../utils';
 
 export const SettingsView: React.FC = () => {
+  const [saved, setSaved] = useState(false);
+  const [selectedRpc, setSelectedRpc] = useState(
+    import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com'
+  );
+  const [wsUrl, setWsUrl] = useState(
+    (import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com').replace('http', 'ws')
+  );
+  const [whaleAlertsEnabled, setWhaleAlertsEnabled] = useState(true);
+  const [autoDisconnect, setAutoDisconnect] = useState(false);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   return (
-    <div className="p-6 max-w-4xl mx-auto w-full animate-[fadeIn_300ms_ease-out]">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">Settings</h2>
-        <p className="text-gray-400">Manage your SolPulse preferences and RPC connections.</p>
+    <div className="flex flex-col h-full bg-[#0A0A0B] overflow-y-auto custom-scrollbar">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[#222226] bg-[#0A0A0B]">
+        <div>
+          <h1 className="text-[14px] font-bold text-[#EEEFF2] uppercase tracking-wide">System Settings</h1>
+          <p className="text-[11px] text-[#52525E]">Network endpoints, node configuration and notification thresholds</p>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="p-6 max-w-3xl mx-auto w-full space-y-5">
         {/* RPC Settings */}
-        <div className="bg-charcoal-light border border-charcoal-lighter rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Zap className="text-lime-green" size={20} />
-            <h3 className="text-lg font-medium text-white">RPC Connection</h3>
+        <div className="bg-[#111113] border border-[#222226] rounded-lg p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap size={14} className="text-blue-400" />
+            <h2 className="text-[13px] font-bold text-[#EEEFF2] uppercase tracking-wide">Solana RPC Configuration</h2>
           </div>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Solana RPC Endpoint</label>
-              <input 
-                type="text" 
-                defaultValue={import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"}
-                className="w-full bg-charcoal border border-charcoal-lighter rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-purple transition-colors"
+              <label className="block text-[11px] font-medium text-[#8A8A96] mb-1.5 uppercase font-mono">
+                Primary RPC Endpoint
+              </label>
+              <input
+                type="text"
+                value={selectedRpc}
+                onChange={(e) => setSelectedRpc(e.target.value)}
+                className="w-full h-8 px-3 bg-[#17171A] border border-[#222226] rounded text-[12px] font-mono text-[#EEEFF2] focus:outline-none focus:border-blue-500 transition-colors"
               />
+              <div className="flex gap-2 mt-2">
+                {[
+                  { name: 'Publicnode (Default)', url: 'https://solana-rpc.publicnode.com' },
+                  { name: 'Official Mainnet', url: 'https://api.mainnet-beta.solana.com' },
+                ].map(item => (
+                  <button
+                    key={item.url}
+                    type="button"
+                    onClick={() => { setSelectedRpc(item.url); setWsUrl(item.url.replace('http', 'ws')); }}
+                    className={cn(
+                      'text-[10px] font-mono px-2 py-0.5 rounded border transition-colors',
+                      selectedRpc === item.url
+                        ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                        : 'bg-[#17171A] border-[#222226] text-[#52525E] hover:text-[#8A8A96]'
+                    )}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">WebSocket Endpoint</label>
-              <input 
-                type="text" 
-                defaultValue={(import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com").replace('http', 'ws')}
-                className="w-full bg-charcoal border border-charcoal-lighter rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-purple transition-colors"
+              <label className="block text-[11px] font-medium text-[#8A8A96] mb-1.5 uppercase font-mono">
+                WebSocket Endpoint
+              </label>
+              <input
+                type="text"
+                value={wsUrl}
+                onChange={(e) => setWsUrl(e.target.value)}
+                className="w-full h-8 px-3 bg-[#17171A] border border-[#222226] rounded text-[12px] font-mono text-[#EEEFF2] focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
         </div>
 
-        {/* Security Settings */}
-        <div className="bg-charcoal-light border border-charcoal-lighter rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Shield className="text-neon-purple" size={20} />
-            <h3 className="text-lg font-medium text-white">Security & Alerts</h3>
+        {/* Security & Alerts */}
+        <div className="bg-[#111113] border border-[#222226] rounded-lg p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield size={14} className="text-blue-400" />
+            <h2 className="text-[13px] font-bold text-[#EEEFF2] uppercase tracking-wide">Security & Subscriptions</h2>
           </div>
-          
-          <div className="space-y-4">
-            <label className="flex items-center justify-between p-3 border border-charcoal-lighter rounded-lg cursor-pointer hover:bg-charcoal/50 transition-colors">
+
+          <div className="space-y-3">
+            <label className="flex items-center justify-between p-3 bg-[#17171A] border border-[#222226] rounded cursor-pointer hover:border-[#2E2E34] transition-colors">
               <div>
-                <div className="text-white font-medium text-sm">Whale Watcher Alerts</div>
-                <div className="text-gray-500 text-xs mt-0.5">Receive push notifications for &gt;$1M transactions</div>
+                <div className="text-[12.5px] font-medium text-[#EEEFF2]">Whale Movement Push Alerts</div>
+                <div className="text-[11px] text-[#52525E]">Notify in UI when monitored whales execute orders &gt; $50,000</div>
               </div>
-              <input type="checkbox" className="accent-neon-purple w-4 h-4" defaultChecked />
+              <input
+                type="checkbox"
+                checked={whaleAlertsEnabled}
+                onChange={(e) => setWhaleAlertsEnabled(e.target.checked)}
+                className="w-4 h-4 rounded bg-[#111113] border-[#222226] text-blue-500 focus:ring-0"
+              />
             </label>
 
-            <label className="flex items-center justify-between p-3 border border-charcoal-lighter rounded-lg cursor-pointer hover:bg-charcoal/50 transition-colors">
+            <label className="flex items-center justify-between p-3 bg-[#17171A] border border-[#222226] rounded cursor-pointer hover:border-[#2E2E34] transition-colors">
               <div>
-                <div className="text-white font-medium text-sm">Auto-Disconnect Wallet</div>
-                <div className="text-gray-500 text-xs mt-0.5">Disconnect wallet after 30 minutes of inactivity</div>
+                <div className="text-[12.5px] font-medium text-[#EEEFF2]">Automatic Wallet Timeout</div>
+                <div className="text-[11px] text-[#52525E]">Safely disconnect hardware/extension wallet after 30m idle</div>
               </div>
-              <input type="checkbox" className="accent-neon-purple w-4 h-4" />
+              <input
+                type="checkbox"
+                checked={autoDisconnect}
+                onChange={(e) => setAutoDisconnect(e.target.checked)}
+                className="w-4 h-4 rounded bg-[#111113] border-[#222226] text-blue-500 focus:ring-0"
+              />
             </label>
           </div>
         </div>
 
-        <div className="flex justify-end pt-4">
-          <button className="bg-neon-purple hover:bg-neon-purple-hover text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-[0_0_15px_rgba(127,86,255,0.2)] flex items-center gap-2">
-            <Save size={16} />
-            Save Preferences
+        {/* Save button */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleSave}
+            className="h-8 px-4 rounded bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium flex items-center gap-1.5 transition-colors"
+          >
+            {saved ? (
+              <>
+                <Check size={13} className="text-white" /> Settings Saved
+              </>
+            ) : (
+              <>
+                <Save size={13} /> Save Preferences
+              </>
+            )}
           </button>
         </div>
       </div>

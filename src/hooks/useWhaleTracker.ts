@@ -75,10 +75,29 @@ export const useWhaleTracker = (solPrice: number = 145) => {
   const [whaleAlerts, setWhaleAlerts] = useState<WhaleAlert[]>([]);
   const [isAlertsLoading, setIsAlertsLoading] = useState(false);
 
-  // Initialize Solana Connection
-  const getConnection = useCallback(() => {
-    const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
-    return new Connection(rpcUrl, 'confirmed');
+  const trackedWhalesRef = useRef(trackedWhales);
+  useEffect(() => {
+    trackedWhalesRef.current = trackedWhales;
+  }, [trackedWhales]);
+
+  // Robust RPC caller with multi-endpoint fallback
+  const runRpc = useCallback(async <T>(fn: (conn: Connection) => Promise<T>): Promise<T> => {
+    const endpoints = [
+      'https://solana-rpc.publicnode.com',
+      import.meta.env.VITE_SOLANA_RPC_URL,
+      'https://api.mainnet-beta.solana.com'
+    ].filter(Boolean) as string[];
+
+    let lastError: any = null;
+    for (const url of endpoints) {
+      try {
+        const conn = new Connection(url, 'confirmed');
+        return await fn(conn);
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError || new Error('All Solana RPC endpoints failed');
   }, []);
 
   // Save whales to localStorage
@@ -94,13 +113,18 @@ export const useWhaleTracker = (solPrice: number = 145) => {
   const fetchSelectedWhaleDetails = useCallback(async (addr: string) => {
     setWhaleDetails(prev => ({ ...prev, isLoading: true, error: null }));
     try {
-      const conn = getConnection();
       const pubkey = new PublicKey(addr);
 
-      // Fetch balance and signatures in parallel
+      // Fetch balance and signatures in parallel with RPC fallback
       const [lamports, signatures] = await Promise.all([
-        conn.getBalance(pubkey).catch(() => 0),
-        conn.getSignaturesForAddress(pubkey, { limit: 20 }).catch(() => [])
+        runRpc(conn => conn.getBalance(pubkey)).catch(err => {
+          console.warn('Balance RPC warning:', err);
+          return 0;
+        }),
+        runRpc(conn => conn.getSignaturesForAddress(pubkey, { limit: 20 })).catch(err => {
+          console.warn('Signatures RPC warning:', err);
+          return [];
+        })
       ]);
 
       const solBalance = lamports / LAMPORTS_PER_SOL;
@@ -112,7 +136,7 @@ export const useWhaleTracker = (solPrice: number = 145) => {
           id: sig.signature,
           signature: sig.signature,
           walletAddress: addr,
-          walletLabel: trackedWhales.find(w => w.address === addr)?.label,
+          walletLabel: trackedWhalesRef.current.find(w => w.address === addr)?.label,
           timestamp: sig.blockTime ? sig.blockTime * 1000 : Date.now(),
           status: isFailed ? 'failed' : 'success',
           type: 'dex_swap',
@@ -150,31 +174,28 @@ export const useWhaleTracker = (solPrice: number = 145) => {
         error: err.message || 'Failed to query Solana blockchain'
       }));
     }
-  }, [getConnection, solPrice, trackedWhales]);
+  }, [runRpc, solPrice]);
 
   // When selected whale changes or solPrice updates, load details
   useEffect(() => {
     if (selectedWhaleAddress) {
       fetchSelectedWhaleDetails(selectedWhaleAddress);
     }
-  }, [selectedWhaleAddress, solPrice]);
+  }, [selectedWhaleAddress, fetchSelectedWhaleDetails]);
 
   // Fetch alerts aggregated from all tracked whales
   const refreshWhaleAlerts = useCallback(async () => {
     setIsAlertsLoading(true);
     try {
-      const conn = getConnection();
       const allAlerts: WhaleAlert[] = [];
+      const topWhales = trackedWhalesRef.current.slice(0, 5);
 
-      // Query latest 3 signatures for each of the top tracked whales
-      const topWhales = trackedWhales.slice(0, 5);
       const promises = topWhales.map(async (whale) => {
         try {
           const pubkey = new PublicKey(whale.address);
-          const sigs = await conn.getSignaturesForAddress(pubkey, { limit: 3 });
+          const sigs = await runRpc(conn => conn.getSignaturesForAddress(pubkey, { limit: 3 }));
           return sigs.map((sig, idx) => {
             const isBuy = (sig.slot % 2 === 0);
-            // Derive a realistic volume amount based on transaction activity
             const estimatedUsd = Math.max(15000, ((sig.slot % 850) + 50) * 120);
 
             return {
@@ -211,7 +232,7 @@ export const useWhaleTracker = (solPrice: number = 145) => {
     } finally {
       setIsAlertsLoading(false);
     }
-  }, [getConnection, trackedWhales]);
+  }, [runRpc]);
 
   useEffect(() => {
     refreshWhaleAlerts();

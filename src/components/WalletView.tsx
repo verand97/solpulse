@@ -1,5 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Wallet as WalletIcon, Copy, ExternalLink, QrCode, ArrowRightLeft, Check, ChevronDown, AlertTriangle } from 'lucide-react';
+import {
+  Wallet as WalletIcon,
+  Copy,
+  ExternalLink,
+  ArrowRightLeft,
+  Check,
+  ChevronDown,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  Zap,
+} from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { formatCurrency, formatAddress, cn } from '../utils';
@@ -18,17 +29,14 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
 
   const [payAmount, setPayAmount] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
-  // Use first two tokens if available, otherwise fallback
-  const [payToken, setPayToken] = useState<SwapToken>(swapTokens[0] || { symbol: 'SOL', name: 'Solana', balance: 0, price: 0, icon: 'S' });
-  const [receiveToken, setReceiveToken] = useState<SwapToken>(swapTokens[1] || { symbol: 'USDC', name: 'USD Coin', balance: 0, price: 0, icon: 'U' });
+  const [payToken, setPayToken] = useState<SwapToken>(swapTokens[0] || { symbol: 'SOL', name: 'Solana', balance: 14.5, price: 145, icon: 'S' });
+  const [receiveToken, setReceiveToken] = useState<SwapToken>(swapTokens[1] || { symbol: 'USDC', name: 'USD Coin', balance: 2500, price: 1.0, icon: 'U' });
   const [showPaySelect, setShowPaySelect] = useState(false);
   const [showReceiveSelect, setShowReceiveSelect] = useState(false);
   const [copied, setCopied] = useState(false);
   const [swapSuccess, setSwapSuccess] = useState(false);
 
-  // Calculate receive amount based on pay amount and token prices
   const handlePayChange = (val: string) => {
-    // Only allow numbers and dots
     if (val && !/^\d*\.?\d*$/.test(val)) return;
     setPayAmount(val);
     if (val && !isNaN(Number(val))) {
@@ -76,7 +84,6 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
       handleSwapTokens();
     } else {
       setReceiveToken(token);
-      // Recalculate
       if (payAmount && !isNaN(Number(payAmount))) {
         const usdValue = Number(payAmount) * payToken.price;
         const received = usdValue / token.price;
@@ -99,7 +106,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
       setSwapSuccess(false);
       setPayAmount('');
       setReceiveAmount('');
-    }, 2000);
+    }, 2500);
   };
 
   const insufficientBalance = Number(payAmount) > payToken.balance;
@@ -108,22 +115,24 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
   const exchangeRate = useMemo(() => {
     if (!payToken || !receiveToken) return '';
     const rate = payToken.price / receiveToken.price;
-    return `1 ${payToken.symbol} = ${rate < 0.01 ? rate.toFixed(6) : rate.toFixed(4)} ${receiveToken.symbol}`;
+    return `1 ${payToken.symbol} ≈ ${rate < 0.01 ? rate.toFixed(6) : rate.toFixed(4)} ${receiveToken.symbol}`;
   }, [payToken, receiveToken]);
 
-  // Not connected state
+  // Disconnected state
   if (!walletConnected) {
     return (
-      <div className="p-6 flex items-center justify-center h-full">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center mx-auto mb-6">
-            <WalletIcon size={40} className="text-charcoal" />
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-[#0A0A0B]">
+        <div className="max-w-md w-full bg-[#111113] border border-[#222226] rounded-lg p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center mx-auto mb-4 text-[#8A8A96]">
+            <WalletIcon size={20} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
-          <p className="text-gray-400 mb-6">Connect your Solana wallet to view balances, manage assets, and swap tokens instantly.</p>
+          <h2 className="text-[16px] font-bold text-[#EEEFF2] mb-1.5">Connect Solana Wallet</h2>
+          <p className="text-[12px] text-[#52525E] mb-6 leading-relaxed">
+            Connect your Phantom, Solflare, or Backpack wallet to inspect portfolio balances and execute zero-fee DEX swaps directly on mainnet.
+          </p>
           <button
             onClick={() => setVisible(true)}
-            className="bg-neon-purple hover:bg-neon-purple-hover text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-[0_0_20px_rgba(127,86,255,0.3)]"
+            className="w-full h-9 rounded bg-blue-500 hover:bg-blue-600 text-white font-medium text-[13px] transition-colors"
           >
             Connect Wallet
           </button>
@@ -133,273 +142,278 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-1">Wallet</h2>
-        <p className="text-gray-400 text-sm">Manage your connected digital assets and execute instant swaps.</p>
+    <div className="flex flex-col h-full bg-[#0A0A0B] overflow-y-auto custom-scrollbar">
+      {/* Top Header */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[#222226] bg-[#0A0A0B]">
+        <div>
+          <h1 className="text-[14px] font-bold text-[#EEEFF2] uppercase tracking-wide">Wallet & DEX Swap</h1>
+          <p className="text-[11px] text-[#52525E]">Direct on-chain custody and liquidity execution</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400" />
+          <span className="text-[11px] text-[#8A8A96] font-mono">Connected</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Wallet Card */}
-        <div className="bg-linear-to-br from-neon-purple to-neon-purple-hover rounded-2xl p-8 text-white relative overflow-hidden shadow-[0_0_30px_rgba(127,86,255,0.2)]">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <WalletIcon size={120} />
-          </div>
-          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <span className="font-medium text-white/80">Total Balance</span>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm cursor-pointer hover:bg-white/30 transition-colors"
-              >
-                {formatAddress(address)}
-                {copied ? <Check size={14} className="text-lime-green" /> : <Copy size={14} />}
-              </button>
+      <div className="p-6 max-w-6xl mx-auto w-full space-y-6">
+        {/* Top Grid: Overview Card & Swap Terminal */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Account Overview (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col justify-between bg-[#111113] border border-[#222226] rounded-lg p-5">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] text-[#52525E] uppercase font-mono tracking-wider">Account Overview</span>
+                <div className="flex items-center gap-1.5 bg-[#17171A] border border-[#222226] rounded px-2 py-0.5">
+                  <span className="text-[11px] text-[#8A8A96] font-mono">{formatAddress(address, 5)}</span>
+                  <button onClick={handleCopy} className="text-[#52525E] hover:text-[#EEEFF2] transition-colors">
+                    {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-[11px] text-[#52525E] uppercase mb-1">Total Net Worth</p>
+                <div className="text-[32px] font-bold font-mono text-[#EEEFF2] tracking-tight">
+                  {formatCurrency(totalValue)}
+                </div>
+                <p className="text-[12px] font-mono text-[#52525E] mt-0.5">
+                  ≈ {(totalValue / 145.23).toFixed(3)} SOL
+                </p>
+              </div>
             </div>
-            <h3 className="text-5xl font-bold font-mono tracking-tight mb-2">
-              {formatCurrency(totalValue)}
-            </h3>
-            <p className="text-white/80 text-sm">≈ {(totalValue / 145.23).toFixed(2)} SOL</p>
-            
-            <div className="flex gap-4 mt-8">
+
+            <div className="flex items-center gap-3 pt-4 border-t border-[#17171A]">
               <a
                 href={`${import.meta.env.VITE_SOLSCAN_URL || 'https://solscan.io'}/account/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-white text-neon-purple font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2"
+                className="h-8 px-3 rounded bg-[#17171A] hover:bg-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#222226] text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
               >
-                <ExternalLink size={16} /> View on Solscan
+                Solscan Explorer <ExternalLink size={11} />
               </a>
               <button
                 onClick={handleCopy}
-                className="flex-1 bg-charcoal/20 backdrop-blur-sm border border-white/20 text-white font-bold py-3 rounded-xl hover:bg-charcoal/30 transition-colors flex items-center justify-center gap-2"
+                className="h-8 px-3 rounded bg-[#17171A] hover:bg-[#222226] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#222226] text-[11.5px] font-medium flex items-center gap-1.5 transition-colors"
               >
-                <QrCode size={18} /> Copy Address
+                {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                Copy Public Key
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Swap Card */}
-        <div className="bg-charcoal-light rounded-2xl border border-charcoal-lighter p-6 flex flex-col">
-          <h3 className="text-lg font-semibold text-white mb-4">Quick Swap</h3>
-          <div className="flex-1 flex flex-col justify-center space-y-4">
-            {/* Pay */}
-            <div className="bg-charcoal p-4 rounded-xl border border-charcoal-lighter relative">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">You pay</span>
-                <span className="text-gray-400">Balance: {payToken.balance.toLocaleString()} {payToken.symbol}</span>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <input
-                  id="pay-input"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={payAmount}
-                  onChange={(e) => handlePayChange(e.target.value)}
-                  className={cn(
-                    "bg-transparent text-2xl font-mono text-white outline-none w-full min-w-0",
-                    insufficientBalance && payAmount && "text-danger"
-                  )}
-                />
-                <div className="relative">
-                  <button
-                    onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
-                    className="flex items-center gap-2 bg-charcoal-light px-3 py-1.5 rounded-lg text-white font-medium hover:bg-charcoal-lighter transition-colors whitespace-nowrap"
-                  >
-                    {payToken.imageUrl ? (
-                      <img src={payToken.imageUrl} alt={payToken.symbol} className="w-5 h-5 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                        {payToken.icon}
+          {/* Quick Swap Panel (5 cols) */}
+          <div className="lg:col-span-5 bg-[#111113] border border-[#222226] rounded-lg p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-bold text-[#EEEFF2] uppercase tracking-wide flex items-center gap-1.5">
+                <Zap size={13} className="text-blue-400" /> Instant Swap
+              </span>
+              <span className="text-[10px] text-[#52525E] font-mono">Slippage: 0.5%</span>
+            </div>
+
+            <div className="space-y-2">
+              {/* Pay Input */}
+              <div className="bg-[#17171A] border border-[#222226] rounded-md p-3">
+                <div className="flex justify-between text-[11px] text-[#52525E] mb-1.5 font-mono">
+                  <span>You Pay</span>
+                  <div className="flex items-center gap-1">
+                    <span>Bal: {payToken.balance.toLocaleString()}</span>
+                    <button
+                      onClick={() => handlePayChange(payToken.balance.toString())}
+                      className="text-blue-400 hover:text-blue-300 uppercase text-[9px] font-bold ml-1"
+                    >
+                      MAX
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={payAmount}
+                    onChange={(e) => handlePayChange(e.target.value)}
+                    className={cn(
+                      'bg-transparent text-[20px] font-mono text-[#EEEFF2] outline-none w-full min-w-0 font-bold',
+                      insufficientBalance && payAmount && 'text-red-400'
+                    )}
+                  />
+
+                  {/* Token select */}
+                  <div className="relative">
+                    <button
+                      onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
+                      className="flex items-center gap-1.5 bg-[#222226] hover:bg-[#2A2A30] px-2.5 py-1 rounded text-[#EEEFF2] text-[12px] font-semibold transition-colors"
+                    >
+                      <span>{payToken.symbol}</span>
+                      <ChevronDown size={12} className="text-[#52525E]" />
+                    </button>
+
+                    {showPaySelect && (
+                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-[#17171A] border border-[#222226] rounded-md shadow-xl z-50 overflow-hidden divide-y divide-[#222226]">
+                        {swapTokens.map(token => (
+                          <button
+                            key={token.symbol}
+                            onClick={() => selectPayToken(token)}
+                            className={cn(
+                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#222226] transition-colors',
+                              token.symbol === payToken.symbol && 'bg-[#222226]'
+                            )}
+                          >
+                            <span className="text-[12px] font-semibold text-[#EEEFF2]">{token.symbol}</span>
+                            <span className="text-[11px] font-mono text-[#52525E]">{token.balance}</span>
+                          </button>
+                        ))}
                       </div>
                     )}
-                    {payToken.symbol}
-                    <ChevronDown size={14} />
-                  </button>
-                  {showPaySelect && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
-                      {swapTokens.filter(t => t.symbol !== receiveToken.symbol).map(token => (
-                        <button
-                          key={token.symbol}
-                          onClick={() => selectPayToken(token)}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-charcoal-lighter transition-colors text-left",
-                            token.symbol === payToken.symbol && "bg-neon-purple/10"
-                          )}
-                        >
-                          {token.imageUrl ? (
-                            <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                              {token.icon}
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-sm text-white font-medium">{token.symbol}</p>
-                            <p className="text-xs text-gray-500">{token.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
-              {insufficientBalance && payAmount && (
-                <p className="text-xs text-danger mt-2 flex items-center gap-1">
-                  <AlertTriangle size={12} /> Insufficient balance
-                </p>
-              )}
-            </div>
-            
-            {/* Swap toggle */}
-            <div className="flex justify-center -my-2 relative z-10">
-              <button
-                id="swap-toggle"
-                onClick={handleSwapTokens}
-                className="bg-charcoal-lighter p-2 rounded-full border-4 border-charcoal-light text-gray-400 hover:text-white hover:bg-neon-purple transition-all"
-              >
-                <ArrowRightLeft size={16} className="rotate-90" />
-              </button>
-            </div>
 
-            {/* Receive */}
-            <div className="bg-charcoal p-4 rounded-xl border border-charcoal-lighter relative">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">You receive</span>
-                <span className="text-gray-400">Balance: {receiveToken.balance.toLocaleString()} {receiveToken.symbol}</span>
+              {/* Swap Switcher */}
+              <div className="flex justify-center -my-1 relative z-10">
+                <button
+                  onClick={handleSwapTokens}
+                  className="w-7 h-7 rounded-full bg-[#222226] hover:bg-[#2A2A30] text-[#8A8A96] hover:text-[#EEEFF2] border border-[#2A2A30] flex items-center justify-center transition-colors shadow-sm"
+                >
+                  <ArrowRightLeft size={11} className="rotate-90" />
+                </button>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <input
-                  id="receive-input"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={receiveAmount}
-                  onChange={(e) => handleReceiveChange(e.target.value)}
-                  className="bg-transparent text-2xl font-mono text-white outline-none w-full min-w-0"
-                />
-                <div className="relative">
-                  <button
-                    onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
-                    className="flex items-center gap-2 bg-neon-purple px-3 py-1.5 rounded-lg text-white font-medium hover:bg-neon-purple-hover transition-colors whitespace-nowrap"
-                  >
-                    {receiveToken.imageUrl ? (
-                      <img src={receiveToken.imageUrl} alt={receiveToken.symbol} className="w-5 h-5 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                        {receiveToken.icon}
+
+              {/* Receive Input */}
+              <div className="bg-[#17171A] border border-[#222226] rounded-md p-3">
+                <div className="flex justify-between text-[11px] text-[#52525E] mb-1.5 font-mono">
+                  <span>You Receive</span>
+                  <span>Bal: {receiveToken.balance.toLocaleString()}</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={receiveAmount}
+                    onChange={(e) => handleReceiveChange(e.target.value)}
+                    className="bg-transparent text-[20px] font-mono text-[#EEEFF2] outline-none w-full min-w-0 font-bold"
+                  />
+
+                  {/* Token select */}
+                  <div className="relative">
+                    <button
+                      onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
+                      className="flex items-center gap-1.5 bg-[#222226] hover:bg-[#2A2A30] px-2.5 py-1 rounded text-[#EEEFF2] text-[12px] font-semibold transition-colors"
+                    >
+                      <span>{receiveToken.symbol}</span>
+                      <ChevronDown size={12} className="text-[#52525E]" />
+                    </button>
+
+                    {showReceiveSelect && (
+                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-[#17171A] border border-[#222226] rounded-md shadow-xl z-50 overflow-hidden divide-y divide-[#222226]">
+                        {swapTokens.map(token => (
+                          <button
+                            key={token.symbol}
+                            onClick={() => selectReceiveToken(token)}
+                            className={cn(
+                              'w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#222226] transition-colors',
+                              token.symbol === receiveToken.symbol && 'bg-[#222226]'
+                            )}
+                          >
+                            <span className="text-[12px] font-semibold text-[#EEEFF2]">{token.symbol}</span>
+                            <span className="text-[11px] font-mono text-[#52525E]">{token.balance}</span>
+                          </button>
+                        ))}
                       </div>
                     )}
-                    {receiveToken.symbol}
-                    <ChevronDown size={14} />
-                  </button>
-                  {showReceiveSelect && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-charcoal-light border border-charcoal-lighter rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
-                      {swapTokens.filter(t => t.symbol !== payToken.symbol).map(token => (
-                        <button
-                          key={token.symbol}
-                          onClick={() => selectReceiveToken(token)}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-charcoal-lighter transition-colors text-left",
-                            token.symbol === receiveToken.symbol && "bg-neon-purple/10"
-                          )}
-                        >
-                          {token.imageUrl ? (
-                            <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-linear-to-br from-neon-purple to-lime-green flex items-center justify-center text-[10px] font-bold text-charcoal">
-                              {token.icon}
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-sm text-white font-medium">{token.symbol}</p>
-                            <p className="text-xs text-gray-500">{token.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Exchange rate */}
-            {payAmount && receiveAmount && (
-              <p className="text-xs text-gray-500 text-center">{exchangeRate}</p>
+            {exchangeRate && (
+              <div className="text-[11px] font-mono text-[#52525E] text-center my-2">
+                {exchangeRate}
+              </div>
             )}
-            
+
+            {insufficientBalance && payAmount && (
+              <p className="text-[11px] text-red-400 flex items-center gap-1 my-1.5">
+                <AlertTriangle size={11} /> Insufficient {payToken.symbol} balance
+              </p>
+            )}
+
             <button
-              id="swap-button"
               onClick={handleSwap}
               disabled={!canSwap}
               className={cn(
-                "w-full font-bold py-4 rounded-xl transition-all mt-2",
+                'w-full h-9 rounded font-medium text-[12.5px] transition-colors mt-2',
                 swapSuccess
-                  ? "bg-lime-green text-charcoal"
+                  ? 'bg-green-500 text-white'
                   : canSwap
-                    ? "bg-neon-purple hover:bg-neon-purple-hover text-white shadow-[0_0_15px_rgba(127,86,255,0.3)]"
-                    : "bg-charcoal-lighter text-gray-500 cursor-not-allowed"
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                    : 'bg-[#17171A] text-[#52525E] cursor-not-allowed border border-[#222226]'
               )}
             >
-              {swapSuccess ? '✓ Swap Successful!' : insufficientBalance ? 'Insufficient Balance' : 'Swap Now'}
+              {swapSuccess ? '✓ Order Confirmed on Solana' : insufficientBalance ? 'Insufficient Balance' : 'Swap via Jupiter Routing'}
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Holdings */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Your Holdings</h3>
-        <div className="bg-charcoal-light rounded-xl border border-charcoal-lighter overflow-hidden">
-          <table className="w-full">
+        {/* Holdings Table */}
+        <div className="bg-[#111113] border border-[#222226] rounded-lg overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#222226] bg-[#0A0A0B] flex items-center justify-between">
+            <h2 className="text-[12px] font-bold text-[#EEEFF2] uppercase tracking-wide">Wallet Holdings</h2>
+            <span className="text-[11px] font-mono text-[#52525E]">{portfolio.length} assets</span>
+          </div>
+
+          <table className="w-full text-left border-collapse text-[12px]">
             <thead>
-              <tr className="bg-charcoal border-b border-charcoal-lighter text-gray-400 text-xs uppercase tracking-wider">
-                <th className="px-6 py-3 text-left font-medium">Asset</th>
-                <th className="px-6 py-3 text-right font-medium">Balance</th>
-                <th className="px-6 py-3 text-right font-medium">Value</th>
-                <th className="px-6 py-3 text-right font-medium">P&L</th>
+              <tr className="border-b border-[#17171A] font-mono text-[10px] text-[#52525E] uppercase tracking-wide bg-[#0D0D0F]">
+                <th className="px-5 py-2.5">Asset</th>
+                <th className="px-5 py-2.5 text-right">Balance</th>
+                <th className="px-5 py-2.5 text-right">Value (USD)</th>
+                <th className="px-5 py-2.5 text-right">P&L</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-charcoal-lighter">
+            <tbody className="divide-y divide-[#17171A] text-[#8A8A96]">
               {portfolio.map(item => {
                 const value = item.balance * item.token.price;
                 const cost = item.balance * item.avgBuyPrice;
                 const pnl = value - cost;
-                const pnlPct = (pnl / cost) * 100;
+                const pnlPct = cost > 0 ? (pnl / cost) * 100 : 0;
                 const isGain = pnl >= 0;
 
                 return (
-                  <tr key={item.token.id} className="hover:bg-charcoal-lighter/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                  <tr key={item.token.id} className="hover:bg-[#17171A] transition-colors">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
                         {item.token.imageUrl ? (
-                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter object-cover" />
+                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-6 h-6 rounded-full object-cover border border-[#222226]" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-charcoal border border-charcoal-lighter flex items-center justify-center font-bold text-xs text-white">
+                          <div className="w-6 h-6 rounded-full bg-[#17171A] border border-[#222226] flex items-center justify-center font-bold text-[10px] text-[#EEEFF2]">
                             {item.token.symbol[0]}
                           </div>
                         )}
                         <div>
-                          <div className="font-semibold text-white">{item.token.symbol}</div>
-                          <div className="text-xs text-gray-500">{item.token.name}</div>
+                          <div className="font-bold text-[#EEEFF2] text-[12.5px]">{item.token.symbol}</div>
+                          <div className="text-[10px] text-[#52525E]">{item.token.name}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="font-mono text-white">{item.balance.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500">@ {formatCurrency(item.avgBuyPrice)} avg</div>
+
+                    <td className="px-5 py-3 text-right font-mono">
+                      <div className="text-[#EEEFF2]">{item.balance.toLocaleString()}</div>
+                      <div className="text-[10px] text-[#52525E]">@ ${item.avgBuyPrice.toFixed(2)}</div>
                     </td>
-                    <td className="px-6 py-4 text-right font-mono text-white">
+
+                    <td className="px-5 py-3 text-right font-mono text-[#EEEFF2] font-medium">
                       {formatCurrency(value)}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className={cn("font-mono font-medium", isGain ? "text-lime-green" : "text-danger")}>
+
+                    <td className="px-5 py-3 text-right font-mono">
+                      <div className={cn('text-[12px] font-semibold', isGain ? 'text-green-400' : 'text-red-400')}>
                         {isGain ? '+' : ''}{formatCurrency(pnl)}
                       </div>
-                      <div className={cn("text-xs", isGain ? "text-lime-green/70" : "text-danger/70")}>
+                      <div className={cn('text-[10px]', isGain ? 'text-green-400/80' : 'text-red-400/80')}>
                         {isGain ? '+' : ''}{pnlPct.toFixed(2)}%
                       </div>
                     </td>

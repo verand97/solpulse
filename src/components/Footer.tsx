@@ -1,22 +1,19 @@
 import React from 'react';
+import { cn } from '../utils';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full border-t border-charcoal-lighter bg-charcoal/90 backdrop-blur-md py-4 px-6 flex justify-center z-20">
-      <div className="flex items-center gap-6 sm:gap-10 text-sm font-mono tracking-wide">
-        <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
-          Dokumentasi
-        </a>
-        <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
-          API
-        </a>
-        <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
-          Twitter
-        </a>
-        <div className="flex items-center gap-2 text-lime-green font-bold">
-          <div className="w-2.5 h-2.5 rounded-full bg-lime-green shadow-[0_0_8px_rgba(128,255,86,0.8)] animate-pulse" />
-          Sistem Operasional
-        </div>
+    <footer className="h-8 shrink-0 flex items-center justify-between px-4 border-t border-[#222226] bg-[#0A0A0B]">
+      <div className="flex items-center gap-3">
+        <span className="text-[11px] text-[#52525E]">SolPulse</span>
+        <span className="text-[#1E1E22]">·</span>
+        <a href="#" className="text-[11px] text-[#52525E] hover:text-[#8A8A96] transition-colors">Docs</a>
+        <a href="#" className="text-[11px] text-[#52525E] hover:text-[#8A8A96] transition-colors">API</a>
+        <a href="#" className="text-[11px] text-[#52525E] hover:text-[#8A8A96] transition-colors">Twitter</a>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+        <span className="text-[11px] text-[#52525E]">Solana Mainnet</span>
       </div>
     </footer>
   );

@@ -53,11 +53,7 @@ export default function App() {
       {showLandingPage ? (
         <LandingPage onLaunch={handleEnterTerminal} />
       ) : (
-        <div className="flex h-screen bg-charcoal bg-grid-pattern overflow-hidden selection:bg-neon-purple/30 relative">
-          {/* Background glow effects for the whole app */}
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-purple/5 rounded-full blur-[150px] pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-lime-green/5 rounded-full blur-[150px] pointer-events-none" />
-          
+        <div className="flex h-screen bg-[#0A0A0B] overflow-hidden">
           <Sidebar 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
@@ -66,7 +62,7 @@ export default function App() {
             onOpenLanding={handleOpenLanding}
           />
           
-          <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+          <div className="flex-1 flex flex-col overflow-hidden">
             <Header 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -76,24 +72,38 @@ export default function App() {
               onMarkRead={handleMarkRead}
             />
             
-            <main className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
-              <div className="mx-auto max-w-7xl h-full pb-8">
-                {activeTab === 'dashboard' && <Dashboard portfolio={portfolio} isLoading={isLoading} />}
-                {activeTab === 'screener' && (
-                  <Screener 
-                    searchQuery={searchQuery} 
-                    tokens={tokens} 
-                    isLoading={isLoading} 
-                    onSearchChange={setSearchQuery}
-                    fetchTokenByAddress={fetchTokenByAddress}
-                  />
-                )}
-                {activeTab === 'livescanner' && <LiveScanner />}
-                {activeTab === 'watchlist' && <Watchlist tokens={tokens} />}
-                {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
-                {activeTab === 'wallet' && <WalletView swapTokens={swapTokens} portfolio={portfolio} />}
-                {activeTab === 'settings' && <SettingsView />}
-              </div>
+            <main className="flex-1 overflow-hidden flex flex-col">
+              {activeTab === 'dashboard' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <Dashboard portfolio={portfolio} isLoading={isLoading} />
+                </div>
+              )}
+              {activeTab === 'screener' && (
+                <Screener 
+                  searchQuery={searchQuery} 
+                  tokens={tokens} 
+                  isLoading={isLoading} 
+                  onSearchChange={setSearchQuery}
+                  fetchTokenByAddress={fetchTokenByAddress}
+                />
+              )}
+              {activeTab === 'livescanner' && <LiveScanner />}
+              {activeTab === 'watchlist' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <Watchlist tokens={tokens} />
+                </div>
+              )}
+              {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
+              {activeTab === 'wallet' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <WalletView swapTokens={swapTokens} portfolio={portfolio} />
+                </div>
+              )}
+              {activeTab === 'settings' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <SettingsView />
+                </div>
+              )}
             </main>
             
             <Footer />
