@@ -158,7 +158,7 @@ export const WhaleAlerts: React.FC<WhaleAlertsProps> = ({ tokens }) => {
               <span className="text-xs text-neon-purple font-mono">SOL: ${solPrice.toFixed(2)}</span>
             </div>
 
-            <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="space-y-2.5 max-h-160 overflow-y-auto pr-1 custom-scrollbar">
               {trackedWhales.map((whale) => {
                 const isSelected = whale.address === selectedWhaleAddress;
                 return (

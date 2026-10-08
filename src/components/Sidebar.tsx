@@ -41,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className={cn(
       "bg-charcoal/90 backdrop-blur-xl flex flex-col h-full border-r border-white/5 relative z-10 transition-all duration-300 ease-in-out shrink-0 overflow-visible",
-      collapsed ? "w-[72px]" : "w-64"
+      collapsed ? "w-18" : "w-64"
     )}>
       {/* Edge glow effect */}
       <div className="absolute right-0 top-0 w-px h-full bg-linear-to-b from-transparent via-neon-purple/50 to-transparent pointer-events-none" />

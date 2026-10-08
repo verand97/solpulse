@@ -374,7 +374,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                                 {token.chainId}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 font-sans truncate max-w-[130px]">
+                            <p className="text-xs text-gray-500 font-sans truncate max-w-32.5">
                               {token.name}
                             </p>
                           </div>
@@ -581,10 +581,10 @@ export const Screener: React.FC<ScreenerProps> = ({
             </div>
 
             {/* Tab Contents */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-[480px]">
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-120">
               {/* TAB 1: REAL DEXSCREENER TRADINGVIEW EMBED */}
               {modalTab === 'chart' && (
-                <div className="w-full h-[480px] rounded-xl overflow-hidden bg-black/60 border border-white/10">
+                <div className="w-full h-120 rounded-xl overflow-hidden bg-black/60 border border-white/10">
                   <iframe
                     src={`https://dexscreener.com/${selectedToken.chainId}/${selectedToken.pairAddress || selectedToken.address}?embed=1&theme=dark&trades=0&info=0`}
                     title={`Chart for ${selectedToken.symbol}`}
@@ -671,7 +671,7 @@ export const Screener: React.FC<ScreenerProps> = ({
 
               {/* TAB 3: BUBBLEMAPS CLUSTERS */}
               {modalTab === 'bubbles' && (
-                <div className="w-full h-[480px] rounded-xl overflow-hidden bg-black/60 border border-white/10">
+                <div className="w-full h-120 rounded-xl overflow-hidden bg-black/60 border border-white/10">
                   <iframe
                     src={`https://app.bubblemaps.io/sol/token/${selectedToken.address}?embed=true`}
                     title={`Bubblemaps for ${selectedToken.symbol}`}
