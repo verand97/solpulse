@@ -7,10 +7,10 @@ import unittest
 from unittest.mock import MagicMock
 from pathlib import Path
 
-from ..database.db_manager import DBManager
-from ..collector.new_pairs_listener import NewPairsListener
-from ..collector.snapshot_scheduler import SnapshotScheduler
-from ..backfill.backfill import HistoricalBackfill
+from ml_service.database.db_manager import DBManager
+from ml_service.collector.new_pairs_listener import NewPairsListener
+from ml_service.collector.snapshot_scheduler import SnapshotScheduler
+from ml_service.backfill.backfill import HistoricalBackfill
 
 
 class TestCollector(unittest.TestCase):
