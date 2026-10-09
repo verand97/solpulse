@@ -1,0 +1,88 @@
+# SolPulse ML Screener Configuration
+version: "1.0.0"
+
+general:
+  primary_chain: "solana"
+  supported_chains:
+    - "solana"
+    - "base"
+    - "bsc"
+  environment: "development"
+  log_level: "INFO"
+
+database:
+  # SQLite by default for zero-setup local dev; can be switched to postgresql://...
+  url: "sqlite:///./data/solpulse_ml.db"
+  parquet_data_dir: "./data/parquet"
+  pool_size: 10
+  max_overflow: 20
+
+collector:
+  polling_interval_seconds: 30
+  max_tokens_per_batch: 50
+  request_timeout_seconds: 10
+  rate_limit:
+    geckoterminal_delay_seconds: 2.0
+    dexscreener_delay_seconds: 0.3
+    rugcheck_delay_seconds: 1.0
+    goplus_delay_seconds: 1.0
+    max_retries: 3
+    backoff_factor: 2.0
+  # Scheduled snapshot intervals from detection (in seconds)
+  snapshot_intervals:
+    t_1m: 60
+    t_5m: 300
+    t_15m: 900
+    t_30m: 1800
+    t_60m: 3600
+    t_6h: 21600
+    t_24h: 86400
+
+endpoints:
+  geckoterminal_base_url: "https://api.geckoterminal.com/api/v2"
+  dexscreener_base_url: "https://api.dexscreener.com"
+  rugcheck_base_url: "https://api.rugcheck.xyz"
+  goplus_base_url: "https://api.gopluslabs.io"
+  solana_rpc_url: "https://api.mainnet-beta.solana.com"
+
+hard_rules:
+  max_sell_tax_pct: 15.0
+  max_buy_tax_pct: 15.0
+  reject_mint_authority: true
+  reject_freeze_authority: true
+  max_top1_holder_pct: 35.0
+  max_top10_holder_pct: 70.0
+  min_initial_liquidity_usd: 1000.0
+
+labeling:
+  entry_timeframe: "t_5m" # Default entry price at T+5m
+  success_multipliers:
+    primary: 2.0
+    sensitivity_tests:
+      - 2.0
+      - 3.0
+      - 5.0
+  rug_liquidity_drop_pct: 80.0
+  dead_price_drop_pct: 90.0
+  dead_window_hours: 6
+  slippage_pct: 3.0
+  dex_fee_pct: 0.3
+  gas_estimate_usd: 0.005
+
+model:
+  feature_version: "v1.0"
+  train_split: 0.60
+  val_split: 0.20
+  test_split: 0.20
+  purged_walk_forward_cv_splits: 5
+  seed: 42
+  alert_thresholds:
+    max_risk_score: 0.20
+    min_potential_score: 0.80
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
