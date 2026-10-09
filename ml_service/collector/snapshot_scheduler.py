@@ -3,7 +3,7 @@
 import time
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
@@ -39,7 +39,7 @@ class SnapshotScheduler:
         """Schedule future point-in-time snapshots for a newly detected token."""
         now = time.time()
         for label, delay_seconds in INTERVALS.items():
-            run_time = datetime.fromtimestamp(now + delay_seconds)
+            run_time = datetime.fromtimestamp(now + delay_seconds, tz=timezone.utc)
             job_id = f"snap_{token_address}_{label}"
             
             try:
@@ -57,7 +57,7 @@ class SnapshotScheduler:
     def execute_snapshot(self, token_address: str, pair_address: Optional[str], interval_label: str):
         """Execute a point-in-time snapshot and store all metrics."""
         logger.info(f"Executing {interval_label} snapshot for {token_address}")
-        fetched_at = datetime.utcnow()
+        fetched_at = datetime.now(timezone.utc)
         
         # 1. Fetch pair & liquidity metrics from DexScreener
         pairs = self.dex_client.get_token_pairs(token_address)

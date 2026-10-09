@@ -1,10 +1,10 @@
-"""Robust Database Manager supporting both SQLite and PostgreSQL with thread safety."""
+"""Robust Database Manager supporting SQLite with thread safety."""
 
 import os
 import json
 import sqlite3
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -166,6 +166,9 @@ CREATE TABLE IF NOT EXISTS ml_scores (
 CREATE INDEX IF NOT EXISTS idx_ml_scores_addr ON ml_scores(token_address);
 """
 
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
 class DBManager:
     """Manages SQLite database connections and CRUD operations."""
 
@@ -218,7 +221,7 @@ class DBManager:
                     "decimals": token_data.get("decimals", 9),
                     "deployer_address": token_data.get("deployer_address"),
                     "created_at": token_data.get("created_at"),
-                    "first_detected_at": token_data.get("first_detected_at", datetime.utcnow().isoformat()),
+                    "first_detected_at": token_data.get("first_detected_at", utc_now_iso()),
                     "initial_liquidity_usd": token_data.get("initial_liquidity_usd"),
                     "initial_price_usd": token_data.get("initial_price_usd"),
                     "metadata_json": json.dumps(token_data.get("metadata", {}))
@@ -258,8 +261,8 @@ class DBManager:
                     snap["token_address"],
                     snap.get("pair_address"),
                     snap["interval_label"],
-                    snap.get("timestamp", datetime.utcnow().isoformat()),
-                    datetime.utcnow().isoformat(),
+                    snap.get("timestamp", utc_now_iso()),
+                    utc_now_iso(),
                     snap.get("price_usd"),
                     snap.get("liquidity_usd"),
                     snap.get("volume_h24"),
@@ -288,8 +291,8 @@ class DBManager:
                 (
                     sec["token_address"],
                     sec.get("chain", "solana"),
-                    datetime.utcnow().isoformat(),
-                    sec.get("snapshot_time", datetime.utcnow().isoformat()),
+                    utc_now_iso(),
+                    sec.get("snapshot_time", utc_now_iso()),
                     sec.get("source", "rugcheck"),
                     1 if sec.get("is_mintable") else 0,
                     1 if sec.get("is_renounced") else 0,
@@ -317,7 +320,7 @@ class DBManager:
                 """,
                 (
                     holders["token_address"],
-                    datetime.utcnow().isoformat(),
+                    utc_now_iso(),
                     holders.get("total_holders", 0),
                     holders.get("top1_pct", 0.0),
                     holders.get("top10_pct", 0.0),
@@ -359,7 +362,7 @@ class DBManager:
                     "max_return_24h": label.get("max_return_24h"),
                     "net_return_24h": label.get("net_return_24h"),
                     "success": 1 if label.get("success") else 0,
-                    "labeled_at": datetime.utcnow().isoformat()
+                    "labeled_at": utc_now_iso()
                 }
             )
             conn.commit()
@@ -375,7 +378,7 @@ class DBManager:
                     feat["token_address"],
                     feat.get("feature_version", "v1.0"),
                     feat.get("point_in_time", "t_5m"),
-                    datetime.utcnow().isoformat(),
+                    utc_now_iso(),
                     json.dumps(feat.get("features", {}))
                 )
             )
@@ -396,7 +399,7 @@ class DBManager:
                     score.get("symbol"),
                     score.get("chain", "solana"),
                     score.get("model_version", "v1.0"),
-                    datetime.utcnow().isoformat(),
+                    utc_now_iso(),
                     score.get("risk_score", 0.5),
                     score.get("potential_score", 0.5),
                     score.get("anomaly_score", 0.0),

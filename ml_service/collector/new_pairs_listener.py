@@ -3,7 +3,7 @@
 import time
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
 from ..database.db_manager import DBManager
@@ -45,7 +45,7 @@ class NewPairsListener:
         if self.db.token_exists(token_address):
             return False
 
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         logger.info(f"✨ [NEW TOKEN DETECTED] {symbol or 'UNKNOWN'} ({token_address}) on Solana via {source}")
 
         # 1. Save raw response

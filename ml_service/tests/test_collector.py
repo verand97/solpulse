@@ -1,11 +1,11 @@
 """Unit tests for Phase 1 Collector (Jalur A & Jalur B) with mock responses."""
 
 import os
-import json
+import shutil
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
+from unittest.mock import MagicMock
+from pathlib import Path
 
 from ..database.db_manager import DBManager
 from ..collector.new_pairs_listener import NewPairsListener
@@ -15,14 +15,16 @@ from ..backfill.backfill import HistoricalBackfill
 
 class TestCollector(unittest.TestCase):
     def setUp(self):
-        # Create a temporary SQLite database for test isolation
-        self.temp_db_fd, self.temp_db_path = tempfile.mkstemp(suffix=".db")
-        self.db = DBManager(db_path=self.temp_db_path)
+        self.temp_dir = tempfile.mkdtemp()
+        self.db_path = str(Path(self.temp_dir) / "test_solpulse.db")
+        self.db = DBManager(db_path=self.db_path)
 
     def tearDown(self):
-        os.close(self.temp_db_fd)
-        if os.path.exists(self.temp_db_path):
-            os.remove(self.temp_db_path)
+        # Allow Windows file lock to release
+        try:
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+        except Exception:
+            pass
 
     def test_database_initialization(self):
         """Verify that all core tables are created properly."""
@@ -95,6 +97,8 @@ class TestCollector(unittest.TestCase):
             raw_count = conn.execute("SELECT count(*) FROM raw_responses").fetchone()[0]
             self.assertGreaterEqual(raw_count, 1)
 
+        listener.stop()
+
     def test_snapshot_scheduler_execution(self):
         """Verify execution of scheduled snapshots and metric persistence."""
         scheduler = SnapshotScheduler(db=self.db)
@@ -144,13 +148,13 @@ class TestCollector(unittest.TestCase):
 
     def test_backfill_pipeline_and_checkpoint(self):
         """Verify historical backfill with mock OHLCV and checkpointing."""
-        backfill = HistoricalBackfill(db=self.db)
+        cp_path = str(Path(self.temp_dir) / "test_cp.json")
+        backfill = HistoricalBackfill(db=self.db, checkpoint_path=cp_path)
         
-        # Mock GeckoTerminal OHLCV bars: [timestamp, open, high, low, close, volume]
         base_ts = 1700000000
         mock_ohlcv = [
             [base_ts + (i * 60), 0.001, 0.0012, 0.0009, 0.0011 + (i * 0.0001), 500.0]
-            for i in range(120) # 120 minutes of bars
+            for i in range(120)
         ]
         backfill.gecko.get_pool_ohlcv = MagicMock(return_value=mock_ohlcv)
 
