@@ -11,7 +11,8 @@ import {
   Radar, 
   ShieldAlert,
   Globe,
-  Zap
+  Zap,
+  Brain
 } from 'lucide-react';
 import { cn } from '../utils';
 
@@ -26,11 +27,13 @@ interface SidebarProps {
 const navItems = [
   { id: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
   { id: 'screener',    label: 'Screener',       icon: LineChart },
+  { id: 'mlscreener',  label: 'AI Screener',    icon: Brain },
   { id: 'alerts',      label: 'Whale Tracker',  icon: ShieldAlert },
   { id: 'livescanner', label: 'Live Scanner',   icon: Radar },
   { id: 'watchlist',   label: 'Watchlist',      icon: Star },
   { id: 'wallet',      label: 'Wallet',         icon: Wallet },
 ];
+
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   activeTab, 

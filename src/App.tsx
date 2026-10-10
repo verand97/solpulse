@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
+import { MLScreenerView } from './components/MLScreenerView';
 import { LiveScanner } from './components/LiveScanner';
 import { WhaleAlerts } from './components/WhaleAlerts';
 import { Watchlist } from './components/Watchlist';
@@ -88,6 +89,7 @@ export default function App() {
                   fetchTokenByAddress={fetchTokenByAddress}
                 />
               )}
+              {activeTab === 'mlscreener' && <MLScreenerView />}
               {activeTab === 'livescanner' && <LiveScanner />}
               {activeTab === 'watchlist' && (
                 <div className="flex-1 overflow-y-auto custom-scrollbar">

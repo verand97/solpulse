@@ -87,3 +87,33 @@ export type SwapToken = {
   icon: string;
   imageUrl?: string;
 };
+
+export interface MLScoreFactor {
+  factor: string;
+  detail: string;
+  impact: 'positive' | 'negative' | 'caution' | 'neutral';
+}
+
+export interface MLScreenedToken {
+  id?: number;
+  token_address: string;
+  symbol: string;
+  name?: string;
+  chain: string;
+  model_version: string;
+  calculated_at: string;
+  risk_score: number;
+  potential_score: number;
+  anomaly_score: number;
+  passes_hard_rules: boolean | number;
+  rejected_rule_reason?: string | null;
+  recommendation: 'STRONG_BUY_CANDIDATE' | 'ACCUMULATE_WATCH' | 'MONITOR' | 'AVOID_HIGH_RISK' | 'REJECT_UNSAFE' | string;
+  top_shap_reasons?: MLScoreFactor[];
+  price_usd?: number;
+  liquidity_usd?: number;
+  volume_24h?: number;
+  price_change_24h?: number;
+  initial_price_usd?: number;
+  initial_liquidity_usd?: number;
+}
+

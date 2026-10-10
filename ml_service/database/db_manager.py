@@ -427,11 +427,22 @@ class DBManager:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             query = """
-            SELECT m.*, t.name, t.initial_liquidity_usd, t.initial_price_usd
-            FROM ml_scores m
+            SELECT m.*, t.name,
+                   COALESCE(s.price_usd, t.initial_price_usd, 0.0) AS price_usd,
+                   COALESCE(s.liquidity_usd, t.initial_liquidity_usd, 0.0) AS liquidity_usd,
+                   COALESCE(s.volume_h24, 0.0) AS volume_24h
+            FROM (
+                SELECT *, ROW_NUMBER() OVER (PARTITION BY token_address ORDER BY calculated_at DESC) as rn
+                FROM ml_scores
+            ) m
             JOIN tokens t ON m.token_address = t.address
-            WHERE m.chain = ? AND m.potential_score >= ? AND m.risk_score <= ?
-            ORDER BY m.calculated_at DESC
+            LEFT JOIN (
+                SELECT token_address, price_usd, liquidity_usd, volume_h24,
+                       ROW_NUMBER() OVER (PARTITION BY token_address ORDER BY timestamp DESC) as rn
+                FROM snapshots
+            ) s ON m.token_address = s.token_address AND s.rn = 1
+            WHERE m.rn = 1 AND m.chain = ? AND m.potential_score >= ? AND m.risk_score <= ?
+            ORDER BY m.potential_score DESC, m.calculated_at DESC
             LIMIT ?
             """
             rows = cursor.execute(query, (chain, min_potential, max_risk, limit)).fetchall()
@@ -445,3 +456,4 @@ class DBManager:
                         d["top_shap_reasons"] = []
                 result.append(d)
             return result
+

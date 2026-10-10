@@ -248,6 +248,7 @@ class ModelTrainer:
             "model_version": "v1.0-hgb",
             "feature_version": "v1.0",
             "trained_at": datetime.now(timezone.utc).isoformat(),
+            "feature_cols": self.feature_cols,
             "train_samples": len(df_train),
             "val_samples": len(df_val),
             "test_samples": len(df_test),
@@ -349,6 +350,13 @@ class ModelTrainer:
         return report_md
 
 
+def train_all_models() -> Dict[str, Any]:
+    """Convenience function to run ModelTrainer and return training evaluation results."""
+    trainer = ModelTrainer()
+    return trainer.train_and_evaluate()
+
+
 if __name__ == "__main__":
     trainer = ModelTrainer()
     trainer.generate_evaluation_report()
+
