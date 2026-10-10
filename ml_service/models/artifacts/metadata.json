@@ -1,0 +1,86 @@
+{
+  "model_version": "v1.0-hgb",
+  "feature_version": "v1.0",
+  "trained_at": "2026-10-10T08:57:05.117621+00:00",
+  "train_samples": 28,
+  "val_samples": 9,
+  "test_samples": 10,
+  "metrics": {
+    "heuristic": {
+      "pr_auc": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.118,
+      "precision": 0.0,
+      "recall": 0.0,
+      "accuracy": 0.9
+    },
+    "logistic_regression": {
+      "pr_auc": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.1145,
+      "precision": 0.0,
+      "recall": 0.0,
+      "accuracy": 0.9
+    },
+    "potential_model": {
+      "pr_auc": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.0628,
+      "precision": 0.0,
+      "recall": 0.0,
+      "accuracy": 0.9
+    },
+    "risk_model": {
+      "pr_auc": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.199,
+      "precision": 0.0,
+      "recall": 0.0,
+      "accuracy": 0.7
+    },
+    "mean_return_all": 1.05,
+    "mean_return_filtered": 1.52
+  },
+  "top_features": [
+    [
+      "liq_usd_initial",
+      0.0
+    ],
+    [
+      "current_liq_usd",
+      0.0
+    ],
+    [
+      "liq_to_mcap_ratio",
+      0.0
+    ],
+    [
+      "liq_change_pct",
+      0.0
+    ],
+    [
+      "lp_locked_pct",
+      0.0
+    ],
+    [
+      "lp_burned_pct",
+      0.0
+    ],
+    [
+      "liq_is_missing",
+      0.0
+    ],
+    [
+      "tx_count_5m",
+      0.0
+    ],
+    [
+      "tx_count_15m",
+      0.0
+    ],
+    [
+      "tx_count_60m",
+      0.0
+    ]
+  ]
+}
