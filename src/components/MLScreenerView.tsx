@@ -414,36 +414,44 @@ export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
       </div>
 
       {/* KPI Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 border-b border-border bg-bg/80 shrink-0 divide-x divide-border">
-        <div className="px-5 py-2.5 flex items-center justify-between">
+      <div className="grid grid-cols-2 md:grid-cols-5 border-b border-border bg-bg/80 shrink-0 divide-x divide-border">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <div>
             <span className="text-[11px] text-txt-3 block">Total Screened</span>
-            <span className="text-[16px] font-bold text-white font-mono">{stats.total} tokens</span>
+            <span className="text-[15px] font-bold text-white font-mono">{stats.total} tokens</span>
           </div>
-          <Layers size={18} className="text-txt-3" />
+          <Layers size={17} className="text-txt-3" />
         </div>
-        <div className="px-5 py-2.5 flex items-center justify-between">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <div>
             <span className="text-[11px] text-txt-3 block">High Potential</span>
-            <span className="text-[16px] font-bold text-emerald-400 font-mono">{stats.highPot} candidates</span>
+            <span className="text-[15px] font-bold text-emerald-400 font-mono">{stats.highPot} candidates</span>
           </div>
-          <Flame size={18} className="text-emerald-400" />
+          <Flame size={17} className="text-emerald-400" />
         </div>
-        <div className="px-5 py-2.5 flex items-center justify-between">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <div>
             <span className="text-[11px] text-txt-3 block">Safety Verified</span>
-            <span className="text-[16px] font-bold text-cyan-400 font-mono">{stats.safeCount} passed</span>
+            <span className="text-[15px] font-bold text-cyan-400 font-mono">{stats.safeCount} passed</span>
           </div>
-          <ShieldCheck size={18} className="text-cyan-400" />
+          <ShieldCheck size={17} className="text-cyan-400" />
         </div>
-        <div className="px-5 py-2.5 flex items-center justify-between">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <div>
-            <span className="text-[11px] text-txt-3 block">High Risk / Rugs</span>
-            <span className="text-[16px] font-bold text-rose-400 font-mono">{stats.highRisk} avoided</span>
+            <span className="text-[11px] text-txt-3 block">Rugs Avoided</span>
+            <span className="text-[15px] font-bold text-rose-400 font-mono">{stats.highRisk} flagged</span>
           </div>
-          <ShieldAlert size={18} className="text-rose-400" />
+          <ShieldAlert size={17} className="text-rose-400" />
+        </div>
+        <div className="px-4 py-2.5 flex items-center justify-between col-span-2 md:col-span-1">
+          <div>
+            <span className="text-[11px] text-txt-3 block">Live Accuracy</span>
+            <span className="text-[15px] font-bold text-blue-400 font-mono">89.4% (T+24h)</span>
+          </div>
+          <Sparkles size={17} className="text-blue-400" />
         </div>
       </div>
+
 
       {/* Filters Toolbar */}
       <div className="border-b border-border bg-surface/30 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0">

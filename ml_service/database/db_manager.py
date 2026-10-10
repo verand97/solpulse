@@ -164,9 +164,29 @@ CREATE TABLE IF NOT EXISTS ml_scores (
 );
 
 CREATE INDEX IF NOT EXISTS idx_ml_scores_addr ON ml_scores(token_address);
+
+CREATE TABLE IF NOT EXISTS ml_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT NOT NULL,
+    symbol TEXT,
+    horizon TEXT DEFAULT '24h',
+    evaluated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    predicted_recommendation TEXT,
+    potential_score REAL,
+    risk_score REAL,
+    entry_price REAL,
+    exit_price REAL,
+    actual_return_pct REAL,
+    was_success BOOLEAN DEFAULT 0,
+    was_rug BOOLEAN DEFAULT 0,
+    prediction_correct BOOLEAN DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_ml_feedback_addr ON ml_feedback(token_address);
 """
 
 def utc_now_iso() -> str:
+
     return datetime.now(timezone.utc).isoformat()
 
 class DBManager:
@@ -456,4 +476,64 @@ class DBManager:
                         d["top_shap_reasons"] = []
                 result.append(d)
             return result
+
+    def record_feedback(self, feedback: Dict[str, Any]):
+        """Record real outcome of an earlier prediction for tracking and retraining."""
+        with self.get_connection() as conn:
+            conn.execute(
+                """
+                INSERT INTO ml_feedback (
+                    token_address, symbol, horizon, evaluated_at,
+                    predicted_recommendation, potential_score, risk_score,
+                    entry_price, exit_price, actual_return_pct,
+                    was_success, was_rug, prediction_correct
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    feedback["token_address"],
+                    feedback.get("symbol"),
+                    feedback.get("horizon", "24h"),
+                    utc_now_iso(),
+                    feedback.get("predicted_recommendation"),
+                    feedback.get("potential_score"),
+                    feedback.get("risk_score"),
+                    feedback.get("entry_price"),
+                    feedback.get("exit_price"),
+                    feedback.get("actual_return_pct"),
+                    1 if feedback.get("was_success") else 0,
+                    1 if feedback.get("was_rug") else 0,
+                    1 if feedback.get("prediction_correct") else 0
+                )
+            )
+            conn.commit()
+
+    def get_feedback_summary(self) -> Dict[str, Any]:
+        """Aggregate feedback metrics: total evaluated, accuracy, precision, and hit rate."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            total = cursor.execute("SELECT count(*) FROM ml_feedback").fetchone()[0]
+            if total == 0:
+                return {
+                    "total_evaluated": 0,
+                    "accuracy": 0.0,
+                    "precision_buy_candidate": 0.0,
+                    "avg_return_pct": 0.0
+                }
+            correct = cursor.execute("SELECT count(*) FROM ml_feedback WHERE prediction_correct = 1").fetchone()[0]
+            buy_recs = cursor.execute(
+                "SELECT count(*), sum(was_success) FROM ml_feedback WHERE predicted_recommendation IN ('STRONG_BUY_CANDIDATE', 'ACCUMULATE_WATCH')"
+            ).fetchone()
+            avg_ret = cursor.execute("SELECT avg(actual_return_pct) FROM ml_feedback").fetchone()[0] or 0.0
+
+            buy_count = buy_recs[0] or 0
+            buy_succ = buy_recs[1] or 0
+            prec_buy = (buy_succ / buy_count) if buy_count > 0 else 0.0
+
+            return {
+                "total_evaluated": total,
+                "accuracy": round(correct / total, 4),
+                "precision_buy_candidate": round(prec_buy, 4),
+                "avg_return_pct": round(avg_ret, 2)
+            }
+
 
