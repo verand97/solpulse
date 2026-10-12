@@ -447,7 +447,7 @@ class DBManager:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             query = """
-            SELECT m.*, t.name,
+            SELECT m.*, t.name, t.metadata_json,
                    COALESCE(s.price_usd, t.initial_price_usd, 0.0) AS price_usd,
                    COALESCE(s.liquidity_usd, t.initial_liquidity_usd, 0.0) AS liquidity_usd,
                    COALESCE(s.volume_h24, 0.0) AS volume_24h
@@ -474,6 +474,30 @@ class DBManager:
                         d["top_shap_reasons"] = json.loads(d["top_shap_reasons_json"])
                     except:
                         d["top_shap_reasons"] = []
+                
+                # Extract image and priceChange from metadata
+                meta_json = d.pop("metadata_json", None)
+                image_url = None
+                price_change = 0.0
+                if meta_json:
+                    try:
+                        meta = json.loads(meta_json)
+                        image_url = (
+                            meta.get("info", {}).get("imageUrl")
+                            or meta.get("imageUrl")
+                            or meta.get("icon")
+                        )
+                        price_change = meta.get("priceChange", {}).get("h24", 0.0)
+                    except Exception:
+                        pass
+                
+                if not image_url and d.get("token_address"):
+                    image_url = f"https://dd.dexscreener.com/ds-data/tokens/solana/{d['token_address']}.png"
+                
+                d["imageUrl"] = image_url
+                d["image_url"] = image_url
+                if not d.get("price_change_24h"):
+                    d["price_change_24h"] = price_change
                 result.append(d)
             return result
 

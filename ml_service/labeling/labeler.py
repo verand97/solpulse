@@ -79,38 +79,58 @@ class TokenLabeler:
         peak_price = max(prices)
         min_liq = min(liquidities) if liquidities else initial_liq
 
-        # Max gross return
-        max_return_24h = peak_price / entry_price if entry_price > 0 else 0.0
-
-        # Realistic net return accounting for DEX fee, sell slippage, and roundtrip gas
-        # friction_factor = (1 - slippage/100) * ((1 - dex_fee/100)^2)
-        friction_factor = (1.0 - (self.slippage_pct / 100.0)) * ((1.0 - (self.dex_fee_pct / 100.0)) ** 2)
-        net_return_24h = max(0.0, (max_return_24h * friction_factor))
-
-        # Check Honeypot: sell tax > 50% or honeypot flag
+        # Max gross return: consider snapshots and pair priceChange from metadata
+        meta_return = 1.0
         with self.db.get_connection() as conn:
+            tok_row = conn.execute("SELECT metadata_json FROM tokens WHERE address = ?", (token_address,)).fetchone()
+            meta_json = tok_row[0] if tok_row else None
             sec = conn.execute(
                 "SELECT danger_risks_count, sell_tax, is_mintable, freeze_authority_enabled FROM security_checks WHERE token_address = ? ORDER BY fetched_at DESC LIMIT 1",
                 (token_address,)
             ).fetchone()
 
-        is_honeypot = False
-        if sec:
-            sell_tax = float(sec[1] or 0.0)
-            if sell_tax > 50.0:
-                is_honeypot = True
+        if meta_json:
+            try:
+                m_obj = json.loads(meta_json)
+                h24_pct = float(m_obj.get("priceChange", {}).get("h24", 0.0) or 0.0)
+                h6_pct = float(m_obj.get("priceChange", {}).get("h6", 0.0) or 0.0)
+                best_pct = max(h24_pct, h6_pct)
+                if best_pct > 0:
+                    meta_return = 1.0 + (best_pct / 100.0)
+            except Exception:
+                pass
 
-        # Check Rug: Liquidity dropped > rug_drop_pct (default 80%) from initial
+        snapshot_ret = peak_price / entry_price if entry_price > 0 else 1.0
+        max_return_24h = max(snapshot_ret, meta_return)
+
+        # Realistic net return accounting for DEX fee, sell slippage, and roundtrip friction
+        friction_factor = (1.0 - (self.slippage_pct / 100.0)) * ((1.0 - (self.dex_fee_pct / 100.0)) ** 2)
+        net_return_24h = max(0.0, (max_return_24h * friction_factor))
+
+        # Check Honeypot / Malicious Contract on Solana
+        danger_count = 0
+        sell_tax = 0.0
+        freeze_enabled = False
+        if sec:
+            danger_count = int(sec[0] or 0)
+            sell_tax = float(sec[1] or 0.0)
+            freeze_enabled = bool(sec[3])
+
+        is_honeypot = bool(freeze_enabled or sell_tax > 20.0 or danger_count >= 2)
+
+        # Check Rug: Liquidity pull (>75% drop from peak or initial) or critical risk flags
         is_rug = False
-        rug_threshold_ratio = 1.0 - (self.rug_drop_pct / 100.0)
-        if initial_liq > 0 and min_liq < (initial_liq * rug_threshold_ratio):
+        peak_liq = max(liquidities) if liquidities else initial_liq
+        ref_liq = max(initial_liq, peak_liq)
+        if ref_liq > 1000 and min_liq < (ref_liq * 0.25):
+            is_rug = True
+        elif danger_count >= 3:
             is_rug = True
 
-        # Check Dead: Latest price dropped > dead_drop_pct (default 90%) from peak
+        # Check Dead: Latest price dropped > 70% from peak
         latest_price = prices[-1]
         is_dead = False
-        dead_threshold_ratio = 1.0 - (self.dead_drop_pct / 100.0)
-        if peak_price > 0 and latest_price < (peak_price * dead_threshold_ratio):
+        if peak_price > 0 and latest_price < (peak_price * 0.30):
             is_dead = True
 
         # Success across sensitivity thresholds

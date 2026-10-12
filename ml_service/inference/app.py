@@ -110,6 +110,19 @@ def get_token_score(address: str):
             data["top_shap_reasons"] = json.loads(data["top_shap_reasons_json"])
         except Exception:
             data["top_shap_reasons"] = []
+    
+    meta_json = data.pop("metadata_json", None)
+    image_url = None
+    if meta_json:
+        try:
+            meta = json.loads(meta_json)
+            image_url = meta.get("info", {}).get("imageUrl") or meta.get("imageUrl") or meta.get("icon")
+        except Exception:
+            pass
+    if not image_url and data.get("token_address"):
+        image_url = f"https://dd.dexscreener.com/ds-data/tokens/solana/{data['token_address']}.png"
+    data["imageUrl"] = image_url
+    data["image_url"] = image_url
     return data
 
 

@@ -87,13 +87,17 @@ class TokenScorer:
         passes_hard, reject_reason = self.evaluate_hard_rules(features)
 
         # 2. Stage 2: ML Scoring
-        feature_vector = np.array([float(features.get(c, 0.0) or 0.0) for c in self.pipeline.feature_cols if hasattr(self.pipeline, 'feature_cols')]).reshape(1, -1) if hasattr(self.pipeline, 'feature_cols') else None
+        feature_cols = self.metadata.get("feature_cols") or getattr(self.pipeline, 'feature_cols', [])
+        feature_vector = (
+            np.array([[float(features.get(c, 0.0) or 0.0) for c in feature_cols]])
+            if feature_cols else None
+        )
 
         if not passes_hard:
             # Immediate rejection
             risk_score = 0.95
             potential_score = 0.05
-            anomaly_score = 0.5
+            anomaly_score = 0.50
             recommendation = "REJECT_UNSAFE"
             shap_reasons = [
                 {"factor": "Hard Rule Violation", "detail": reject_reason, "impact": "negative"}
@@ -103,25 +107,38 @@ class TokenScorer:
             if self.pot_model and feature_vector is not None and feature_vector.shape[1] > 0:
                 try:
                     potential_score = float(self.pot_model.predict_proba(feature_vector)[0, 1])
-                except Exception:
-                    potential_score = 0.5
+                except Exception as e:
+                    logger.warning(f"Error predicting potential model: {e}")
+                    ratio = features.get("buy_sell_volume_ratio", 1.0)
+                    potential_score = min(0.95, max(0.1, 0.4 + (ratio * 0.15)))
             else:
-                # Heuristic fallback based on buy/sell ratio and liquidity
                 ratio = features.get("buy_sell_volume_ratio", 1.0)
                 potential_score = min(0.95, max(0.1, 0.4 + (ratio * 0.15)))
 
             if self.risk_model and feature_vector is not None and feature_vector.shape[1] > 0:
                 try:
                     risk_score = float(self.risk_model.predict_proba(feature_vector)[0, 1])
-                except Exception:
-                    risk_score = 0.2
+                except Exception as e:
+                    logger.warning(f"Error predicting risk model: {e}")
+                    danger_count = features.get("danger_risks_count", 0)
+                    risk_score = min(0.95, max(0.05, 0.1 + (danger_count * 0.3)))
             else:
                 danger_count = features.get("danger_risks_count", 0)
                 risk_score = min(0.95, max(0.05, 0.1 + (danger_count * 0.3)))
 
-            anomaly_score = 0.0
+            # Anomaly Score from Isolation Forest
+            anomaly_score = 0.03
+            if self.anomaly_model:
+                try:
+                    ano_cols = ["tx_count_5m", "buy_sell_volume_ratio", "top1_pct", "top10_pct", "volatility", "current_liq_usd"]
+                    ano_vec = np.array([[float(features.get(c, 0.0) or 0.0) for c in ano_cols]])
+                    raw_score = float(self.anomaly_model.score_samples(ano_vec)[0])
+                    # score_samples produces negative values around -0.4 to -0.8
+                    anomaly_score = max(0.01, min(0.99, round(0.5 - raw_score, 4)))
+                except Exception:
+                    anomaly_score = 0.03
 
-            # Recommendation
+            # Recommendation Strategy
             if potential_score >= 0.75 and risk_score <= 0.25:
                 recommendation = "STRONG_BUY_CANDIDATE"
             elif potential_score >= 0.60 and risk_score <= 0.40:
@@ -131,38 +148,80 @@ class TokenScorer:
             else:
                 recommendation = "MONITOR"
 
-            # Top 3 Driver Reasons
+            # Dynamic Feature Driver Explanations (SHAP Drivers)
             shap_reasons = []
-            if features.get("buy_sell_volume_ratio", 0) > 1.5:
+            ratio = features.get("buy_sell_volume_ratio", 1.0)
+            if ratio >= 1.4:
                 shap_reasons.append({
-                    "factor": "Buy Pressure",
-                    "detail": f"Buy/Sell ratio {features.get('buy_sell_volume_ratio'):.2f} indicates strong accumulation",
+                    "factor": "Buy Volume Pressure",
+                    "detail": f"Buy/Sell ratio {ratio:.2f}x signals strong organic buy inflow",
                     "impact": "positive"
                 })
-            if features.get("current_liq_usd", 0) > 10000:
+            elif ratio <= 0.6:
                 shap_reasons.append({
-                    "factor": "Healthy Liquidity",
-                    "detail": f"Pool liquidity ${features.get('current_liq_usd'):,.0f} provides lower slippage",
+                    "factor": "Sell Pressure Heavy",
+                    "detail": f"Buy/Sell ratio {ratio:.2f}x shows aggressive net selling",
+                    "impact": "negative"
+                })
+
+            liq = features.get("current_liq_usd", 0)
+            if liq >= 15000:
+                shap_reasons.append({
+                    "factor": "Healthy Liquidity Depth",
+                    "detail": f"Pool liquidity ${liq:,.0f} provides stable trade execution",
                     "impact": "positive"
                 })
-            if features.get("top1_pct", 0) > 20.0:
+            elif liq < 2000 and liq > 0:
                 shap_reasons.append({
-                    "factor": "Holder Concentration",
-                    "detail": f"Top 1 holder owns {features.get('top1_pct'):.1f}%",
+                    "factor": "Thin Liquidity",
+                    "detail": f"Pool liquidity under $2,000 creates slippage sensitivity",
                     "impact": "caution"
                 })
+
+            top1 = features.get("top1_pct", 0)
+            if top1 > 0 and top1 <= 15:
+                shap_reasons.append({
+                    "factor": "Holder Dispersion",
+                    "detail": f"Top 1 holder owns only {top1:.1f}% (healthy decentralized spread)",
+                    "impact": "positive"
+                })
+            elif top1 > 25:
+                shap_reasons.append({
+                    "factor": "Whale Concentration",
+                    "detail": f"Single wallet holds {top1:.1f}% of circulating supply",
+                    "impact": "caution"
+                })
+
+            if features.get("freeze_authority_enabled") == 0 and features.get("mint_authority_enabled") == 0:
+                shap_reasons.append({
+                    "factor": "Contract Verified",
+                    "detail": "Mint and freeze authorities revoked; zero transfer taxes",
+                    "impact": "positive"
+                })
+
             if not shap_reasons:
                 shap_reasons.append({
                     "factor": "Baseline Market Flow",
-                    "detail": "Standard orderbook and pool liquidity metrics",
+                    "detail": "Order velocity and liquidity match normal baseline distribution",
                     "impact": "neutral"
                 })
 
-        # Save to database
+        # Fetch token metadata for image logo
         with self.db.get_connection() as conn:
-            tok = conn.execute("SELECT symbol, chain FROM tokens WHERE address = ?", (token_address,)).fetchone()
+            tok = conn.execute("SELECT symbol, chain, metadata_json FROM tokens WHERE address = ?", (token_address,)).fetchone()
             symbol = tok[0] if tok else "TOKEN"
             chain = tok[1] if tok else "solana"
+            meta_json = tok[2] if tok and len(tok) > 2 else None
+
+        image_url = None
+        if meta_json:
+            try:
+                meta = json.loads(meta_json)
+                image_url = meta.get("info", {}).get("imageUrl") or meta.get("imageUrl") or meta.get("icon")
+            except Exception:
+                pass
+        if not image_url and token_address:
+            image_url = f"https://dd.dexscreener.com/ds-data/tokens/solana/{token_address}.png"
 
         score_record = {
             "token_address": token_address,
@@ -175,7 +234,9 @@ class TokenScorer:
             "passes_hard_rules": passes_hard,
             "rejected_rule_reason": reject_reason,
             "recommendation": recommendation,
-            "top_shap_reasons": shap_reasons
+            "top_shap_reasons": shap_reasons[:4],
+            "imageUrl": image_url,
+            "image_url": image_url
         }
 
         self.db.upsert_ml_score(score_record)

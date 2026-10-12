@@ -115,5 +115,6 @@ export interface MLScreenedToken {
   price_change_24h?: number;
   initial_price_usd?: number;
   initial_liquidity_usd?: number;
+  imageUrl?: string;
 }
 

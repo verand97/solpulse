@@ -1,7 +1,7 @@
 {
   "model_version": "v1.0-hgb",
   "feature_version": "v1.0",
-  "trained_at": "2026-10-10T22:53:31.106331+00:00",
+  "trained_at": "2026-10-12T03:21:54.878179+00:00",
   "feature_cols": [
     "liq_usd_initial",
     "current_liq_usd",
