@@ -16,6 +16,7 @@ import {
 import { useWatchlist } from '../hooks/useWatchlist';
 import { TokenChart } from './TokenChart';
 import { generateMockChartData } from '../data';
+import { TokenAvatar } from './TokenAvatar';
 
 interface WatchlistProps {
   tokens: Token[];
@@ -127,13 +128,12 @@ export const Watchlist: React.FC<WatchlistProps> = ({ tokens }) => {
                       {/* Token */}
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
-                          {token.imageUrl ? (
-                            <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover shrink-0 border border-border" />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-surface-2 border border-border flex items-center justify-center font-bold text-[10px] text-txt shrink-0">
-                              {token.symbol[0]}
-                            </div>
-                          )}
+                          <TokenAvatar
+                            symbol={token.symbol}
+                            address={token.address}
+                            imageUrl={token.imageUrl}
+                            size="sm"
+                          />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <span className="font-bold text-txt text-[12.5px] truncate">{token.symbol}</span>
@@ -231,13 +231,12 @@ export const Watchlist: React.FC<WatchlistProps> = ({ tokens }) => {
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-bg">
               <div className="flex items-center gap-3">
-                {selectedToken.imageUrl ? (
-                  <img src={selectedToken.imageUrl} alt={selectedToken.symbol} className="w-8 h-8 rounded-full border border-border object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-surface-2 border border-border flex items-center justify-center font-bold text-xs text-txt">
-                    {selectedToken.symbol[0]}
-                  </div>
-                )}
+                <TokenAvatar
+                  symbol={selectedToken.symbol}
+                  address={selectedToken.address}
+                  imageUrl={selectedToken.imageUrl}
+                  size="md"
+                />
                 <div>
                   <h3 className="text-[14px] font-bold text-txt flex items-center gap-2">
                     {selectedToken.symbol}

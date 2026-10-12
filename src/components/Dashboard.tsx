@@ -4,6 +4,7 @@ import { generateMockChartData } from '../data';
 import { PortfolioAsset } from '../types';
 import { formatCurrency, cn } from '../utils';
 import { TokenChart } from './TokenChart';
+import { TokenAvatar } from './TokenAvatar';
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -132,12 +133,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ portfolio, isLoading }) =>
                   <div key={item.token.id} className="px-4 py-3 hover:bg-surface-2 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-surface-2 border border-border flex items-center justify-center overflow-hidden shrink-0">
-                          {item.token.imageUrl
-                            ? <img src={item.token.imageUrl} alt={item.token.symbol} className="w-full h-full object-cover" />
-                            : <span className="text-[10px] font-bold text-txt-2">{item.token.symbol[0]}</span>
-                          }
-                        </div>
+                        <TokenAvatar
+                          symbol={item.token.symbol}
+                          address={item.token.address}
+                          imageUrl={item.token.imageUrl}
+                          size="sm"
+                        />
                         <div>
                           <div className="text-[12.5px] font-bold text-txt">{item.token.symbol}</div>
                           <div className="text-[10px] text-txt-3 font-mono">{item.balance.toLocaleString()}</div>

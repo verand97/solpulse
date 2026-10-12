@@ -15,6 +15,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { formatCurrency, formatAddress, cn } from '../utils';
 import { SwapToken, PortfolioAsset } from '../types';
+import { TokenAvatar } from './TokenAvatar';
 
 interface WalletViewProps {
   swapTokens: SwapToken[];
@@ -245,6 +246,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                       onClick={() => { setShowPaySelect(!showPaySelect); setShowReceiveSelect(false); }}
                       className="flex items-center gap-1.5 bg-border hover:bg-border-2 px-2.5 py-1 rounded text-txt text-[12px] font-semibold transition-colors"
                     >
+                      <TokenAvatar symbol={payToken.symbol} imageUrl={payToken.imageUrl} size="xs" />
                       <span>{payToken.symbol}</span>
                       <ChevronDown size={12} className="text-txt-3" />
                     </button>
@@ -260,7 +262,10 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                               token.symbol === payToken.symbol && 'bg-border'
                             )}
                           >
-                            <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            <div className="flex items-center gap-2">
+                              <TokenAvatar symbol={token.symbol} imageUrl={token.imageUrl} size="xs" />
+                              <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            </div>
                             <span className="text-[11px] font-mono text-txt-3">{token.balance}</span>
                           </button>
                         ))}
@@ -303,6 +308,7 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                       onClick={() => { setShowReceiveSelect(!showReceiveSelect); setShowPaySelect(false); }}
                       className="flex items-center gap-1.5 bg-border hover:bg-border-2 px-2.5 py-1 rounded text-txt text-[12px] font-semibold transition-colors"
                     >
+                      <TokenAvatar symbol={receiveToken.symbol} imageUrl={receiveToken.imageUrl} size="xs" />
                       <span>{receiveToken.symbol}</span>
                       <ChevronDown size={12} className="text-txt-3" />
                     </button>
@@ -318,7 +324,10 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                               token.symbol === receiveToken.symbol && 'bg-border'
                             )}
                           >
-                            <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            <div className="flex items-center gap-2">
+                              <TokenAvatar symbol={token.symbol} imageUrl={token.imageUrl} size="xs" />
+                              <span className="text-[12px] font-semibold text-txt">{token.symbol}</span>
+                            </div>
                             <span className="text-[11px] font-mono text-txt-3">{token.balance}</span>
                           </button>
                         ))}
@@ -386,13 +395,12 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
                   <tr key={item.token.id} className="hover:bg-surface-2 transition-colors">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2.5">
-                        {item.token.imageUrl ? (
-                          <img src={item.token.imageUrl} alt={item.token.symbol} className="w-6 h-6 rounded-full object-cover border border-border" />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-surface-2 border border-border flex items-center justify-center font-bold text-[10px] text-txt">
-                            {item.token.symbol[0]}
-                          </div>
-                        )}
+                        <TokenAvatar
+                          symbol={item.token.symbol}
+                          address={item.token.address}
+                          imageUrl={item.token.imageUrl}
+                          size="sm"
+                        />
                         <div>
                           <div className="font-bold text-txt text-[12.5px]">{item.token.symbol}</div>
                           <div className="text-[10px] text-txt-3">{item.token.name}</div>

@@ -1,7 +1,7 @@
 {
   "model_version": "v1.0-hgb",
   "feature_version": "v1.0",
-  "trained_at": "2026-10-12T03:21:54.878179+00:00",
+  "trained_at": "2026-10-12T03:52:04.021298+00:00",
   "feature_cols": [
     "liq_usd_initial",
     "current_liq_usd",
@@ -57,60 +57,72 @@
     "name_similarity_to_top_tokens",
     "social_is_missing"
   ],
-  "train_samples": 28,
-  "val_samples": 9,
-  "test_samples": 10,
+  "train_samples": 76,
+  "val_samples": 25,
+  "test_samples": 26,
   "metrics": {
     "heuristic": {
-      "pr_auc": 0.0,
-      "roc_auc": 0.5,
-      "brier_score": 0.118,
-      "precision": 0.0,
-      "recall": 0.0,
-      "accuracy": 0.9
+      "pr_auc": 0.2621,
+      "roc_auc": 0.6238,
+      "brier_score": 0.2146,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "accuracy": 0.7692
     },
     "logistic_regression": {
-      "pr_auc": 0.0,
-      "roc_auc": 0.5,
-      "brier_score": 0.1145,
-      "precision": 0.0,
-      "recall": 0.0,
-      "accuracy": 0.9
+      "pr_auc": 0.3961,
+      "roc_auc": 0.5619,
+      "brier_score": 0.2969,
+      "precision": 0.2222,
+      "recall": 0.4,
+      "accuracy": 0.6154
     },
     "potential_model": {
-      "pr_auc": 0.0,
-      "roc_auc": 0.5,
-      "brier_score": 0.0628,
+      "pr_auc": 0.9111,
+      "roc_auc": 0.9619,
+      "brier_score": 0.0863,
       "precision": 0.0,
       "recall": 0.0,
-      "accuracy": 0.9
+      "accuracy": 0.8077
     },
     "risk_model": {
-      "pr_auc": 0.0,
-      "roc_auc": 0.5,
-      "brier_score": 0.199,
+      "pr_auc": 0.625,
+      "roc_auc": 0.9375,
+      "brier_score": 0.0764,
       "precision": 0.0,
       "recall": 0.0,
-      "accuracy": 0.7
+      "accuracy": 0.9231
     },
-    "mean_return_all": 1.05,
-    "mean_return_filtered": 1.52
+    "mean_return_all": 1.98,
+    "mean_return_filtered": 1.98
   },
   "top_features": [
+    [
+      "liq_to_mcap_ratio",
+      0.1289
+    ],
+    [
+      "initial_price_usd",
+      0.1263
+    ],
+    [
+      "secs_deploy_to_liquidity",
+      0.0421
+    ],
+    [
+      "liq_change_pct",
+      0.0289
+    ],
+    [
+      "avg_trade_size_usd",
+      0.0289
+    ],
     [
       "liq_usd_initial",
       0.0
     ],
     [
       "current_liq_usd",
-      0.0
-    ],
-    [
-      "liq_to_mcap_ratio",
-      0.0
-    ],
-    [
-      "liq_change_pct",
       0.0
     ],
     [
@@ -123,18 +135,6 @@
     ],
     [
       "liq_is_missing",
-      0.0
-    ],
-    [
-      "tx_count_5m",
-      0.0
-    ],
-    [
-      "tx_count_15m",
-      0.0
-    ],
-    [
-      "tx_count_60m",
       0.0
     ]
   ]

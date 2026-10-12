@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { WhaleAlert, Token, TrackedWhale } from '../types';
 import { formatCurrency, formatAddress, formatRelativeTime, cn } from '../utils';
 import { useWhaleTracker } from '../hooks/useWhaleTracker';
+import { TokenAvatar } from './TokenAvatar';
 import {
   ShieldAlert,
   ArrowRightLeft,
@@ -358,7 +359,20 @@ export const WhaleAlerts: React.FC<WhaleAlertsProps> = ({ tokens }) => {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-bold text-txt font-mono">{alert.tokenSymbol}</span>
+                          {(() => {
+                            const matched = tokens.find(t => t.symbol.toUpperCase() === alert.tokenSymbol.toUpperCase());
+                            return (
+                              <div className="flex items-center gap-2">
+                                <TokenAvatar
+                                  symbol={alert.tokenSymbol}
+                                  address={matched?.address}
+                                  imageUrl={matched?.imageUrl}
+                                  size="xs"
+                                />
+                                <span className="font-bold text-txt font-mono">{alert.tokenSymbol}</span>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-right font-mono font-semibold text-txt">
                           {formatCurrency(alert.amountUsd)}

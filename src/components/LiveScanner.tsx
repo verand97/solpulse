@@ -15,6 +15,7 @@ import {
   Clock,
   Filter,
 } from 'lucide-react';
+import { TokenAvatar } from './TokenAvatar';
 
 export const LiveScanner: React.FC = () => {
   const { liveTokens, isScanning, setIsScanning, minLiquidity, setMinLiquidity, clearTokens } = useLiveScanner();
@@ -146,13 +147,12 @@ export const LiveScanner: React.FC = () => {
                     {/* Token */}
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
-                        {token.imageUrl ? (
-                          <img src={token.imageUrl} alt={token.symbol} className="w-6 h-6 rounded-full object-cover shrink-0 border border-border" />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-surface-2 border border-border flex items-center justify-center font-bold text-[10px] text-txt shrink-0">
-                            {token.symbol[0]}
-                          </div>
-                        )}
+                        <TokenAvatar
+                          symbol={token.symbol}
+                          address={token.address}
+                          imageUrl={token.imageUrl}
+                          size="sm"
+                        />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-txt text-[12.5px] truncate">{token.symbol}</span>
