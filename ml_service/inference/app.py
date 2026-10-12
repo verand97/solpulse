@@ -98,11 +98,49 @@ def get_token_score(address: str):
         ).fetchone()
 
     if not row:
-        # If token exists but not yet scored, score on demand
+        # If token does not exist in local DB yet, attempt real-time on-demand discovery
+        if not db.token_exists(address):
+            try:
+                from ml_service.collector.clients.dexscreener import DexScreenerClient
+                from ml_service.collector.new_pairs_listener import NewPairsListener
+
+                dex_client = DexScreenerClient()
+                pairs = dex_client.get_token_pairs(address)
+                if pairs:
+                    sol_pairs = [p for p in pairs if str(p.get("chainId", "")).lower() == "solana"]
+                    target_pair = sol_pairs[0] if sol_pairs else pairs[0]
+                    base_tok = target_pair.get("baseToken", {})
+                    listener = NewPairsListener(db=db)
+                    listener.process_new_token(
+                        token_address=address,
+                        symbol=base_tok.get("symbol", "UNKNOWN"),
+                        name=base_tok.get("name", "Unknown Token"),
+                        pair_address=target_pair.get("pairAddress"),
+                        initial_price=float(target_pair.get("priceUsd") or 0.0),
+                        initial_liquidity=float(target_pair.get("liquidity", {}).get("usd") or 0.0),
+                        source="on_demand_screener",
+                        raw_data=target_pair
+                    )
+            except Exception as e:
+                logger.warning(f"On-demand discovery failed for {address}: {e}")
+
+        # If token exists now, score immediately
         if db.token_exists(address):
-            score_data = scorer.score_token(address)
-            return score_data
-        raise HTTPException(status_code=404, detail="Token not found in SolPulse database")
+            scorer.score_token(address)
+            with db.get_connection() as conn:
+                row = conn.execute(
+                    """
+                    SELECT m.*, t.name, t.initial_liquidity_usd, t.initial_price_usd, t.metadata_json
+                    FROM ml_scores m
+                    JOIN tokens t ON m.token_address = t.address
+                    WHERE m.token_address = ?
+                    ORDER BY m.calculated_at DESC LIMIT 1
+                    """,
+                    (address,)
+                ).fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="Token not found on Solana DEXes")
 
     data = dict(row)
     if data.get("top_shap_reasons_json"):
