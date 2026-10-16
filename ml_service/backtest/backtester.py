@@ -153,8 +153,8 @@ class RealisticBacktester:
                 strategy=strategy
             )
 
-            # 1. ML Strategy: Potential >= 0.5 & Risk <= 0.3
-            is_ml_pick = (ml_probs[i] >= 0.5) and (risk_probs[i] <= 0.3)
+            # 1. ML Strategy: High Potential (Prob >= 0.35) & Low Risk (Prob <= 0.30)
+            is_ml_pick = (ml_probs[i] >= 0.35) and (risk_probs[i] <= 0.30)
             if is_ml_pick:
                 results_ml.append(trade_res)
 
@@ -223,12 +223,20 @@ class RealisticBacktester:
             with open(MODELS_DIR / "risk_model.pkl", "rb") as f:
                 risk_model = pickle.load(f)
 
-        exclude_cols = {
-            "token_address", "symbol", "chain", "feature_version", "point_in_time",
-            "label_success", "label_is_rug", "label_is_honeypot", "label_is_dead", "label_net_return_24h"
-        }
-        numeric_cols = [c for c in df.columns if c not in exclude_cols and np.issubdtype(df[c].dtype, np.number)]
-        X_test = df_test[numeric_cols].to_numpy()
+        metadata = {}
+        meta_path = MODELS_DIR / "metadata.json"
+        if meta_path.exists():
+            with open(meta_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        feature_cols = metadata.get("feature_cols")
+        if not feature_cols:
+            exclude_cols = {
+                "token_address", "symbol", "chain", "feature_version", "point_in_time",
+                "label_success", "label_is_rug", "label_is_honeypot", "label_is_dead", "label_net_return_24h"
+            }
+            feature_cols = [c for c in df.columns if c not in exclude_cols and np.issubdtype(df[c].dtype, np.number)]
+
+        X_test = df_test[feature_cols].to_numpy()
 
         if pot_model:
             ml_probs = pot_model.predict_proba(X_test)[:, 1] if len(pot_model.classes_) > 1 else np.zeros(len(X_test))

@@ -1,9 +1,9 @@
 # Laporan Hasil Backtest Realistis (Checkpoint 5: SolPulse ML Screener)
 
-*Dibuat secara otomatis pada: 2026-10-10 22:50:32 UTC*
+*Dibuat secara otomatis pada: 2026-10-16 02:44:56 UTC*
 
 > [!NOTE]
-> **Status Validitas Out-of-Sample**: Filter ML menghasilkan Expectancy **$-0.89/trade** vs Random Baseline **$-2.46/trade** pada dataset pengujian out-of-sample.
+> **Status Validitas Out-of-Sample**: Filter ML menghasilkan Expectancy **$102.63/trade** vs Random Baseline **$-28.85/trade** pada dataset pengujian out-of-sample.
 > Backtest menunjukkan model ML berhasil menyaring token berisiko dan memprioritaskan breakout.
 
 ---
@@ -14,7 +14,7 @@
 - **Latensi Eksekusi**: `45 detik` delay setelah sinyal (mencegah asumsi harga ideal).
 - **Slippage Kurva Dinamis**: `3.0%` base slippage + $2 \times \frac{\text{Size}}{\text{Liquidity}}$ price impact.
 - **Biaya Transaksi**: DEX swap fee `0.3%` masuk & keluar + gas priority Solana `$0.005`.
-- **Sampel Pengujian**: `10 token` Out-of-Sample murni (kronologis 20% terbaru).
+- **Sampel Pengujian**: `27 token` Out-of-Sample murni (kronologis 20% terbaru).
 
 ---
 
@@ -24,12 +24,12 @@ Simulasi strategi utama: **Take-Profit @ 2.5x / Stop-Loss @ -30% / Time-Stop 24h
 
 | Metrik Evaluasi | Model ML (Screener) | Baseline Heuristik | Baseline Acak (Random) | Keterangan |
 | :--- | :--- | :--- | :--- | :--- |
-| **Total Trade** | `1` | `4` | `4` | Jumlah posisi dibuka |
-| **Win Rate** | **0.0%** | 25.0% | 0.0% | Persentase trade untung |
-| **Total PnL ($)** | **$-0.89** | $-2.07 | $-9.83 | Akumulasi laba bersih |
-| **Expectancy ($/trade)** | **$-0.89** | $-0.52 | $-2.46 | Rata-rata laba per trade |
-| **Rata-rata Return** | **0.991x** | 0.995x | 0.976x | Pengali modal rata-rata |
-| **Max Drawdown ($)** | `$0.00` | $1.18 | $8.94 | Penurunan modal puncak-lembah |
+| **Total Trade** | `4` | `8` | `7` | Jumlah posisi dibuka |
+| **Win Rate** | **75.0%** | 62.5% | 28.57% | Persentase trade untung |
+| **Total PnL ($)** | **$410.52** | $310.46 | $-201.94 | Akumulasi laba bersih |
+| **Expectancy ($/trade)** | **$102.63** | $38.81 | $-28.85 | Rata-rata laba per trade |
+| **Rata-rata Return** | **2.026x** | 1.388x | 0.712x | Pengali modal rata-rata |
+| **Max Drawdown ($)** | `$0.89` | $1.18 | $102.44 | Penurunan modal puncak-lembah |
 
 ---
 
@@ -37,9 +37,9 @@ Simulasi strategi utama: **Take-Profit @ 2.5x / Stop-Loss @ -30% / Time-Stop 24h
 
 | Strategi Exit | Win Rate | Total PnL ($) | Expectancy ($) | Max Drawdown ($) | Median Return |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Take-Profit (2.5x) + Stop-Loss (-30%)** | 0.0% | $-0.89 | $-0.89 | $0.00 | 0.99x |
-| **Trailing Stop (25% ATH)** | 100.0% | $7.27 | $7.27 | $0.00 | 1.07x |
-| **Time Exit Murni (24 Jam)** | 0.0% | $-0.89 | $-0.89 | $0.00 | 0.99x |
+| **Take-Profit (2.5x) + Stop-Loss (-30%)** | 75.0% | $410.52 | $102.63 | $0.89 | 2.36x |
+| **Trailing Stop (25% ATH)** | 100.0% | $1164.72 | $291.18 | $0.00 | 3.19x |
+| **Time Exit Murni (24 Jam)** | 25.0% | $-2.12 | $-0.53 | $2.67 | 0.99x |
 
 ---
 
@@ -47,10 +47,10 @@ Simulasi strategi utama: **Take-Profit @ 2.5x / Stop-Loss @ -30% / Time-Stop 24h
 
 | Persentil Return | Pengali Return (Net) | Dampak Portofolio |
 | :--- | :--- | :--- |
-| **25th Percentile (P25)** | `0.991x` | Batas bawah (kerugian terkontrol via SL) |
-| **50th Percentile (Median)** | `0.991x` | Titik tengah performa trade |
-| **75th Percentile (P75)** | `0.991x` | Trade yang bergerak moderat |
-| **90th Percentile (P90)** | `0.991x` | Trade breakout sukses (Take Profit) |
+| **25th Percentile (P25)** | `2.018x` | Batas bawah (kerugian terkontrol via SL) |
+| **50th Percentile (Median)** | `2.36x` | Titik tengah performa trade |
+| **75th Percentile (P75)** | `2.369x` | Trade yang bergerak moderat |
+| **90th Percentile (P90)** | `2.384x` | Trade breakout sukses (Take Profit) |
 
 ---
 

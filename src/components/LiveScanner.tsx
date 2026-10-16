@@ -14,12 +14,16 @@ import {
   TrendingDown,
   Clock,
   Filter,
+  Brain,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { TokenAvatar } from './TokenAvatar';
 
 export const LiveScanner: React.FC = () => {
   const { liveTokens, isScanning, setIsScanning, minLiquidity, setMinLiquidity, clearTokens } = useLiveScanner();
   const [copied, setCopied] = useState<string | null>(null);
+  const [selectedDetailToken, setSelectedDetailToken] = useState<any | null>(null);
 
   const handleCopy = (addr: string) => {
     navigator.clipboard.writeText(addr);
@@ -128,7 +132,8 @@ export const LiveScanner: React.FC = () => {
                 <th className="px-4 py-2.5 text-right">Liquidity</th>
                 <th className="px-4 py-2.5 text-right">24h Volume</th>
                 <th className="px-4 py-2.5 text-center">Safety</th>
-                <th className="px-4 py-2.5 text-right">External</th>
+                <th className="px-4 py-2.5 text-center">ML Potential</th>
+                <th className="px-4 py-2.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-2 text-txt-2">
@@ -204,9 +209,43 @@ export const LiveScanner: React.FC = () => {
                       </span>
                     </td>
 
-                    {/* External links */}
+                    {/* ML Potential & Signal */}
+                    <td className="px-4 py-2.5 text-center">
+                      {token.mlPotential !== undefined ? (
+                        <button
+                          onClick={() => setSelectedDetailToken(token)}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold font-mono border transition-transform hover:scale-105",
+                            token.mlPotential >= 0.65
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+                              : token.mlPotential >= 0.50
+                              ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25"
+                              : "bg-surface-2 text-txt-3 border-border"
+                          )}
+                          title="Click to view ML Audit and Factors"
+                        >
+                          <Brain size={10} />
+                          {(token.mlPotential * 100).toFixed(0)}%
+                          {token.mlPotential >= 0.65 && <Sparkles size={9} className="text-emerald-400" />}
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-txt-3 font-mono flex items-center justify-center gap-1">
+                          <RefreshCw size={9} className="animate-spin text-blue-400" /> Scoring...
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
                     <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <a
+                          href={`https://jup.ag/swap/SOL-${token.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="h-6 px-2 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[10.5px] font-mono flex items-center gap-1 transition-colors"
+                        >
+                          Trade <ExternalLink size={9} />
+                        </a>
                         <a
                           href={`https://dexscreener.com/solana/${token.address}`}
                           target="_blank"
@@ -232,6 +271,86 @@ export const LiveScanner: React.FC = () => {
           </table>
         )}
       </div>
+
+      {/* Deep-Dive Modal for Live Token */}
+      {selectedDetailToken && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-surface border border-border rounded-xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <TokenAvatar
+                  symbol={selectedDetailToken.symbol}
+                  address={selectedDetailToken.address}
+                  imageUrl={selectedDetailToken.imageUrl}
+                  size="md"
+                />
+                <div>
+                  <h3 className="text-[15px] font-bold text-white flex items-center gap-2">
+                    {selectedDetailToken.name} ({selectedDetailToken.symbol})
+                  </h3>
+                  <p className="text-[10.5px] text-txt-3 font-mono">
+                    {selectedDetailToken.address}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedDetailToken(null)}
+                className="text-txt-3 hover:text-white p-1 rounded hover:bg-surface-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-surface-2 border border-border text-center space-y-1">
+                <span className="text-[11px] text-txt-3">ML Potential Score</span>
+                <span className="block text-[20px] font-bold text-emerald-400 font-mono">
+                  {selectedDetailToken.mlPotential !== undefined ? `${(selectedDetailToken.mlPotential * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+                <span className="text-[10px] text-txt-3">Target &gt;= 2.0x breakout</span>
+              </div>
+              <div className="p-3 rounded-lg bg-surface-2 border border-border text-center space-y-1">
+                <span className="text-[11px] text-txt-3">Safety Risk Score</span>
+                <span className="block text-[20px] font-bold text-cyan-400 font-mono">
+                  {selectedDetailToken.mlRisk !== undefined ? `${(selectedDetailToken.mlRisk * 100).toFixed(1)}%` : 'Safe'}
+                </span>
+                <span className="text-[10px] text-txt-3">Contract audited</span>
+              </div>
+            </div>
+
+            {selectedDetailToken.shapReasons && selectedDetailToken.shapReasons.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-[11px] font-semibold text-txt-2 uppercase tracking-wide">Key Decision Drivers:</span>
+                <div className="space-y-1.5">
+                  {selectedDetailToken.shapReasons.map((r: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-2 rounded bg-surface-2 text-[11.5px]">
+                      <span className="font-medium text-white">{r.factor}</span>
+                      <span className="text-txt-3 text-[11px] truncate max-w-64">{r.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-border">
+              <a
+                href={`https://jup.ag/swap/SOL-${selectedDetailToken.address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded bg-emerald-500 hover:bg-emerald-600 text-[12px] text-white font-medium transition-colors flex items-center gap-1.5"
+              >
+                Trade on Jupiter <ExternalLink size={12} />
+              </a>
+              <button
+                onClick={() => setSelectedDetailToken(null)}
+                className="px-3 py-1.5 rounded bg-surface-2 hover:bg-surface text-[12px] text-txt-2 hover:text-white border border-border transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

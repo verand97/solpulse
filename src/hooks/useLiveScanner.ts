@@ -4,6 +4,10 @@ import { Token } from '../types';
 export interface LiveToken extends Token {
   rugCheckScore: number;
   detectedAt: Date;
+  mlPotential?: number;
+  mlRisk?: number;
+  mlRecommendation?: string;
+  shapReasons?: Array<{ factor: string; detail: string; impact: string }>;
 }
 
 export const useLiveScanner = () => {
@@ -65,7 +69,17 @@ export const useLiveScanner = () => {
           const dangerRisks = rcData.risks?.filter((r: any) => r.level === 'danger') || [];
           
           if (dangerRisks.length === 0) {
-            // It's safe!
+            // It's safe! Attempt real-time ML inference
+            let mlData: any = null;
+            try {
+              const mlRes = await fetch(`http://localhost:8000/tokens/${address}/score`, { signal: AbortSignal.timeout(2500) });
+              if (mlRes.ok) {
+                mlData = await mlRes.json();
+              }
+            } catch {
+              // Graceful fallback
+            }
+
             const newLiveToken: LiveToken = {
               id: address,
               address,
@@ -82,6 +96,10 @@ export const useLiveScanner = () => {
               createdAt: Date.now(),
               rugCheckScore: rcData.score || 0,
               detectedAt: new Date(),
+              mlPotential: mlData?.potential_score,
+              mlRisk: mlData?.risk_score,
+              mlRecommendation: mlData?.recommendation,
+              shapReasons: mlData?.top_shap_reasons,
             };
 
             setLiveTokens(prev => [newLiveToken, ...prev].slice(0, 50)); // Keep last 50
