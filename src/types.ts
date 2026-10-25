@@ -118,3 +118,36 @@ export interface MLScreenedToken {
   imageUrl?: string;
 }
 
+export interface NarrativeEvent {
+  id: string;
+  vipName: string;
+  vipHandle: string;
+  vipAvatar: string;
+  vipCategory: 'elon' | 'trump' | 'ai' | 'viral';
+  tweetText: string;
+  timestamp: string;
+  virality: 'Explosive' | 'High' | 'Trending';
+  keywords: string[];
+  activeMemeTokensCount?: number;
+}
+
+export interface FundamentalAudit {
+  score: number; // 0 - 100
+  grade: 'S' | 'A' | 'B' | 'C' | 'F';
+  narrativeScore: number; // 0 - 30
+  safetyScore: number; // 0 - 25
+  distributionScore: number; // 0 - 20
+  liquidityScore: number; // 0 - 15
+  communityScore: number; // 0 - 10
+  isMintRevoked: boolean;
+  isFreezeRevoked: boolean;
+  isLpLocked: boolean;
+  top10Percentage: number;
+  devHoldingPercentage: number;
+  isFirstRunner: boolean;
+  verdictId: string;
+  verdictText: string;
+  risks: string[];
+  strengths: string[];
+}
+

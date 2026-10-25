@@ -6,6 +6,7 @@ import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
 import { MLScreenerView } from './components/MLScreenerView';
+import { NarrativeRadar } from './components/NarrativeRadar';
 import { LiveScanner } from './components/LiveScanner';
 import { WhaleAlerts } from './components/WhaleAlerts';
 import { Watchlist } from './components/Watchlist';
@@ -90,6 +91,7 @@ export default function App() {
                 />
               )}
               {activeTab === 'mlscreener' && <MLScreenerView />}
+              {activeTab === 'narrative' && <NarrativeRadar />}
               {activeTab === 'livescanner' && <LiveScanner />}
               {activeTab === 'watchlist' && (
                 <div className="flex-1 overflow-y-auto custom-scrollbar">

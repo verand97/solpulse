@@ -12,7 +12,8 @@ import {
   ShieldAlert,
   Globe,
   Zap,
-  Brain
+  Brain,
+  Flame
 } from 'lucide-react';
 import { cn } from '../utils';
 
@@ -25,13 +26,14 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
-  { id: 'screener',    label: 'Screener',       icon: LineChart },
-  { id: 'mlscreener',  label: 'AI Screener',    icon: Brain },
-  { id: 'alerts',      label: 'Whale Tracker',  icon: ShieldAlert },
-  { id: 'livescanner', label: 'Live Scanner',   icon: Radar },
-  { id: 'watchlist',   label: 'Watchlist',      icon: Star },
-  { id: 'wallet',      label: 'Wallet',         icon: Wallet },
+  { id: 'dashboard',   label: 'Dashboard',         icon: LayoutDashboard },
+  { id: 'screener',    label: 'Screener',          icon: LineChart },
+  { id: 'mlscreener',  label: 'AI Screener',       icon: Brain },
+  { id: 'narrative',   label: 'X Trends & Funda',  icon: Flame },
+  { id: 'alerts',      label: 'Whale Tracker',     icon: ShieldAlert },
+  { id: 'livescanner', label: 'Live Scanner',      icon: Radar },
+  { id: 'watchlist',   label: 'Watchlist',         icon: Star },
+  { id: 'wallet',      label: 'Wallet',            icon: Wallet },
 ];
 
 
