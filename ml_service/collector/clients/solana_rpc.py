@@ -31,9 +31,9 @@ class SolanaRPCClient:
         }
         backoff = 1.0
 
-        for attempt in range(max_retries):
+        for attempt in range(min(max_retries, 2)):
             try:
-                resp = self.session.post(self.rpc_url, json=payload, timeout=12)
+                resp = self.session.post(self.rpc_url, json=payload, timeout=4)
                 if resp.status_code == 200:
                     data = resp.json()
                     if "result" in data:
@@ -42,15 +42,11 @@ class SolanaRPCClient:
                         logger.warning(f"Solana RPC error ({method}): {data['error']}")
                         return None
                 elif resp.status_code == 429:
-                    logger.warning(f"Solana RPC 429 rate limit. Waiting {backoff}s...")
-                    time.sleep(backoff)
-                    backoff *= 2.0
+                    logger.debug(f"Solana RPC 429 rate limit, falling back to cached/default metrics.")
+                    return None
             except Exception as e:
-                logger.error(f"Solana RPC exception ({method}): {e}")
-                time.sleep(backoff)
-                backoff *= 1.5
-
-        return None
+                logger.debug(f"Solana RPC exception ({method}): {e}")
+                return None
 
     def get_token_supply(self, mint_address: str) -> Optional[Dict[str, Any]]:
         """Get total token supply."""
