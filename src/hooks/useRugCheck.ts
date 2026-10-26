@@ -28,13 +28,18 @@ export const useRugCheck = (address: string | null) => {
       return;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     const fetchRugCheck = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
         const baseUrl = import.meta.env.VITE_RUGCHECK_API_URL || 'https://api.rugcheck.xyz';
-        const response = await fetch(`${baseUrl}/v1/tokens/${address}/report/summary`);
+        const response = await fetch(`${baseUrl}/v1/tokens/${address}/report/summary`, {
+          signal: controller.signal
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch RugCheck data');
@@ -50,15 +55,24 @@ export const useRugCheck = (address: string | null) => {
           ...result,
           isSafe: dangerRisks.length === 0,
         });
-      } catch (err) {
-        console.error('RugCheck API Error:', err);
-        setError('Could not verify token security.');
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('RugCheck API Error:', err);
+          setError('Could not verify token security.');
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchRugCheck();
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [address]);
 
   return { data, isLoading, error };

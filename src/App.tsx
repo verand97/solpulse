@@ -1,18 +1,27 @@
 // SolPulse Terminal - Solana Analytics
-import React, { useState, useCallback, useMemo } from 'react';
-import { LandingPage } from './components/LandingPage';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Screener } from './components/Screener';
-import { MLScreenerView } from './components/MLScreenerView';
-import { NarrativeRadar } from './components/NarrativeRadar';
-import { LiveScanner } from './components/LiveScanner';
-import { WhaleAlerts } from './components/WhaleAlerts';
-import { Watchlist } from './components/Watchlist';
-import { WalletView } from './components/WalletView';
-import { SettingsView } from './components/SettingsView';
 import { Footer } from './components/Footer';
+
+// Code-split heavy views with React.lazy
+const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
+const MLScreenerView = lazy(() => import('./components/MLScreenerView').then(m => ({ default: m.MLScreenerView })));
+const NarrativeRadar = lazy(() => import('./components/NarrativeRadar').then(m => ({ default: m.NarrativeRadar })));
+const LiveScanner = lazy(() => import('./components/LiveScanner').then(m => ({ default: m.LiveScanner })));
+const WhaleAlerts = lazy(() => import('./components/WhaleAlerts').then(m => ({ default: m.WhaleAlerts })));
+const Watchlist = lazy(() => import('./components/Watchlist').then(m => ({ default: m.Watchlist })));
+const WalletView = lazy(() => import('./components/WalletView').then(m => ({ default: m.WalletView })));
+const SettingsView = lazy(() => import('./components/SettingsView').then(m => ({ default: m.SettingsView })));
+
+const TabLoader = () => (
+  <div className="flex-1 flex flex-col items-center justify-center py-24 text-txt-3">
+    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2.5" />
+    <span className="text-[11.5px] font-mono">Loading module...</span>
+  </div>
+);
 import { MOCK_NOTIFICATIONS } from './data';
 import { Notification, PortfolioAsset, SwapToken } from './types';
 import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
@@ -54,7 +63,9 @@ export default function App() {
   return (
     <>
       {showLandingPage ? (
-        <LandingPage onLaunch={handleEnterTerminal} />
+        <Suspense fallback={<TabLoader />}>
+          <LandingPage onLaunch={handleEnterTerminal} />
+        </Suspense>
       ) : (
         <div className="flex h-screen bg-bg overflow-hidden">
           <Sidebar 
@@ -76,39 +87,41 @@ export default function App() {
             />
             
             <main className="flex-1 overflow-hidden flex flex-col">
-              {activeTab === 'dashboard' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  <Dashboard portfolio={portfolio} isLoading={isLoading} />
-                </div>
-              )}
-              {activeTab === 'screener' && (
-                <Screener 
-                  searchQuery={searchQuery} 
-                  tokens={tokens} 
-                  isLoading={isLoading} 
-                  onSearchChange={setSearchQuery}
-                  fetchTokenByAddress={fetchTokenByAddress}
-                />
-              )}
-              {activeTab === 'mlscreener' && <MLScreenerView />}
-              {activeTab === 'narrative' && <NarrativeRadar />}
-              {activeTab === 'livescanner' && <LiveScanner />}
-              {activeTab === 'watchlist' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  <Watchlist tokens={tokens} />
-                </div>
-              )}
-              {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
-              {activeTab === 'wallet' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  <WalletView swapTokens={swapTokens} portfolio={portfolio} />
-                </div>
-              )}
-              {activeTab === 'settings' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  <SettingsView />
-                </div>
-              )}
+              <Suspense fallback={<TabLoader />}>
+                {activeTab === 'dashboard' && (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <Dashboard portfolio={portfolio} isLoading={isLoading} />
+                  </div>
+                )}
+                {activeTab === 'screener' && (
+                  <Screener 
+                    searchQuery={searchQuery} 
+                    tokens={tokens} 
+                    isLoading={isLoading} 
+                    onSearchChange={setSearchQuery}
+                    fetchTokenByAddress={fetchTokenByAddress}
+                  />
+                )}
+                {activeTab === 'mlscreener' && <MLScreenerView />}
+                {activeTab === 'narrative' && <NarrativeRadar />}
+                {activeTab === 'livescanner' && <LiveScanner />}
+                {activeTab === 'watchlist' && (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <Watchlist tokens={tokens} />
+                  </div>
+                )}
+                {activeTab === 'alerts' && <WhaleAlerts tokens={tokens} />}
+                {activeTab === 'wallet' && (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <WalletView swapTokens={swapTokens} portfolio={portfolio} />
+                  </div>
+                )}
+                {activeTab === 'settings' && (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <SettingsView />
+                  </div>
+                )}
+              </Suspense>
             </main>
             
             <Footer />

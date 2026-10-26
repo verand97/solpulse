@@ -75,7 +75,8 @@ export const Screener: React.FC<ScreenerProps> = ({
       return;
     }
     setIsMlLoading(true);
-    fetch(`http://localhost:8000/tokens/${selectedToken.address}/score`, { signal: AbortSignal.timeout(2500) })
+    const mlBaseUrl = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+    fetch(`${mlBaseUrl}/tokens/${selectedToken.address}/score`, { signal: AbortSignal.timeout(2500) })
       .then(res => res.ok ? res.json() : null)
       .then(data => setMlScore(data))
       .catch(() => setMlScore(null))

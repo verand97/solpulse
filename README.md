@@ -1,4 +1,4 @@
-1# ⚡ SolPulse — AI-Powered Solana DEX Terminal & ML Token Screener
+# ⚡ SolPulse — AI-Powered Solana DEX Terminal & ML Token Screener
 
 Real-time Solana DEX analytics platform combining on-chain transaction indexing, whale tracking, deterministic smart contract audits, and calibrated machine learning models to screen high-upside and low-risk tokens.
 

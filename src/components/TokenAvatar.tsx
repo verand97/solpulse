@@ -48,28 +48,31 @@ export const TokenAvatar: React.FC<TokenAvatarProps> = ({
   className = '',
   alt
 }) => {
-  // Construct list of possible image candidate URLs in order of preference
-  const candidates: string[] = [];
-  if (imageUrl && imageUrl.trim()) {
-    candidates.push(imageUrl.trim());
-  }
-  if (address && address.length > 20) {
-    // 1. DexScreener official token icon CDN
-    candidates.push(`https://dd.dexscreener.com/ds-data/tokens/solana/${address}.png`);
-    // 2. Solana Labs token list repository CDN
-    candidates.push(`https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${address}/logo.png`);
-    // 3. Raydium token icons CDN
-    candidates.push(`https://img.raydium.io/icon/${address}.png`);
-  }
+  // Memoize candidates list to avoid re-allocating arrays on every table cell re-render
+  const candidates = React.useMemo(() => {
+    const list: string[] = [];
+    if (imageUrl && imageUrl.trim()) {
+      list.push(imageUrl.trim());
+    }
+    if (address && address.length > 20) {
+      // 1. DexScreener official token icon CDN
+      list.push(`https://dd.dexscreener.com/ds-data/tokens/solana/${address}.png`);
+      // 2. Solana Labs token list repository CDN
+      list.push(`https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${address}/logo.png`);
+      // 3. Raydium token icons CDN
+      list.push(`https://img.raydium.io/icon/${address}.png`);
+    }
+    return list;
+  }, [imageUrl, address]);
 
   const [candidateIdx, setCandidateIdx] = useState(0);
-  const [hasExhausted, setHasExhausted] = useState(candidates.length === 0);
+  const [hasExhausted, setHasExhausted] = useState(() => candidates.length === 0);
 
   // Reset state when imageUrl or address changes
   useEffect(() => {
     setCandidateIdx(0);
     setHasExhausted(candidates.length === 0);
-  }, [imageUrl, address]);
+  }, [candidates]);
 
   const handleImageError = () => {
     if (candidateIdx + 1 < candidates.length) {

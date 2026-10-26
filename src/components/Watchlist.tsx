@@ -35,20 +35,71 @@ export const Watchlist: React.FC<WatchlistProps> = ({ tokens }) => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const watchlistTokens = watchlistAddresses
-    .map(address => tokens.find(t => t.address === address) || {
+  const [extraTokens, setExtraTokens] = useState<Record<string, Token>>({});
+
+  React.useEffect(() => {
+    const missing = watchlistAddresses.filter(
+      addr => !tokens.some(t => t.address.toLowerCase() === addr.toLowerCase()) && !extraTokens[addr]
+    );
+    if (missing.length === 0) return;
+
+    const fetchMissing = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com';
+        const chunk = missing.slice(0, 30).join(',');
+        const res = await fetch(`${baseUrl}/latest/dex/tokens/${chunk}`, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && Array.isArray(data.pairs)) {
+          const map: Record<string, Token> = {};
+          data.pairs.forEach((p: any) => {
+            if (p?.baseToken?.address) {
+              const addr = p.baseToken.address;
+              if (!map[addr] || (map[addr].liquidity < (p.liquidity?.usd || 0))) {
+                map[addr] = {
+                  id: p.pairAddress || addr,
+                  pairAddress: p.pairAddress,
+                  symbol: p.baseToken.symbol || 'UNKNOWN',
+                  name: p.baseToken.name || 'Unknown Token',
+                  price: parseFloat(p.priceUsd) || 0,
+                  priceChange24h: p.priceChange?.h24 || 0,
+                  volume24h: p.volume?.h24 || 0,
+                  liquidity: p.liquidity?.usd || 0,
+                  marketCap: p.marketCap || p.fdv || 0,
+                  address: addr,
+                  chainId: p.chainId || 'solana',
+                  createdAt: p.pairCreatedAt || Date.now(),
+                  imageUrl: p.info?.imageUrl,
+                };
+              }
+            }
+          });
+          setExtraTokens(prev => ({ ...prev, ...map }));
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchMissing();
+  }, [watchlistAddresses, tokens, extraTokens]);
+
+  const watchlistTokens = watchlistAddresses.map(address => {
+    const found = tokens.find(t => t.address.toLowerCase() === address.toLowerCase()) || extraTokens[address];
+    if (found) return found;
+    return {
       address,
-      symbol: '...',
-      name: 'Offline / Unlisted',
+      symbol: address.slice(0, 4).toUpperCase(),
+      name: `Token ${address.slice(0, 6)}...`,
       price: 0,
       priceChange24h: 0,
       volume24h: 0,
       liquidity: 0,
       marketCap: 0,
       id: address,
+      chainId: 'solana',
       createdAt: 0,
-    } as Token)
-    .filter(t => t.symbol !== '...');
+    } as Token;
+  });
 
   const filteredTokens = watchlistTokens.filter(t =>
     t.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||

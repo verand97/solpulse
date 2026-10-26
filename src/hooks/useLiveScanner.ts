@@ -20,31 +20,31 @@ export const useLiveScanner = () => {
     if (!isScanning) return;
 
     let timeoutId: number;
-    let isActive = true;
+    const controller = new AbortController();
 
     const scanRoutine = async () => {
       try {
-        // 1. Fetch newly created token profiles
-        const profileRes = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
+        if (controller.signal.aborted) return;
+        const dexBaseUrl = import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com';
+        const profileRes = await fetch(`${dexBaseUrl}/token-profiles/latest/v1`, {
+          signal: controller.signal
+        });
         if (!profileRes.ok) throw new Error('Failed to fetch new profiles');
         
         const data = await profileRes.json();
         const solanaTokens = (data || []).filter((t: any) => t.chainId === 'solana');
 
         for (const token of solanaTokens) {
-          if (!isActive) break;
+          if (controller.signal.aborted) break;
           const address = token.tokenAddress;
+          if (!address) continue;
           
           if (scannedAddresses.current.has(address)) continue;
-          scannedAddresses.current.add(address);
-
-          // Prevent memory leak
-          if (scannedAddresses.current.size > 2000) {
-            scannedAddresses.current.clear();
-          }
 
           // 2. Fetch Liquidity
-          const dexRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`);
+          const dexRes = await fetch(`${dexBaseUrl}/latest/dex/tokens/${address}`, {
+            signal: controller.signal
+          });
           if (!dexRes.ok) continue;
           
           const dexData = await dexRes.json();
@@ -58,12 +58,25 @@ export const useLiveScanner = () => {
           );
           
           const liquidity = bestPair.liquidity?.usd || 0;
-          if (liquidity < minLiquidity) continue;
+          if (liquidity < minLiquidity) {
+            // Do not permanently blacklist: token might gain liquidity later
+            continue;
+          }
+
+          // Mark as processed
+          scannedAddresses.current.add(address);
+          if (scannedAddresses.current.size > 1500) {
+            const arr = Array.from(scannedAddresses.current);
+            scannedAddresses.current = new Set(arr.slice(arr.length - 800));
+          }
 
           // 3. Fetch RugCheck
           const rugCheckUrl = import.meta.env.VITE_RUGCHECK_API_URL || 'https://api.rugcheck.xyz';
-          const rcRes = await fetch(`${rugCheckUrl}/v1/tokens/${address}/report/summary`);
-          if (!rcRes.ok) continue;
+          const rcRes = await fetch(`${rugCheckUrl}/v1/tokens/${address}/report/summary`, {
+            signal: controller.signal
+          }).catch(() => null);
+
+          if (!rcRes || !rcRes.ok) continue;
           
           const rcData = await rcRes.json();
           const dangerRisks = rcData.risks?.filter((r: any) => r.level === 'danger') || [];
@@ -71,8 +84,11 @@ export const useLiveScanner = () => {
           if (dangerRisks.length === 0) {
             // It's safe! Attempt real-time ML inference
             let mlData: any = null;
+            const mlBaseUrl = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
             try {
-              const mlRes = await fetch(`http://localhost:8000/tokens/${address}/score`, { signal: AbortSignal.timeout(2500) });
+              const mlRes = await fetch(`${mlBaseUrl}/tokens/${address}/score`, { 
+                signal: AbortSignal.timeout(2500) 
+              });
               if (mlRes.ok) {
                 mlData = await mlRes.json();
               }
@@ -102,25 +118,30 @@ export const useLiveScanner = () => {
               shapReasons: mlData?.top_shap_reasons,
             };
 
-            setLiveTokens(prev => [newLiveToken, ...prev].slice(0, 50)); // Keep last 50
+            setLiveTokens(prev => {
+              const withoutDup = prev.filter(t => t.address !== address);
+              return [newLiveToken, ...withoutDup].slice(0, 50);
+            });
           }
           
-          // Sleep a bit to avoid hitting rate limits too hard
-          await new Promise(r => setTimeout(r, 1000));
+          // Polite delay between pairs to respect rate limits
+          await new Promise(r => setTimeout(r, 800));
         }
-      } catch (err) {
-        console.error("Live scanner error:", err);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error("Live scanner error:", err);
+        }
       }
 
-      if (isActive) {
-        timeoutId = window.setTimeout(scanRoutine, 60000); // Re-run every minute
+      if (!controller.signal.aborted) {
+        timeoutId = window.setTimeout(scanRoutine, 45000); // Re-run routine
       }
     };
 
     scanRoutine();
 
     return () => {
-      isActive = false;
+      controller.abort();
       clearTimeout(timeoutId);
     };
   }, [isScanning, minLiquidity]);

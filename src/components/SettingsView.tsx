@@ -4,16 +4,30 @@ import { cn } from '../utils';
 
 export const SettingsView: React.FC = () => {
   const [saved, setSaved] = useState(false);
-  const [selectedRpc, setSelectedRpc] = useState(
-    import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com'
-  );
-  const [wsUrl, setWsUrl] = useState(
-    (import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com').replace('http', 'ws')
-  );
-  const [whaleAlertsEnabled, setWhaleAlertsEnabled] = useState(true);
-  const [autoDisconnect, setAutoDisconnect] = useState(false);
+  const [selectedRpc, setSelectedRpc] = useState(() => {
+    return localStorage.getItem('solpulse_rpc_url') || import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com';
+  });
+  const [wsUrl, setWsUrl] = useState(() => {
+    return localStorage.getItem('solpulse_ws_url') || (import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com').replace('http', 'ws');
+  });
+  const [whaleAlertsEnabled, setWhaleAlertsEnabled] = useState(() => {
+    const val = localStorage.getItem('solpulse_whale_alerts');
+    return val !== null ? val === 'true' : true;
+  });
+  const [autoDisconnect, setAutoDisconnect] = useState(() => {
+    return localStorage.getItem('solpulse_auto_disconnect') === 'true';
+  });
 
   const handleSave = () => {
+    try {
+      localStorage.setItem('solpulse_rpc_url', selectedRpc.trim());
+      localStorage.setItem('solpulse_ws_url', wsUrl.trim());
+      localStorage.setItem('solpulse_whale_alerts', String(whaleAlertsEnabled));
+      localStorage.setItem('solpulse_auto_disconnect', String(autoDisconnect));
+      window.dispatchEvent(new Event('solpulse_settings_changed'));
+    } catch {
+      // ignore
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

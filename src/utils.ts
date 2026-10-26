@@ -1,44 +1,52 @@
 export const formatCurrency = (value: number) => {
   if (value === undefined || value === null || isNaN(value)) return '$0.00';
-  if (value >= 1e9) {
-    return `$${(value / 1e9).toFixed(2)}B`;
+  const isNegative = value < 0;
+  const abs = Math.abs(value);
+  const prefix = isNegative ? '-$' : '$';
+
+  if (abs >= 1e9) {
+    return `${prefix}${(abs / 1e9).toFixed(2)}B`;
   }
-  if (value >= 1e6) {
-    return `$${(value / 1e6).toFixed(2)}M`;
+  if (abs >= 1e6) {
+    return `${prefix}${(abs / 1e6).toFixed(2)}M`;
   }
-  if (value >= 1e3) {
-    return `$${(value / 1e3).toFixed(2)}K`;
+  if (abs >= 1e3) {
+    return `${prefix}${(abs / 1e3).toFixed(2)}K`;
   }
-  if (value >= 1) {
-    return `$${value.toFixed(2)}`;
+  if (abs >= 1) {
+    return `${prefix}${abs.toFixed(2)}`;
   }
-  if (value >= 0.01) {
-    return `$${value.toFixed(4)}`;
+  if (abs >= 0.01) {
+    return `${prefix}${abs.toFixed(4)}`;
   }
-  if (value > 0.000001) {
-    return `$${value.toFixed(6)}`;
+  if (abs > 0.000001) {
+    return `${prefix}${abs.toFixed(6)}`;
   }
-  if (value > 0) {
-    return `$${value.toFixed(8)}`;
+  if (abs > 0) {
+    return `${prefix}${abs.toFixed(8)}`;
   }
   return '$0.00';
 };
 
 export const formatNumber = (value: number) => {
   if (value === undefined || value === null || isNaN(value)) return '0';
-  if (value >= 1e9) {
-    return `${(value / 1e9).toFixed(2)}B`;
+  const isNegative = value < 0;
+  const abs = Math.abs(value);
+  const prefix = isNegative ? '-' : '';
+
+  if (abs >= 1e9) {
+    return `${prefix}${(abs / 1e9).toFixed(2)}B`;
   }
-  if (value >= 1e6) {
-    return `${(value / 1e6).toFixed(2)}M`;
+  if (abs >= 1e6) {
+    return `${prefix}${(abs / 1e6).toFixed(2)}M`;
   }
-  if (value >= 1e3) {
-    return `${(value / 1e3).toFixed(2)}K`;
+  if (abs >= 1e3) {
+    return `${prefix}${(abs / 1e3).toFixed(2)}K`;
   }
-  if (value < 0.01 && value > 0) {
-    return value.toFixed(6);
+  if (abs < 0.01 && abs > 0) {
+    return `${prefix}${abs.toFixed(6)}`;
   }
-  return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return `${prefix}${abs.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 };
 
 export const formatAddress = (address: string, chars: number = 4) => {

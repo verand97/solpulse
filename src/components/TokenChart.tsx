@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useId } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { ChartDataPoint } from '../types';
 
@@ -13,12 +13,15 @@ export const TokenChart: React.FC<TokenChartProps> = ({
   color = '#10B981', 
   height = 300 
 }) => {
+  const rawId = useId();
+  const gradientId = `tokenChartGradient-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
   const minMax = useMemo(() => {
     if (!data.length) return { min: 0, max: 0 };
     const prices = data.map(d => d.price);
     const min = Math.min(...prices);
     const max = Math.max(...prices);
-    const padding = (max - min) * 0.1;
+    const padding = (max - min) * 0.1 || (min * 0.05);
     return { min: Math.max(0, min - padding), max: max + padding };
   }, [data]);
 
@@ -27,7 +30,7 @@ export const TokenChart: React.FC<TokenChartProps> = ({
       <ResponsiveContainer>
         <AreaChart data={data} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
           <defs>
-            <linearGradient id="tokenChartGradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={color} stopOpacity={0.18} />
               <stop offset="95%" stopColor={color} stopOpacity={0.0} />
             </linearGradient>
@@ -59,7 +62,7 @@ export const TokenChart: React.FC<TokenChartProps> = ({
             stroke={color} 
             strokeWidth={1.5}
             fillOpacity={1} 
-            fill="url(#tokenChartGradient)" 
+            fill={`url(#${gradientId})`} 
             isAnimationActive={false}
           />
         </AreaChart>

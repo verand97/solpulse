@@ -30,12 +30,26 @@ export const WalletView: React.FC<WalletViewProps> = ({ swapTokens, portfolio })
 
   const [payAmount, setPayAmount] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
-  const [payToken, setPayToken] = useState<SwapToken>(swapTokens[0] || { symbol: 'SOL', name: 'Solana', balance: 14.5, price: 145, icon: 'S' });
-  const [receiveToken, setReceiveToken] = useState<SwapToken>(swapTokens[1] || { symbol: 'USDC', name: 'USD Coin', balance: 2500, price: 1.0, icon: 'U' });
+  const [payToken, setPayToken] = useState<SwapToken>(swapTokens[0] || { symbol: 'SOL', name: 'Solana', balance: 0, price: 145, icon: 'S' });
+  const [receiveToken, setReceiveToken] = useState<SwapToken>(swapTokens[1] || { symbol: 'USDC', name: 'USD Coin', balance: 0, price: 1.0, icon: 'U' });
   const [showPaySelect, setShowPaySelect] = useState(false);
   const [showReceiveSelect, setShowReceiveSelect] = useState(false);
   const [copied, setCopied] = useState(false);
   const [swapSuccess, setSwapSuccess] = useState(false);
+
+  // Sync selected tokens whenever live wallet portfolio balances update
+  React.useEffect(() => {
+    if (swapTokens.length > 0) {
+      setPayToken(prev => {
+        const found = swapTokens.find(t => t.symbol === prev.symbol);
+        return found || swapTokens[0];
+      });
+      setReceiveToken(prev => {
+        const found = swapTokens.find(t => t.symbol === prev.symbol);
+        return found || (swapTokens[1] || swapTokens[0]);
+      });
+    }
+  }, [swapTokens]);
 
   const handlePayChange = (val: string) => {
     if (val && !/^\d*\.?\d*$/.test(val)) return;

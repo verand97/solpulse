@@ -10,8 +10,10 @@ export const useDexScreenerTokens = () => {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed.tokens) && parsed.tokens.length > 0) {
-          return parsed.tokens;
+        if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL) {
+          if (Array.isArray(parsed.tokens) && parsed.tokens.length > 0) {
+            return parsed.tokens;
+          }
         }
       }
     } catch {
@@ -20,9 +22,14 @@ export const useDexScreenerTokens = () => {
     return [];
   });
   
-  const [isLoading, setIsLoading] = useState(tokens.length === 0);
+  const [isLoading, setIsLoading] = useState(() => tokens.length === 0);
   const [isSearching, setIsSearching] = useState(false);
   const isFetchingRef = useRef(false);
+  const tokensCountRef = useRef(tokens.length);
+
+  useEffect(() => {
+    tokensCountRef.current = tokens.length;
+  }, [tokens.length]);
 
   const parsePairsToTokens = useCallback((pairs: any[]): Token[] => {
     if (!Array.isArray(pairs)) return [];
@@ -58,18 +65,18 @@ export const useDexScreenerTokens = () => {
   const fetchTokens = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (tokens.length === 0) setIsLoading(true);
+    if (tokensCountRef.current === 0) setIsLoading(true);
 
     try {
       const baseUrl = import.meta.env.VITE_DEXSCREENER_API_URL || 'https://api.dexscreener.com';
 
       // 1. Fetch boosted / trending tokens (currently hot)
-      const boostsPromise = fetch(`${baseUrl}/token-boosts/latest/v1`)
+      const boostsPromise = fetch(`${baseUrl}/token-boosts/latest/v1`, { signal: AbortSignal.timeout(10000) })
         .then(res => res.ok ? res.json() : [])
         .catch(() => []);
 
       // 2. Fetch latest token profiles
-      const profilesPromise = fetch(`${baseUrl}/token-profiles/latest/v1`)
+      const profilesPromise = fetch(`${baseUrl}/token-profiles/latest/v1`, { signal: AbortSignal.timeout(10000) })
         .then(res => res.ok ? res.json() : [])
         .catch(() => []);
 
@@ -82,7 +89,7 @@ export const useDexScreenerTokens = () => {
         ? profilesData.map((p: any) => p.tokenAddress).filter(Boolean).slice(0, 50)
         : [];
 
-      // Top established Solana tokens
+      // Top established Solana ecosystem tokens
       const establishedSolana = [
         'So11111111111111111111111111111111111111112', // SOL
         'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
@@ -98,10 +105,10 @@ export const useDexScreenerTokens = () => {
         'ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82', // BOME
         '63LfUcswYbcL9XkR3T9T4Gg5L7q5LqE8t3Q6b5fXpump', // GIGA
         '3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump', // MOTHER
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
-        '0x6982508145454Ce325dDbE47a25d4ec3d2311933', // PEPE
-        '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // Base USDC
-        '0x532f27101965dd16442E59d40670FaF5eBB142E4', // BRETT
+        'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE', // ORCA
+        'TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6', // TNSR
+        'DriFtupJYLTosbwoN8koMbEYSx54aFAVLddWsbksjwg7', // DRIFT
+        'CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump', // GOAT
       ];
 
       const combinedAddresses = Array.from(new Set([...establishedSolana, ...trendingAddresses, ...newAddresses]));
@@ -113,7 +120,7 @@ export const useDexScreenerTokens = () => {
       }
 
       const tokenPromises = chunks.map(chunk =>
-        fetch(`${baseUrl}/latest/dex/tokens/${chunk}`)
+        fetch(`${baseUrl}/latest/dex/tokens/${chunk}`, { signal: AbortSignal.timeout(10000) })
           .then(res => res.ok ? res.json() : { pairs: [] })
           .catch(() => ({ pairs: [] }))
       );
@@ -121,7 +128,7 @@ export const useDexScreenerTokens = () => {
       // Search popular keywords for discovery
       const searchTerms = ['solana', 'meme', 'pump', 'raydium'];
       const searchPromises = searchTerms.map(term =>
-        fetch(`${baseUrl}/latest/dex/search?q=${term}`)
+        fetch(`${baseUrl}/latest/dex/search?q=${term}`, { signal: AbortSignal.timeout(10000) })
           .then(res => res.ok ? res.json() : { pairs: [] })
           .catch(() => ({ pairs: [] }))
       );
@@ -169,7 +176,7 @@ export const useDexScreenerTokens = () => {
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [parsePairsToTokens, tokens.length]);
+  }, [parsePairsToTokens]);
 
   // Fetch a specific token on-demand if user searches an address
   const fetchTokenByAddress = useCallback(async (queryOrAddress: string): Promise<Token | null> => {
@@ -186,7 +193,7 @@ export const useDexScreenerTokens = () => {
         ? `${baseUrl}/latest/dex/tokens/${trimmed}`
         : `${baseUrl}/latest/dex/search?q=${encodeURIComponent(trimmed)}`;
 
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
       if (!res.ok) return null;
       const data = await res.json();
       
@@ -224,7 +231,7 @@ export const useDexScreenerTokens = () => {
   return { 
     tokens, 
     isLoading, 
-    isSearching,
+    isSearching, 
     refreshTokens: fetchTokens,
     fetchTokenByAddress 
   };

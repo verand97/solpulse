@@ -1,31 +1,57 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+
+const STORAGE_KEY = 'solpulse_watchlist';
+
+const getInitialWatchlist = (): string[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.error("Failed to parse watchlist", err);
+  }
+  return [];
+};
 
 export const useWatchlist = () => {
-  const [watchlistAddresses, setWatchlistAddresses] = useState<string[]>([]);
+  const [watchlistAddresses, setWatchlistAddresses] = useState<string[]>(getInitialWatchlist);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('solpulse_watchlist');
-      if (stored) {
-        setWatchlistAddresses(JSON.parse(stored));
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setWatchlistAddresses(parsed);
+        } catch {
+          // ignore
+        }
       }
-    } catch (err) {
-      console.error("Failed to parse watchlist", err);
-    }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const toggleWatchlist = (address: string) => {
+  const toggleWatchlist = useCallback((address: string) => {
     setWatchlistAddresses(prev => {
-      const updated = prev.includes(address)
-        ? prev.filter(a => a !== address)
-        : [...prev, address];
+      const cleanAddr = address.trim();
+      const updated = prev.includes(cleanAddr)
+        ? prev.filter(a => a !== cleanAddr)
+        : [...prev, cleanAddr];
       
-      localStorage.setItem('solpulse_watchlist', JSON.stringify(updated));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (err) {
+        console.error("Failed to save watchlist", err);
+      }
       return updated;
     });
-  };
+  }, []);
 
-  const isInWatchlist = (address: string) => watchlistAddresses.includes(address);
+  const isInWatchlist = useCallback((address: string) => {
+    return watchlistAddresses.includes(address.trim());
+  }, [watchlistAddresses]);
 
   return { watchlistAddresses, toggleWatchlist, isInWatchlist };
 };

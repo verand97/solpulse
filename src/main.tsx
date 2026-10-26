@@ -9,7 +9,10 @@ import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adap
 import { clusterApiUrl } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-const endpoint = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
+const endpoint = 
+  localStorage.getItem('solpulse_rpc_url') || 
+  import.meta.env.VITE_SOLANA_RPC_URL || 
+  'https://solana-rpc.publicnode.com';
 const wallets = [
   new PhantomWalletAdapter(),
   new SolflareWalletAdapter(),
