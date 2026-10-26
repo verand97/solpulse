@@ -1,7 +1,7 @@
 {
   "model_version": "v1.0-hgb",
   "feature_version": "v1.0",
-  "trained_at": "2026-10-12T03:52:04.021298+00:00",
+  "trained_at": "2026-10-26T07:53:17.027687+00:00",
   "feature_cols": [
     "liq_usd_initial",
     "current_liq_usd",
@@ -57,72 +57,72 @@
     "name_similarity_to_top_tokens",
     "social_is_missing"
   ],
-  "train_samples": 76,
-  "val_samples": 25,
-  "test_samples": 26,
+  "train_samples": 312,
+  "val_samples": 104,
+  "test_samples": 104,
   "metrics": {
     "heuristic": {
-      "pr_auc": 0.2621,
-      "roc_auc": 0.6238,
-      "brier_score": 0.2146,
-      "precision": 0.3333,
-      "recall": 0.2,
-      "accuracy": 0.7692
-    },
-    "logistic_regression": {
-      "pr_auc": 0.3961,
-      "roc_auc": 0.5619,
-      "brier_score": 0.2969,
-      "precision": 0.2222,
-      "recall": 0.4,
-      "accuracy": 0.6154
-    },
-    "potential_model": {
-      "pr_auc": 0.9111,
-      "roc_auc": 0.9619,
-      "brier_score": 0.0863,
-      "precision": 0.0,
-      "recall": 0.0,
+      "pr_auc": 0.8605,
+      "roc_auc": 0.9552,
+      "brier_score": 0.1326,
+      "precision": 0.6491,
+      "recall": 1.0,
       "accuracy": 0.8077
     },
-    "risk_model": {
-      "pr_auc": 0.625,
-      "roc_auc": 0.9375,
-      "brier_score": 0.0764,
-      "precision": 0.0,
-      "recall": 0.0,
-      "accuracy": 0.9231
+    "logistic_regression": {
+      "pr_auc": 0.9916,
+      "roc_auc": 0.9952,
+      "brier_score": 0.0324,
+      "precision": 1.0,
+      "recall": 0.8649,
+      "accuracy": 0.9519
     },
-    "mean_return_all": 1.98,
-    "mean_return_filtered": 1.98
+    "potential_model": {
+      "pr_auc": 0.9814,
+      "roc_auc": 0.973,
+      "brier_score": 0.0313,
+      "precision": 1.0,
+      "recall": 0.8649,
+      "accuracy": 0.9519
+    },
+    "risk_model": {
+      "pr_auc": 1.0,
+      "roc_auc": 1.0,
+      "brier_score": 0.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "accuracy": 1.0
+    },
+    "mean_return_all": 5.39,
+    "mean_return_filtered": 16.14
   },
   "top_features": [
     [
-      "liq_to_mcap_ratio",
-      0.1289
+      "tx_count_60m",
+      0.266
     ],
     [
-      "initial_price_usd",
-      0.1263
+      "price_change_5m",
+      0.1647
     ],
     [
-      "secs_deploy_to_liquidity",
-      0.0421
-    ],
-    [
-      "liq_change_pct",
-      0.0289
-    ],
-    [
-      "avg_trade_size_usd",
-      0.0289
+      "top10_pct",
+      0.1006
     ],
     [
       "liq_usd_initial",
-      0.0
+      0.0122
     ],
     [
       "current_liq_usd",
+      0.0
+    ],
+    [
+      "liq_to_mcap_ratio",
+      0.0
+    ],
+    [
+      "liq_change_pct",
       0.0
     ],
     [
