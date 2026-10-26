@@ -261,7 +261,7 @@ const FALLBACK_SCREENED_TOKENS: MLScreenedToken[] = [
 ];
 
 export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
-  apiBaseUrl = "http://localhost:8000"
+  apiBaseUrl = import.meta.env.VITE_ML_SERVICE_URL || "http://localhost:8000"
 }) => {
   const [tokens, setTokens] = useState<MLScreenedToken[]>(FALLBACK_SCREENED_TOKENS);
   const [isLoading, setIsLoading] = useState(false);

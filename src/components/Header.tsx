@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, X, Check, CheckCheck, ShieldAlert, TrendingUp, Radio, LogOut, Wallet } from 'lucide-react';
+import { Search, Bell, X, Check, CheckCheck, ShieldAlert, TrendingUp, Radio, LogOut, Wallet, Volume2, VolumeX } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Notification } from '../types';
 import { cn } from '../utils';
+import { isAudioAlertEnabled, setAudioAlertEnabled, playBreakoutChime } from '../utils/audioAlert';
 
 interface HeaderProps {
   searchQuery: string;
@@ -12,6 +13,7 @@ interface HeaderProps {
   unreadCount: number;
   onMarkAllRead: () => void;
   onMarkRead: (id: string) => void;
+  onOpenCommandPalette?: () => void;
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
@@ -36,9 +38,18 @@ export const Header: React.FC<HeaderProps> = ({
   unreadCount,
   onMarkAllRead,
   onMarkRead,
+  onOpenCommandPalette,
 }) => {
   const [showNotifs, setShowNotifs] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(isAudioAlertEnabled);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const toggleAudio = () => {
+    const next = !audioEnabled;
+    setAudioEnabled(next);
+    setAudioAlertEnabled(next);
+    if (next) playBreakoutChime();
+  };
 
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
@@ -58,30 +69,59 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-bg shrink-0">
-      {/* Search */}
-      <div className="flex-1 max-w-80">
-        <div className="relative">
-          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3 pointer-events-none" />
+      {/* Search / Command Palette Trigger */}
+      <div className="flex-1 max-w-96">
+        <div 
+          onClick={onOpenCommandPalette}
+          className="relative group cursor-pointer"
+        >
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3 pointer-events-none group-hover:text-blue-400 transition-colors" />
           <input
             id="search-input"
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search tokens..."
-            className="w-full h-8 pl-8 pr-8 bg-surface-2 border border-border rounded-md text-[12.5px] text-txt placeholder-txt-3 focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Search tokens, CAs, tabs (Ctrl+K)..."
+            className="w-full h-8 pl-8 pr-16 bg-surface-2 border border-border group-hover:border-border-2 rounded-md text-[12px] text-txt placeholder-txt-3 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
           />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-txt-3 hover:text-txt-2"
-            >
-              <X size={12} />
-            </button>
-          )}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {searchQuery ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); onSearchChange(''); }}
+                className="text-txt-3 hover:text-txt-2"
+              >
+                <X size={12} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenCommandPalette}
+                className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-surface-3 border border-border text-[9.5px] font-mono text-txt-3 group-hover:text-txt-2 transition-colors"
+                title="Open Global Spotlight (Ctrl+K)"
+              >
+                ⌘K
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 ml-3">
+        {/* Audio Alpha Alert Toggle */}
+        <button
+          id="audio-alert-button"
+          onClick={toggleAudio}
+          className={cn(
+            'relative h-8 w-8 flex items-center justify-center rounded-md transition-colors border',
+            audioEnabled
+              ? 'bg-surface-2 text-emerald-400 border-border hover:border-emerald-500/30'
+              : 'text-txt-3 border-transparent hover:text-txt-2 hover:bg-surface-2'
+          )}
+          title={audioEnabled ? 'Alpha Audio Chime: Enabled (click to mute)' : 'Alpha Audio Chime: Muted (click to enable)'}
+        >
+          {audioEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+        </button>
+
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button

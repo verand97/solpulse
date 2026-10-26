@@ -23,9 +23,11 @@ const TabLoader = () => (
   </div>
 );
 import { MOCK_NOTIFICATIONS } from './data';
-import { Notification, PortfolioAsset, SwapToken } from './types';
+import { Notification, PortfolioAsset, SwapToken, Token } from './types';
 import { useDexScreenerTokens } from './hooks/useDexScreenerTokens';
 import { useWalletPortfolio } from './hooks/useWalletPortfolio';
+import { useWatchlist } from './hooks/useWatchlist';
+import { CommandPalette } from './components/CommandPalette';
 
 export default function App() {
   // Default directly to Terminal app so user can immediately use the tools
@@ -36,11 +38,25 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const { tokens, isLoading, fetchTokenByAddress } = useDexScreenerTokens();
   const { portfolio, swapTokens, isWalletLoading } = useWalletPortfolio(tokens);
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Global Ctrl+K / Cmd+K listener
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleMarkAllRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -60,8 +76,22 @@ export default function App() {
     setShowLandingPage(true);
   };
 
+  const handleSelectTokenFromPalette = (token: Token) => {
+    setSearchQuery(token.symbol);
+    setActiveTab('screener');
+  };
+
   return (
     <>
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        tokens={tokens}
+        onSelectToken={handleSelectTokenFromPalette}
+        onNavigateTab={setActiveTab}
+        onToggleWatchlist={toggleWatchlist}
+        isInWatchlist={isInWatchlist}
+      />
       {showLandingPage ? (
         <Suspense fallback={<TabLoader />}>
           <LandingPage onLaunch={handleEnterTerminal} />
@@ -84,6 +114,7 @@ export default function App() {
               unreadCount={unreadCount}
               onMarkAllRead={handleMarkAllRead}
               onMarkRead={handleMarkRead}
+              onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
             />
             
             <main className="flex-1 overflow-hidden flex flex-col">

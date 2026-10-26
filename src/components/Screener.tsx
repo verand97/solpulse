@@ -31,10 +31,11 @@ interface ScreenerProps {
 }
 
 type SortKey = 'price' | 'priceChange24h' | 'priceChange1h' | 'volume24h' | 'liquidity' | 'marketCap';
-type PresetFilter = 'all' | 'trending' | 'gainers' | 'losers' | 'new' | 'high_volume' | 'micro_cap';
+type PresetFilter = 'all' | 'memecoins' | 'trending' | 'gainers' | 'losers' | 'new' | 'high_volume' | 'micro_cap';
 
 const PRESETS: { id: PresetFilter; label: string }[] = [
   { id: 'all',         label: 'All' },
+  { id: 'memecoins',   label: '🔥 Memecoins' },
   { id: 'trending',    label: 'Trending' },
   { id: 'gainers',     label: 'Gainers' },
   { id: 'losers',      label: 'Losers' },
@@ -58,6 +59,7 @@ export const Screener: React.FC<ScreenerProps> = ({
   const [minLiquidity, setMinLiquidity] = useState<number>(0);
   const [minVolume, setMinVolume]       = useState<number>(0);
   const [showFilters, setShowFilters]   = useState(false);
+  const [tradeSlippage, setTradeSlippage] = useState<'0.5' | '1.0' | '2.5' | '5.0'>('1.0');
 
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [modalTab, setModalTab]           = useState<'chart' | 'security' | 'bubbles' | 'ml_audit'>('chart');
@@ -93,6 +95,7 @@ export const Screener: React.FC<ScreenerProps> = ({
       if (chainFilter !== 'all' && t.chainId.toLowerCase() !== chainFilter.toLowerCase()) return false;
       if (minLiquidity > 0 && t.liquidity < minLiquidity) return false;
       if (minVolume    > 0 && t.volume24h < minVolume)    return false;
+      if (filter === 'memecoins')   return (t.marketCap > 0 && t.marketCap <= 150000000) && (t.volume24h > 15000 || Math.abs(t.priceChange24h) > 5);
       if (filter === 'gainers')     return t.priceChange24h > 0;
       if (filter === 'losers')      return t.priceChange24h < 0;
       if (filter === 'new')         return Date.now() - t.createdAt < 86400000 * 7;
@@ -199,6 +202,26 @@ export const Screener: React.FC<ScreenerProps> = ({
           )}
         </button>
 
+        {/* Fast Slippage selector for Memecoins */}
+        <div className="flex items-center gap-1 bg-surface-2 border border-border rounded-md px-1.5 py-0.5 text-[11px]">
+          <span className="text-txt-3 text-[10.5px] font-medium hidden sm:inline">Slippage:</span>
+          {(['0.5', '1.0', '2.5', '5.0'] as const).map(slip => (
+            <button
+              key={slip}
+              type="button"
+              onClick={() => setTradeSlippage(slip)}
+              className={cn(
+                'px-1.5 py-0.5 rounded text-[10.5px] font-mono font-medium transition-colors',
+                tradeSlippage === slip
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-txt-3 hover:text-txt-2'
+              )}
+            >
+              {slip}%
+            </button>
+          ))}
+        </div>
+
         {/* CA search */}
         <form onSubmit={handleCaSearch} className="flex items-center gap-1.5 ml-auto">
           <div className="relative">
@@ -277,20 +300,21 @@ export const Screener: React.FC<ScreenerProps> = ({
               <Th label="Volume 24h" field="volume24h" />
               <Th label="Liquidity" field="liquidity" />
               <Th label="Mkt Cap"   field="marketCap" />
+              <th className="px-3 py-2.5 text-center text-[11px] font-medium text-txt-3 uppercase tracking-wide w-28">Buy Pressure</th>
               <th className="px-3 py-2.5 text-right text-[11px] font-medium text-txt-3 uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[12.5px] font-mono">
             {isLoading && tokens.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-20 text-center text-txt-3">
+                <td colSpan={10} className="py-20 text-center text-txt-3">
                   <Loader2 size={20} className="animate-spin mx-auto mb-2 text-blue-400" />
                   <p className="font-sans text-[12px]">Loading token data...</p>
                 </td>
               </tr>
             ) : filteredTokens.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-20 text-center text-txt-3 font-sans text-[12px]">
+                <td colSpan={10} className="py-20 text-center text-txt-3 font-sans text-[12px]">
                   No tokens match current filters
                 </td>
               </tr>
@@ -381,6 +405,30 @@ export const Screener: React.FC<ScreenerProps> = ({
                       {formatCurrency(token.marketCap)}
                     </td>
 
+                    {/* Buy Pressure */}
+                    <td className="px-3 py-2.5">
+                      {(() => {
+                        const buys = token.buys24h ?? 0;
+                        const sells = token.sells24h ?? 0;
+                        const total = buys + sells;
+                        const buyRatio = total > 0 ? (buys / total) * 100 : (token.priceChange24h >= 0 ? 58 : 42);
+                        return (
+                          <div className="flex flex-col gap-1 w-24 mx-auto" title={`${buys.toLocaleString()} Buys / ${sells.toLocaleString()} Sells`}>
+                            <div className="flex items-center justify-between text-[9.5px] font-mono leading-none">
+                              <span className="text-emerald-400 font-semibold">{buyRatio.toFixed(0)}% B</span>
+                              <span className="text-rose-400 font-semibold">{(100 - buyRatio).toFixed(0)}% S</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-rose-500/30 rounded-full overflow-hidden flex">
+                              <div
+                                className="h-full bg-emerald-400 rounded-l-full transition-all duration-300"
+                                style={{ width: `${Math.min(95, Math.max(5, buyRatio))}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </td>
+
                     {/* Actions */}
                     <td className="px-3 py-2.5 text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1.5">
@@ -391,7 +439,7 @@ export const Screener: React.FC<ScreenerProps> = ({
                           Chart
                         </button>
                         <a
-                          href={`https://jup.ag/swap/SOL-${token.address}`}
+                          href={`https://jup.ag/swap/SOL-${token.address}?slippageBps=${Math.round(Number(tradeSlippage) * 100)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-[11px] font-sans text-blue-400 transition-colors flex items-center gap-1"
@@ -450,12 +498,12 @@ export const Screener: React.FC<ScreenerProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <a
-                  href={`https://jup.ag/swap/SOL-${selectedToken.address}`}
+                  href={`https://jup.ag/swap/SOL-${selectedToken.address}?slippageBps=${Math.round(Number(tradeSlippage) * 100)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="h-7 px-3 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium flex items-center gap-1.5 transition-colors"
                 >
-                  Swap <ExternalLink size={11} />
+                  Swap ({tradeSlippage}%) <ExternalLink size={11} />
                 </a>
                 <a
                   href={`https://solscan.io/token/${selectedToken.address}`}
@@ -557,7 +605,9 @@ export const Screener: React.FC<ScreenerProps> = ({
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-white text-[13px]">SolPulse ML Screener Model</span>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-txt-3">v1.0-hgb</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-txt-3">
+                                {mlScore?.model_version || 'v1.1-memecoin'}
+                              </span>
                             </div>
                             <p className="text-[11px] text-txt-3">Trained with HistGradientBoosting on Solana on-chain data & order flow</p>
                           </div>
