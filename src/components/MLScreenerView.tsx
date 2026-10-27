@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { MLScreenedToken, MLScoreFactor } from '../types';
 import { formatCurrency, formatAddress, cn } from '../utils';
 import { TokenAvatar } from './TokenAvatar';
+import { playBreakoutChime, playRiskWarningChime, playQuickActionClick, playSuccessChime } from '../utils/audioAlert';
 import {
   Brain,
   Sparkles,
@@ -282,8 +283,11 @@ export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [showBacktestProof, setShowBacktestProof] = useState(false);
 
+  const knownHighPotentialTokens = useRef<Set<string>>(new Set());
+
   const exportToCsv = () => {
     if (filteredTokens.length === 0) return;
+    playSuccessChime();
     const headers = ["Symbol", "Name", "Address", "PotentialScore", "RiskScore", "AnomalyScore", "PriceUSD", "LiquidityUSD", "Volume24h", "PriceChange24h", "Recommendation"];
     const rows = filteredTokens.map(t => [
       `"${t.symbol || ''}"`,
@@ -318,6 +322,19 @@ export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
       if (!resp.ok) throw new Error(`HTTP error: ${resp.status}`);
       const data = await resp.json();
       if (Array.isArray(data.tokens) && data.tokens.length > 0) {
+        if (isSilent) {
+          const hasNewBreakout = data.tokens.some((t: MLScreenedToken) =>
+            (t.potential_score >= 0.65 || t.recommendation === 'STRONG_BUY_CANDIDATE') &&
+            !knownHighPotentialTokens.current.has(t.token_address)
+          );
+          if (hasNewBreakout) {
+            playBreakoutChime();
+          }
+        }
+        data.tokens.forEach((t: MLScreenedToken) => {
+          if (t.potential_score >= 0.65) knownHighPotentialTokens.current.add(t.token_address);
+        });
+
         setTokens(data.tokens);
         setIsBackendOnline(true);
       } else {
@@ -348,6 +365,7 @@ export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
   // Copy address to clipboard
   const handleCopy = (addr: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    playQuickActionClick();
     navigator.clipboard.writeText(addr);
     setCopiedAddr(addr);
     setTimeout(() => setCopiedAddr(null), 2000);
@@ -356,12 +374,14 @@ export const MLScreenerView: React.FC<MLScreenerViewProps> = ({
   // Trigger token rescore
   const handleRescore = async (addr: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    playQuickActionClick();
     setRescoringAddr(addr);
     try {
       const resp = await fetch(`${apiBaseUrl}/tokens/${addr}/score`);
       if (resp.ok) {
         const updated = await resp.json();
         setTokens(prev => prev.map(t => t.token_address === addr ? { ...t, ...updated } : t));
+        playSuccessChime();
       }
     } catch {
       // offline fallback simulation
