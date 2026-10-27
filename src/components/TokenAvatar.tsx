@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 export interface TokenAvatarProps {
   symbol?: string;
@@ -7,6 +7,34 @@ export interface TokenAvatarProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   alt?: string;
+}
+
+// Global In-Memory Caches across all component lifecycles to eliminate 404 network thrashing
+const resolvedAvatarCache = new Map<string, string>();
+const failedUrlCache = new Set<string>();
+const permanentlyDeadAddresses = new Set<string>();
+
+// Preload helper to opportunistically fetch avatars in background without blocking UI
+export function preloadTokenAvatar(address: string, imageUrl?: string) {
+  if (typeof window === 'undefined') return;
+  if (permanentlyDeadAddresses.has(address)) return;
+  if (resolvedAvatarCache.has(address)) return;
+
+  const testUrls: string[] = [];
+  if (imageUrl && !failedUrlCache.has(imageUrl.trim())) {
+    testUrls.push(imageUrl.trim());
+  }
+  const cdnUrl = `https://dd.dexscreener.com/ds-data/tokens/solana/${address}.png`;
+  if (!failedUrlCache.has(cdnUrl)) {
+    testUrls.push(cdnUrl);
+  }
+
+  if (testUrls.length === 0) return;
+
+  const img = new Image();
+  img.src = testUrls[0];
+  img.onload = () => resolvedAvatarCache.set(address, testUrls[0]);
+  img.onerror = () => failedUrlCache.add(testUrls[0]);
 }
 
 // Curated vibrant modern crypto gradient palettes
@@ -21,7 +49,7 @@ const GRADIENTS = [
   'from-fuchsia-600 to-violet-600 text-fuchsia-100',
 ];
 
-// Simple deterministic hash
+// Fast deterministic string hash for color stability
 function getGradientForString(str: string): string {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -40,7 +68,7 @@ const SIZE_MAP = {
   xl: { container: 'w-14 h-14 text-[18px]', icon: 'w-14 h-14' },
 };
 
-export const TokenAvatar: React.FC<TokenAvatarProps> = ({
+export const TokenAvatar: React.FC<TokenAvatarProps> = React.memo(({
   symbol = 'TK',
   address,
   imageUrl,
@@ -48,39 +76,79 @@ export const TokenAvatar: React.FC<TokenAvatarProps> = ({
   className = '',
   alt
 }) => {
-  // Memoize candidates list to avoid re-allocating arrays on every table cell re-render
-  const candidates = React.useMemo(() => {
+  // If this address is already confirmed dead, skip network calls completely
+  const isDead = address ? permanentlyDeadAddresses.has(address) : false;
+
+  // Build candidate URLs, pre-filtering any known dead/failed URLs
+  const candidates = useMemo(() => {
+    if (isDead) return [];
+
+    // If we already resolved a working image for this address, use only that one
+    if (address && resolvedAvatarCache.has(address)) {
+      return [resolvedAvatarCache.get(address)!];
+    }
+
     const list: string[] = [];
     if (imageUrl && imageUrl.trim()) {
-      list.push(imageUrl.trim());
+      const clean = imageUrl.trim();
+      if (!failedUrlCache.has(clean)) list.push(clean);
     }
     if (address && address.length > 20) {
       // 1. DexScreener official token icon CDN
-      list.push(`https://dd.dexscreener.com/ds-data/tokens/solana/${address}.png`);
-      // 2. Solana Labs token list repository CDN
-      list.push(`https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${address}/logo.png`);
-      // 3. Raydium token icons CDN
-      list.push(`https://img.raydium.io/icon/${address}.png`);
+      const dex = `https://dd.dexscreener.com/ds-data/tokens/solana/${address}.png`;
+      if (!failedUrlCache.has(dex)) list.push(dex);
+
+      // 2. Raydium token icons CDN
+      const ray = `https://img.raydium.io/icon/${address}.png`;
+      if (!failedUrlCache.has(ray)) list.push(ray);
+
+      // 3. Solana Labs token list repository CDN
+      const sol = `https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${address}/logo.png`;
+      if (!failedUrlCache.has(sol)) list.push(sol);
     }
     return list;
-  }, [imageUrl, address]);
+  }, [imageUrl, address, isDead]);
 
   const [candidateIdx, setCandidateIdx] = useState(0);
-  const [hasExhausted, setHasExhausted] = useState(() => candidates.length === 0);
+  const [hasExhausted, setHasExhausted] = useState(() => isDead || candidates.length === 0);
+  const [isLoaded, setIsLoaded] = useState(() => {
+    if (!address) return false;
+    return resolvedAvatarCache.has(address);
+  });
 
-  // Reset state when imageUrl or address changes
+  // Keep state in sync if candidates change
   useEffect(() => {
+    if (isDead || candidates.length === 0) {
+      setHasExhausted(true);
+      return;
+    }
     setCandidateIdx(0);
-    setHasExhausted(candidates.length === 0);
-  }, [candidates]);
+    setHasExhausted(false);
+  }, [candidates, isDead]);
 
-  const handleImageError = () => {
+  const handleImageLoad = useCallback(() => {
+    setIsLoaded(true);
+    const currentSrc = candidates[candidateIdx];
+    if (currentSrc && address) {
+      resolvedAvatarCache.set(address, currentSrc);
+    }
+  }, [candidates, candidateIdx, address]);
+
+  const handleImageError = useCallback(() => {
+    const failedSrc = candidates[candidateIdx];
+    if (failedSrc) {
+      failedUrlCache.add(failedSrc);
+    }
+
     if (candidateIdx + 1 < candidates.length) {
       setCandidateIdx(prev => prev + 1);
     } else {
       setHasExhausted(true);
+      if (address) {
+        permanentlyDeadAddresses.add(address);
+      }
     }
-  };
+  }, [candidates, candidateIdx, address]);
 
   const sizeCfg = SIZE_MAP[size] || SIZE_MAP.md;
   const cleanSymbol = symbol ? symbol.toUpperCase().slice(0, 2) : 'TK';
@@ -88,24 +156,33 @@ export const TokenAvatar: React.FC<TokenAvatarProps> = ({
 
   return (
     <div
-      className={`rounded-full overflow-hidden shrink-0 flex items-center justify-center border border-border/80 shadow-sm transition-all select-none ${sizeCfg.container} ${className}`}
+      className={`rounded-full overflow-hidden shrink-0 relative flex items-center justify-center border border-border/80 shadow-sm transition-all select-none bg-surface-2 ${sizeCfg.container} ${className}`}
       title={alt || symbol}
     >
       {!hasExhausted && candidates[candidateIdx] ? (
         <img
           src={candidates[candidateIdx]}
           alt={alt || symbol}
+          onLoad={handleImageLoad}
           onError={handleImageError}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover transition-opacity duration-200 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           loading="lazy"
+          decoding="async"
         />
-      ) : (
+      ) : null}
+
+      {/* Instant graceful fallback while loading or when image is exhausted */}
+      {(hasExhausted || !isLoaded) && (
         <div
-          className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center font-bold font-sans tracking-tight`}
+          className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center font-bold font-sans tracking-tight`}
         >
           {cleanSymbol}
         </div>
       )}
     </div>
   );
-};
+});
+
+TokenAvatar.displayName = 'TokenAvatar';
