@@ -9,7 +9,9 @@ from typing import Dict, Any, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
+import time
 
 from ml_service.database.db_manager import DBManager
 from ml_service.inference.scorer import TokenScorer
@@ -30,9 +32,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Enable high-speed GZip compression for large JSON token payload responses
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 db = DBManager()
 scorer = TokenScorer(db=db)
+
+# High-performance micro-cache with 5-second TTL to handle rapid frontend polling
+_screened_cache: Dict[str, Any] = {}
+CACHE_TTL_SEC = 5.0
 
 
 class RescoreRequest(BaseModel):
@@ -64,14 +72,20 @@ def get_screened_tokens(
     max_risk: float = Query(1.0, description="Maximum risk score (0.0 - 1.0)"),
     limit: int = Query(50, ge=1, le=200, description="Max results to return")
 ):
-    """Retrieve ML-screened tokens filtered by risk, potential, and chain."""
+    """Retrieve ML-screened tokens filtered by risk, potential, and chain with micro-caching."""
+    cache_key = f"{chain}_{min_potential:.2f}_{max_risk:.2f}_{limit}"
+    now = time.time()
+    cached = _screened_cache.get(cache_key)
+    if cached and (now - cached["timestamp"] < CACHE_TTL_SEC):
+        return cached["payload"]
+
     results = db.get_screened_tokens(
         chain=chain,
         min_potential=min_potential,
         max_risk=max_risk,
         limit=limit
     )
-    return {
+    payload = {
         "count": len(results),
         "chain": chain,
         "filters": {
@@ -80,6 +94,8 @@ def get_screened_tokens(
         },
         "tokens": results
     }
+    _screened_cache[cache_key] = {"timestamp": now, "payload": payload}
+    return payload
 
 
 @app.get("/tokens/{address}/score")

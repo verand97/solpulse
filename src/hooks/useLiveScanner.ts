@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Token } from '../types';
+import { playBreakoutChime } from '../utils/audioAlert';
 
 export interface LiveToken extends Token {
   rugCheckScore: number;
@@ -122,6 +123,11 @@ export const useLiveScanner = () => {
               const withoutDup = prev.filter(t => t.address !== address);
               return [newLiveToken, ...withoutDup].slice(0, 50);
             });
+
+            // Trigger acoustic alpha chime for high-conviction token
+            if (newLiveToken.mlPotential && newLiveToken.mlPotential >= 0.6) {
+              playBreakoutChime();
+            }
           }
           
           // Polite delay between pairs to respect rate limits

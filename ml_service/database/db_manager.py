@@ -164,6 +164,11 @@ CREATE TABLE IF NOT EXISTS ml_scores (
 );
 
 CREATE INDEX IF NOT EXISTS idx_ml_scores_addr ON ml_scores(token_address);
+CREATE INDEX IF NOT EXISTS idx_ml_scores_filter ON ml_scores(chain, potential_score, risk_score);
+CREATE INDEX IF NOT EXISTS idx_ml_scores_token_calc ON ml_scores(token_address, calculated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_snapshots_token_ts ON snapshots(token_address, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_pairs_token_chain ON pairs(token_address, chain);
+CREATE INDEX IF NOT EXISTS idx_tokens_chain_address ON tokens(chain, address);
 
 CREATE TABLE IF NOT EXISTS ml_feedback (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -199,12 +204,23 @@ class DBManager:
     def get_connection(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path, timeout=30.0)
         conn.row_factory = sqlite3.Row
+        # High-performance SQLite tuning for concurrent reading & writing
+        conn.execute("PRAGMA journal_mode = WAL;")
+        conn.execute("PRAGMA synchronous = NORMAL;")
+        conn.execute("PRAGMA cache_size = -64000;")
+        conn.execute("PRAGMA busy_timeout = 10000;")
+        conn.execute("PRAGMA temp_store = MEMORY;")
+        conn.execute("PRAGMA mmap_size = 268435456;")
         return conn
 
     def init_db(self):
         with self.get_connection() as conn:
             conn.executescript(SCHEMA_SQL)
             conn.commit()
+            try:
+                conn.execute("PRAGMA optimize;")
+            except Exception:
+                pass
 
     def record_raw_response(self, endpoint: str, response_body: str, query_params: Optional[str] = None, status_code: int = 200) -> int:
         with self.get_connection() as conn:
@@ -454,6 +470,7 @@ class DBManager:
             FROM (
                 SELECT *, ROW_NUMBER() OVER (PARTITION BY token_address ORDER BY calculated_at DESC) as rn
                 FROM ml_scores
+                WHERE chain = ? AND potential_score >= ? AND risk_score <= ?
             ) m
             JOIN tokens t ON m.token_address = t.address
             LEFT JOIN (
@@ -461,7 +478,7 @@ class DBManager:
                        ROW_NUMBER() OVER (PARTITION BY token_address ORDER BY timestamp DESC) as rn
                 FROM snapshots
             ) s ON m.token_address = s.token_address AND s.rn = 1
-            WHERE m.rn = 1 AND m.chain = ? AND m.potential_score >= ? AND m.risk_score <= ?
+            WHERE m.rn = 1
             ORDER BY m.potential_score DESC, m.calculated_at DESC
             LIMIT ?
             """
